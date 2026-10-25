@@ -59,7 +59,4 @@ estão em [docs/packs.pt-BR.md](docs/packs.pt-BR.md).
 
 ## Licença
 
-O VIXE é livre para usar, modificar e compartilhar sob uma [licença no estilo MIT](LICENSE)
-com uma regra a mais: se você vender o jogo, ou qualquer coisa feita a partir dele, o produto
-e a página de venda precisam mostrar "Based on VIXE by Thiago Dutra" com um link para este
-repositório.
+[MIT](LICENSE)

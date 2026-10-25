@@ -59,6 +59,4 @@ and level number. Every tile, event and the music format are covered in
 
 ## License
 
-VIXE is free to use, modify and share under a [MIT-style license](LICENSE) with one extra
-rule: if you sell it, or anything built from it, the product and its store page must show
-"Based on VIXE by Thiago Dutra" with a link to this repository.
+[MIT](LICENSE)
