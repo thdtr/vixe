@@ -31,9 +31,13 @@ export async function loadPacks(base) {
     try {
       const dir = `${base}${id}/`;
       const pack = await json(`${dir}pack.json`);
-      const list = await Promise.all(pack.worlds.map((file) => json(dir + file)));
+      // The script downloads alongside the worlds; it registers once they're all in.
+      const [list, script] = await Promise.all([
+        Promise.all(pack.worlds.map((file) => json(dir + file))),
+        pack.script && import(new URL(dir + pack.script, document.baseURI)),
+      ]);
       if (pack.strings) mergeStrings(pack.strings);
-      if (pack.script) (await import(new URL(dir + pack.script, document.baseURI))).register?.(api);
+      script?.register?.(api);
       for (const w of list) {
         w.levels.forEach((lv, i) => { lv.id ??= `${w.id}.${i + 1}`; });
         worlds.push(w);

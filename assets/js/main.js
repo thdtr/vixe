@@ -42,8 +42,7 @@ class App {
     // Only iOS needs it, and only before the game is added to the home screen.
     if (navigator.standalone === false) touchIcon();
     setLang(this.save.lang);
-    await loadStrings('assets/i18n/');
-    this.worlds = await loadPacks('assets/packs/');
+    [, this.worlds] = await Promise.all([loadStrings('assets/i18n/'), loadPacks('assets/packs/')]);
     const params = new URLSearchParams(location.search);
     if (params.has('dev')) window.app = this;
     this.progress = new Progress(this.save, this.worlds, params.has('dev'));

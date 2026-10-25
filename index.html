@@ -19,6 +19,35 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="assets/css/style.css">
 <script type="module" src="assets/js/main.js"></script>
+<!-- Everything the boot needs, asked for at once instead of one import (or file) at a time.
+     A file missing here still loads, only later; CI checks this list against assets/js. -->
+<link rel="modulepreload" href="assets/js/config.js">
+<link rel="modulepreload" href="assets/js/core/audio.js">
+<link rel="modulepreload" href="assets/js/core/i18n.js">
+<link rel="modulepreload" href="assets/js/core/icon.js">
+<link rel="modulepreload" href="assets/js/core/input.js">
+<link rel="modulepreload" href="assets/js/core/packs.js">
+<link rel="modulepreload" href="assets/js/core/screen.js">
+<link rel="modulepreload" href="assets/js/core/storage.js">
+<link rel="modulepreload" href="assets/js/game/events.js">
+<link rel="modulepreload" href="assets/js/game/level.js">
+<link rel="modulepreload" href="assets/js/game/player.js">
+<link rel="modulepreload" href="assets/js/game/progress.js">
+<link rel="modulepreload" href="assets/js/game/render.js">
+<link rel="modulepreload" href="assets/js/game/tiles.js">
+<link rel="modulepreload" href="assets/js/scenes/credits.js">
+<link rel="modulepreload" href="assets/js/scenes/ending.js">
+<link rel="modulepreload" href="assets/js/scenes/intro.js">
+<link rel="modulepreload" href="assets/js/scenes/menu.js">
+<link rel="modulepreload" href="assets/js/scenes/options.js">
+<link rel="modulepreload" href="assets/js/scenes/play.js">
+<link rel="modulepreload" href="assets/js/scenes/select.js">
+<link rel="modulepreload" href="assets/js/scenes/title.js">
+<link rel="modulepreload" href="assets/packs/base/script.js">
+<link rel="preload" href="assets/i18n/en.json" as="fetch" crossorigin>
+<link rel="preload" href="assets/i18n/pt-BR.json" as="fetch" crossorigin>
+<link rel="preload" href="assets/packs/manifest.json" as="fetch" crossorigin>
+<link rel="preload" href="assets/packs/base/pack.json" as="fetch" crossorigin>
 </head>
 <body>
 <main id="stage">
