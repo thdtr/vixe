@@ -106,6 +106,28 @@ export function drawBodies(screen, level, pal, time, found = false) {
   }
 }
 
+// Fields shimmer with motes that show which way they pull, so a beam reads as a beam.
+export function drawFields(screen, level, pal, time) {
+  const ctx = screen.ctx;
+  ctx.globalAlpha = 0.45;
+  for (const [id, f] of level.fields) {
+    if (!f.on) continue;
+    const [px, py] = f.push || [0, 0];
+    // Which way the motes stream (in cells/s), and what they look like.
+    const vx = px, vy = py || (f.gravity ? f.gravity * 3 : 0);
+    const ch = vx && !vy ? '-' : vy ? "'" : '·';
+    for (const i of level.zones.get(id) || []) {
+      const x = i % MAP_COLS, y = (i / MAP_COLS) | 0, n = hash(x * 3, y + 11);
+      if (n > 0.3) continue;
+      const k = time + n * 9;
+      const dx = vx ? ((k * vx * CW) % CW + CW) % CW : Math.sin(k * 1.3) * 2;
+      const dy = vy ? ((k * vy * CH) % CH + CH) % CH : Math.cos(k) * 2;
+      screen.glyph(ch, x * CW + dx - (vx ? CW / 2 : 0), y * CH + dy - (vy ? CH / 2 : 0) + MAP_Y, pal.accent);
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+
 // The tide: a churning surface and a sparse body of acid beneath it.
 export function drawTide(screen, tide, pal, time) {
   const top = tide.y + MAP_Y;

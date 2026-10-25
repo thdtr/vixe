@@ -15,6 +15,8 @@ const SFX = {
   select:  [{ wave: 'square', f: [440, 880], d: 0.07, v: 0.06 }],
   glitch:  [{ noise: 5000, d: 0.08, v: 0.12 }, { wave: 'square', f: [60, 2000], d: 0.06, v: 0.05, at: 0.05 }],
   type:    [{ noise: 3500, d: 0.015, v: 0.05 }],
+  hum:     [{ wave: 'sine', f: [90, 180], d: 0.3, v: 0.12 }, { wave: 'triangle', f: [360, 720], d: 0.25, v: 0.04 }],
+  warp:    [{ wave: 'sine', f: [1800, 120], d: 0.3, v: 0.1 }, { wave: 'triangle', f: [200, 1600], d: 0.2, v: 0.05, at: 0.12 }],
 };
 
 // Sounds heard over and over drift a little in pitch (noise: in brightness) on each play,

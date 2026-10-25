@@ -30,6 +30,7 @@ export const PHYS = {
   buffer: 0.12,
   bodyGravity: 1100,                  // falling scenery is a bit lazier than you
   bodyMaxFall: 600,
+  driftAccel: 900,                    // how fast a field's push takes hold of you
 };
 
 const FACE = "'DejaVu Sans Mono','Cascadia Mono','Noto Sans Mono',Menlo,Consolas,'Liberation Mono',monospace";
@@ -37,4 +38,4 @@ export const FONT = `16px ${FACE}`;
 export const FONT_BOLD = `bold 16px ${FACE}`;
 
 export const SAVE_KEY = 'vixe/save/v1';
-export const VERSION = '1.0.0';
+export const VERSION = '1.1.0';

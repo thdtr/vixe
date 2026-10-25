@@ -22,6 +22,8 @@ export class Progress {
 
   worldOpen(world) {
     if (this.dev) return true;
+    // Once you've been in, a world stays open, even if an update moves its door.
+    if (world.levels.some((l) => this.passed(l))) return true;
     const req = world.requires;
     if (!req) {
       const i = this.worlds.indexOf(world);

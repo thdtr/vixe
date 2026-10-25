@@ -54,6 +54,7 @@ export const actions = {
   },
 
   // { "move": "a", "by": [dx, dy] (cells), "speed": cells/s, "loop": true, "linear": true }
+  // "loop": "wrap" starts over from the beginning instead of coming back.
   move(p, id, s) {
     const b = body(p, id);
     const [dx, dy] = s.by;
@@ -64,6 +65,20 @@ export const actions = {
     };
     if (!s.quiet && !s.loop) p.sfx('trap', midX(b));
     return s.wait ? Math.hypot(dx, dy) / b.motion.speed : 0;
+  },
+
+  // Circles around a point: { "orbit": "a", "radius": [rx, ry] (cells), "period": s, "at": 0..1, "dir": -1 }
+  // "at" is where on the loop the group starts (0 right, 0.25 below, 0.5 left, 0.75 above).
+  // Sent to a group that is already orbiting, it keeps its place and changes pace or direction.
+  orbit(p, id, s) {
+    const b = body(p, id), m = b.motion;
+    const period = (s.period ?? 6) * ease(p), dir = s.dir ?? 1;
+    if (m?.type === 'orbit') return void Object.assign(m, { period, dir });
+    const [rx, ry] = s.radius ?? [4, 4], a = (s.at ?? 0) * Math.PI * 2;
+    b.motion = {
+      type: 'orbit', a, period, dir, rx: rx * CW, ry: ry * CH,
+      cx: b.ox - Math.cos(a) * rx * CW, cy: b.oy - Math.sin(a) * ry * CH,
+    };
   },
 
   stop: (p, id) => { body(p, id).motion = null; },
@@ -83,7 +98,17 @@ export const actions = {
   },
 
   gravity(p, v) {
-    p.setGravity(v === 'flip' ? -p.player.gdir : v);
+    p.setGravity(v === 'flip' ? -p.gravity : v);
+  },
+
+  // How hard gravity pulls: { "weight": 0.5 } is the moon.
+  weight: (p, v) => { p.weight = v; },
+
+  // Turns a field on or off: { "field": "A", "on": false }
+  field(p, id, s) {
+    const f = p.level.fields.get(id);
+    if (f) f.on = s.on ?? !f.on;
+    if (!s.quiet) p.sfx(f?.on ? 'hum' : 'pop');
   },
 
   controls: (p, v) => { p.reversed = v === 'reverse'; p.sfx('glitch'); },

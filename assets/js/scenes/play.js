@@ -2,7 +2,7 @@ import { CW, CH, COLS, MAP_COLS, MAP_Y, MAP_W, MAP_H, PHYS, VIEW_W, VIEW_H } fro
 import { Level, overlaps } from '../game/level.js';
 import { Player } from '../game/player.js';
 import { Events } from '../game/events.js';
-import { drawStatic, drawLive, drawBodies, drawTide, drawPlayer, Particles } from '../game/render.js';
+import { drawStatic, drawLive, drawBodies, drawFields, drawTide, drawPlayer, Particles } from '../game/render.js';
 import { t, loc } from '../core/i18n.js';
 import { Menu } from './menu.js';
 
@@ -65,6 +65,9 @@ export class Play {
     this.state = 'play';
     this.stateT = 0;
     this.reversed = false;
+    this.gravity = 1;            // which way the level pulls; a field can override it while you're in it
+    this.weight = this.def.weight ?? 1;
+    this.flipT = -1;
     this.dark = this.def.dark || 0;
     this.ease = 1;
     this.glitch = 0;
@@ -104,10 +107,22 @@ export class Play {
   say(text, time = 2.5) { this.msg = { text: loc(text), t: time, age: 0 }; }
 
   setGravity(dir) {
-    if (dir === this.player.gdir) return;
-    this.player.gdir = dir;
-    this.player.ground = null;
-    this.sfx('flip', this.player.cx);
+    this.gravity = dir;
+    this.applyFields();
+  }
+
+  // What pulls on you right now: the level's gravity, unless a field says otherwise.
+  applyFields() {
+    const p = this.player, f = this.level.fieldAt(p.rect);
+    p.weight = f?.weight ?? this.weight;
+    p.push = f?.push;
+    const dir = f?.gravity ?? this.gravity;
+    if (dir === p.gdir) return;
+    p.gdir = dir;
+    p.ground = null;
+    // Bobbing on the edge of a beam flips you often: only the first flip is heard.
+    if (this.time - this.flipT > 0.3) this.sfx('flip', p.cx);
+    this.flipT = this.time;
   }
 
   kill() {
@@ -231,6 +246,7 @@ export class Play {
     let dir = input.axis('left', 'right', 'held');
     if (this.reversed) dir = -dir;
     const jump = input.held('jump') || input.held('up');
+    this.applyFields();
     p.update(dt, { dir, jump, jumpPressed: input.pressed('jump') || input.pressed('up') }, this.level);
 
     for (const i of p.revealed) {
@@ -310,6 +326,7 @@ export class Play {
     const found = this.app.save.secrets.includes(this.def.id);
     drawLive(screen, this.level, pal, this.time, found);
     drawBodies(screen, this.level, pal, this.time, found);
+    if (this.level.fields.size) drawFields(screen, this.level, pal, this.time);
 
     const p = this.player;
     if (this.state === 'play') drawPlayer(screen, p, pal);

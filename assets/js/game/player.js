@@ -11,6 +11,9 @@ export class Player {
     this.vx = 0;
     this.vy = 0;
     this.gdir = 1;            // 1: gravity pulls down, -1: up
+    this.weight = 1;          // how hard gravity pulls: 0.5 is the moon
+    this.drift = { x: 0, y: 0 };   // carried along by a field, in px/s
+    this.push = null;              // the field's push it eases toward, in cells/s
     this.speed = 1;
     this.facing = 1;
     this.alive = true;
@@ -60,12 +63,17 @@ export class Player {
     const rising = this.vy * g < 0;
     if (rising && !ctl.jump && -this.vy * g > P.jumpCut) this.vy = -P.jumpCut * g;
     const floaty = ctl.jump && Math.abs(this.vy) < 60;
-    this.vy += P.gravity * g * (floaty ? P.apexGravity : 1) * dt;
-    if (this.vy * g > P.maxFall) this.vy = P.maxFall * g;
+    this.vy += P.gravity * this.weight * g * (floaty ? P.apexGravity : 1) * dt;
+    if (this.vy * g > P.maxFall * this.weight) this.vy = P.maxFall * this.weight * g;
+
+    // A field's push fades in and out, so crossing its edge doesn't jerk.
+    const d = this.drift, push = this.push;
+    d.x = approach(d.x, (push?.[0] || 0) * CW, P.driftAccel * dt);
+    d.y = approach(d.y, (push?.[1] || 0) * CH, P.driftAccel * dt);
 
     this.revealed.length = 0;
-    this.moveX(this.vx * dt, level);
-    this.ground = this.moveY(this.vy * dt, level);
+    this.moveX((this.vx + d.x) * dt, level);
+    this.ground = this.moveY((this.vy + d.y) * dt, level);
 
     this.landed = !wasGrounded && !!this.ground;
     if (this.landed) this.squash = 0.3;

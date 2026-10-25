@@ -2,7 +2,7 @@
   "id": "w5",
   "code": "?",
   "hidden": true,
-  "requires": {"world": "w4", "secrets": 4},
+  "requires": {"world": "w6", "secrets": 5},
   "ending": "true",
   "name": {"pt-BR": "Bastidores", "en": "Backstage"},
   "tagline": {"pt-BR": "você não deveria estar aqui.", "en": "you're not supposed to be here."},

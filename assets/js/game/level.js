@@ -10,6 +10,10 @@ import { loc } from '../core/i18n.js';
 //   hidden: groups that start invisible, e.g. "bc"
 //   signs:  texts for each "?" in reading order
 //   words:  localized solid text placed on the map: { at: [x, y], text: {...}, group? }
+//   fields: zones that change how you fall while you're inside them:
+//           { "A": { gravity: -1, weight: 0.3, push: [dx, dy] (cells/s), off: true } }
+//           A field may cover a rect instead, { "pull": { at: [x, y, w, h], ... } }:
+//           its name then works as a zone too.
 //   events: see events.js
 
 const isGroup = (c) => c >= 'a' && c <= 'z';
@@ -77,6 +81,7 @@ export class Level {
     this.spawn = { x: 1, y: 1 };
     this.version = 0;
     this.tide = null;                 // rising acid: { y, speed, to } in pixels
+    this.fields = new Map(Object.entries(def.fields || {}).map(([id, f]) => [id, { ...f, on: !f.off }]));
 
     let sign = 0;
     for (let y = 0; y < MAP_ROWS; y++) {
@@ -105,6 +110,12 @@ export class Level {
       });
     }
     for (const id of def.hidden || '') this.group(id).visible = false;
+    for (const [id, f] of this.fields) {
+      if (!f.at) continue;
+      const [x0, y0, w, h] = f.at, cells = new Set();
+      for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) cells.add(y * MAP_COLS + x);
+      this.zones.set(id, cells);
+    }
   }
 
   group(id) {
@@ -171,6 +182,13 @@ export class Level {
     return false;
   }
 
+  // The field you're in (by your middle), the first one listed when they overlap.
+  fieldAt(r) {
+    const mid = { x: r.x + r.w / 2 - 0.5, y: r.y + r.h / 2 - 0.5, w: 1, h: 1 };
+    for (const [id, f] of this.fields) if (f.on && this.inZone(id, mid)) return f;
+    return null;
+  }
+
   zoneCells(id) {
     return [...(this.zones.get(id) || [])];
   }
@@ -201,7 +219,7 @@ export class Level {
       if (b.wobble > 0) b.wobble = Math.max(0, b.wobble - dt);
       const m = b.motion;
       if (!m) { b.vx = 0; continue; }
-      let nx = b.ox, ny = b.oy;
+      let nx = b.ox, ny = b.oy, wrapped = false;
 
       if (m.type === 'fall') {
         m.vy = Math.min(m.vy + PHYS.bodyGravity * dt, PHYS.bodyMaxFall);
@@ -216,9 +234,14 @@ export class Level {
           b.motion = null;
         }
       } else if (m.type === 'move') {
+        const was = m.t;
         m.t += dt * m.speed / m.len;
         let p = m.t;
-        if (m.loop) {
+        if (m.loop === 'wrap') {
+          // Back to the start in one jump, like a meteor that falls again from the top.
+          wrapped = Math.floor(p) > Math.floor(was);
+          p %= 1;
+        } else if (m.loop) {
           p %= 2;
           if (p > 1) p = 2 - p;
         } else if (p >= 1) {
@@ -228,12 +251,17 @@ export class Level {
         const e = m.loop || m.linear ? p : p * p * (3 - 2 * p);
         nx = m.fx + (m.tx - m.fx) * e;
         ny = m.fy + (m.ty - m.fy) * e;
+      } else if (m.type === 'orbit') {
+        m.a += dt * m.dir * Math.PI * 2 / m.period;
+        nx = m.cx + Math.cos(m.a) * m.rx;
+        ny = m.cy + Math.sin(m.a) * m.ry;
       }
 
       const dx = nx - b.ox, dy = ny - b.oy;
       b.ox = nx;
       b.oy = ny;
-      b.vx = dx / dt;
+      b.vx = wrapped ? 0 : dx / dt;
+      if (wrapped) { if (player.ground === b) player.ground = null; continue; }
       if (!b.visible || !player.alive || (!dx && !dy)) continue;
       if (player.ground === b) {
         player.carry(dx, dy, this);

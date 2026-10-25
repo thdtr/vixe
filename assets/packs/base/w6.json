@@ -1,0 +1,440 @@
+{
+  "id": "w6",
+  "name": {"pt-BR": "Órbita", "en": "Orbit"},
+  "tagline": {"pt-BR": "aqui ninguém ouve você pular.", "en": "in space, no one can hear you jump."},
+  "palette": {
+    "bg": "#05060f", "dots": "#252a4d", "wall": "#c9cfe0", "wallDim": "#3a3f5c",
+    "girder": "#e0a84f", "hazard": "#ff4fd8", "exit": "#9dff6b", "player": "#f4f6ff",
+    "text": "#b8bfd8", "accent": "#ffd66b", "hud": "#c9cfe0", "dim": "#5d6488"
+  },
+  "music": {
+    "bpm": 72,
+    "voices": [
+      {"wave": "triangle", "v": 0.28, "notes": "d2 . . . . . a1 . f1 . . . . . c2 ."},
+      {"wave": "sine", "v": 0.07, "notes": "a4 . . . e5 . . . . . . . d5 . . . c5 . . . . . . . a4 . . . . . . ."}
+    ]
+  },
+  "ending": "main",
+  "levels": [
+    {
+      "name": {"pt-BR": "Pequeno Passo", "en": "One Small Step"},
+      "weight": 0.6,
+      "map": [
+        "   °",
+        "                 °           °",
+        "",
+        "",
+        "",
+        "",
+        " ·                         ·                     ·          °",
+        "°           °  °                ###############",
+        "                                ###############",
+        "                                ###############",
+        "                                vvvvvvvvvvvvvvv",
+        "",
+        "",
+        "",
+        "",
+        "   @  ?                                                   >",
+        "##############        ##############       #####################",
+        "##############^^^^^^^^##############^^^^^^^#####################"
+      ],
+      "marks": [
+        "",
+        "",
+        "                                                  AAA",
+        "                                                  AAA",
+        "                                                  AAA",
+        "                                                  AAA",
+        "                                                  AAA",
+        "                                                  AAA",
+        "                                                  AAA",
+        "                                                  AAA",
+        "                                                  AAA",
+        "                                                  AAA",
+        "                                                  AAA",
+        "                                                  AAA",
+        "                                                  AAA",
+        "                                                  AAA     e",
+        "",
+        ""
+      ],
+      "signs": [
+        {"pt-BR": "um pequeno passo.", "en": "one small step."}
+      ],
+      "events": [
+        {"when": {"zone": "A"}, "do": [{"say": {"pt-BR": "até a porta flutua aqui.", "en": "even the door floats up here."}}, {"move": "e", "by": [0, -5], "speed": 2.5}]}
+      ]
+    },
+    {
+      "name": {"pt-BR": "Feixe Trator", "en": "Tractor Beam"},
+      "map": [
+        "       °                          °           ·",
+        "                    ·                  ·",
+        "                           °                   °  ·",
+        "            ======                            ======",
+        "                                                            >",
+        "                                                    ############",
+        "                  ################                  ############",
+        "                  ################",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "   @  ?",
+        "############                      ############^^^^^^############",
+        "############^^^^^^^^^^^^^^^^^^^^^^##############################"
+      ],
+      "marks": [
+        "",
+        "",
+        "",
+        "",
+        "            AAAAAA                            BBBBBB",
+        "            AAAAAA                            BBBBBB",
+        "            AAAAAA                            BBBBBB",
+        "            AAAAAA                            BBBBBB",
+        "            AAAAAA                            BBBBBB",
+        "            AAAAAA                            BBBBBB",
+        "            AAAAAA                            BBBBBB",
+        "            AAAAAA                            BBBBBB",
+        "            AAAAAA                            BBBBBB",
+        "            AAAAAA                            BBBBBB",
+        "            AAAAAA                            BBBBBB",
+        "            AAAAAA                            BBBBBB",
+        "            AAAAAA",
+        ""
+      ],
+      "fields": {"A": {"gravity": -1, "weight": 0.3}, "B": {"gravity": -1, "weight": 0.3}},
+      "signs": [
+        {"pt-BR": "o feixe leva você.", "en": "the beam will carry you."}
+      ],
+      "events": [
+        {"when": {"every": 4, "fewerDeaths": 6}, "repeat": true, "do": [{"field": "B", "on": false}, {"wait": 1.4}, {"field": "B", "on": true}]},
+        {"when": {"every": 4, "deaths": 6}, "repeat": true, "do": [{"field": "B", "on": false}, {"wait": 0.9}, {"field": "B", "on": true}]}
+      ]
+    },
+    {
+      "name": {"pt-BR": "Órbita", "en": "Orbit"},
+      "weight": 0.6,
+      "map": [
+        "",
+        "            °",
+        " °                                                          ·",
+        "",
+        "                              °                         °",
+        "",
+        "                             ######                            °",
+        "                   ·       ##########",
+        "               ===        ############         ===",
+        "     °                     ##########                  °     >",
+        "                             ######                 ############",
+        "                               $                 ·  ############",
+        "           ===",
+        "                                                 °",
+        "",
+        " ° @  ?                           ·                         °",
+        "##############     °",
+        "##############"
+      ],
+      "marks": [
+        "                          TTTTTTTTTTTT",
+        "                          TTTTTTTTTTTT",
+        "                          TTTTTTTTTTTT",
+        "                          TTTTTTTTTTTT",
+        "",
+        "",
+        "",
+        "",
+        "               aaa                             bbb",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "signs": [
+        {"pt-BR": "tudo gira em torno de algo.", "en": "everything goes around something."}
+      ],
+      "events": [
+        {"when": {"start": true, "deaths": 6}, "do": [{"ease": 1.4}]},
+        {"when": {"start": true}, "do": [{"orbit": "a", "radius": [16, 6], "period": 8, "at": 0.5}, {"orbit": "b", "radius": [16, 6], "period": 8, "at": 0}]},
+        {"when": {"stand": "a", "zone": "T"}, "do": [{"say": {"pt-BR": "contramão.", "en": "wrong way."}}, {"orbit": "a", "dir": -1}]}
+      ]
+    },
+    {
+      "name": {"pt-BR": "Chuva de Meteoros", "en": "Meteor Shower"},
+      "weight": 0.6,
+      "map": [
+        "       ·   °       ´       ´       ´       ´       ´   *#*",
+        "             °     *       *  °    *       *  °   °*",
+        "   °                                               °",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "   @  ?                                                     >",
+        "########################    ############    ####################",
+        "########################^^^^############^^^^####################"
+      ],
+      "marks": [
+        "                   a       b       c       d       e   zzz",
+        "                   a       b       c       d       e",
+        "                                                   AA",
+        "                                                   AA",
+        "                                                   AA",
+        "                                                   AA",
+        "                                                   AA",
+        "                                                   AA",
+        "                                                   AA",
+        "                                                   AA",
+        "                                                   AA",
+        "                                                   AA",
+        "                                                   AA",
+        "                                                   AA",
+        "                                                   AA",
+        "                                                   AA",
+        "",
+        ""
+      ],
+      "signs": [
+        {"pt-BR": "faça um pedido.", "en": "make a wish."}
+      ],
+      "events": [
+        {"when": {"start": true, "deaths": 6}, "do": [{"ease": 1.4}]},
+        {"when": {"start": true}, "do": [{"move": "a", "by": [-5, 14], "speed": 9, "loop": "wrap", "linear": true}]},
+        {"when": {"time": 0.45}, "do": [{"move": "b", "by": [-5, 14], "speed": 9, "loop": "wrap", "linear": true}]},
+        {"when": {"time": 0.9}, "do": [{"move": "c", "by": [-5, 14], "speed": 9, "loop": "wrap", "linear": true}]},
+        {"when": {"time": 1.35}, "do": [{"move": "d", "by": [-5, 14], "speed": 9, "loop": "wrap", "linear": true}]},
+        {"when": {"time": 0.2}, "do": [{"move": "e", "by": [-5, 14], "speed": 9, "loop": "wrap", "linear": true}]},
+        {"when": {"zone": "A"}, "do": [{"fall": "z"}]}
+      ]
+    },
+    {
+      "name": {"pt-BR": "Câmara de Vácuo", "en": "Airlock"},
+      "map": [
+        "################################################################",
+        "################################################################",
+        "#                                                             ##",
+        "#                                                             ##",
+        "#                                                             ##",
+        "#                                                             ##",
+        "#                                                             ##",
+        "#                                                             ##",
+        "#                                                             ##",
+        "#                                                             ##",
+        "#                                                             ##",
+        "#                                                             ##",
+        "#                                            >                ##",
+        "#                                           ===               ##",
+        "#                                                             ##",
+        "#  @    ?                                                     ##",
+        "######################            ######################======##",
+        "######################^^^^^^^^^^^^######################      ##"
+      ],
+      "marks": [
+        "",
+        "",
+        "             EEEEEEEEE",
+        "             EEEEEEEEE",
+        "             EEEEEEEEE",
+        "             EEEEEEEEE",
+        "             EEEEEEEEE",
+        "             EEEEEEEEE",
+        "             EEEEEEEEE",
+        "             EEEEEEEEE",
+        "             EEEEEEEEE",
+        "             EEEEEEEEE",
+        "             EEEEEEEEE",
+        "             EEEEEEEEE",
+        "             EEEEEEEEE",
+        "             EEEEEEEEE",
+        "                                                        dddddd",
+        ""
+      ],
+      "fields": {"W": {"at": [1, 2, 61, 14], "push": [12, 0], "off": true}},
+      "signs": [
+        {"pt-BR": "mantenha os braços dentro da nave.", "en": "keep your arms inside the ship."}
+      ],
+      "events": [
+        {"when": {"zone": "E"}, "do": [{"flag": "go"}]},
+        {"when": {"every": 4, "flag": "go", "fewerDeaths": 6}, "repeat": true, "do": [{"hide": "d"}, {"field": "W", "on": true}, {"shake": 0.2}, {"wait": 2}, {"field": "W", "on": false}, {"show": "d"}]},
+        {"when": {"every": 4, "flag": "go", "deaths": 6}, "repeat": true, "do": [{"hide": "d"}, {"field": "W", "on": true}, {"shake": 0.2}, {"wait": 2.6}, {"field": "W", "on": false}, {"show": "d"}]}
+      ]
+    },
+    {
+      "name": {"pt-BR": "Buraco de Minhoca", "en": "Wormhole"},
+      "map": [
+        "################################################################",
+        "###########################¤¤¤¤¤¤¤¤¤¤¤¤#########################",
+        "#                  ##                     ##    vvv      ¤  > ##",
+        "#              °   ##                     ##                  ##",
+        "#   °              ##              °      ##                  ##",
+        "#                  ##    ·                ##                  ##",
+        "#          ·       ##                     ##                  ##",
+        "#                  ##                     ##                  ##",
+        "#                  ##                     ##                  ##",
+        "#                  ##                   · ##           ·      ##",
+        "#       ·          ##                     ##                  ##",
+        "#                  ##                     ##                  ##",
+        "#                  ##                     ##    °             ##",
+        "#                  ##                     ##               °  ##",
+        "#                  ##                     ##                  ##",
+        "#  @   ?        ¤  ##                   ¤ ##                  ##",
+        "###########################            #########################",
+        "###########################¤¤¤¤¤¤¤¤¤¤¤¤#########################"
+      ],
+      "marks": [
+        "",
+        "",
+        "                                                     FF  p",
+        "                                                     FF",
+        "                                                     FF",
+        "                                                     FF",
+        "                                                     FF",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "                A                       C",
+        "",
+        "                           BBBBBBBBBBBB"
+      ],
+      "hidden": "p",
+      "signs": [
+        {"pt-BR": "o que entra, sai.", "en": "what goes in comes out."}
+      ],
+      "events": [
+        {"when": {"zone": "A"}, "repeat": true, "do": [{"warp": [23, 15]}]},
+        {"when": {"zone": "B"}, "repeat": true, "do": [{"warp": [null, 2]}]},
+        {"when": {"zone": "C"}, "repeat": true, "do": [{"warp": [45, 2], "flip": true}]},
+        {"when": {"zone": "F"}, "do": [{"show": "p"}, {"flag": "p"}]},
+        {"when": {"zone": [57, 2, 1, 1], "flag": "p"}, "repeat": true, "do": [{"warp": [3, 15], "flip": true}, {"say": {"pt-BR": "de volta ao começo.", "en": "back to square one."}}]}
+      ]
+    },
+    {
+      "name": {"pt-BR": "Lado Escuro da Lua", "en": "Dark Side of the Moon"},
+      "weight": 0.6,
+      "dark": 4,
+      "map": [
+        "    ° ·                                           °  °",
+        "                                         °",
+        "            ·",
+        "                                     °",
+        "     ° °   °   °",
+        "                            ·",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "                                    ===",
+        "                         ####                 ===",
+        "                         ####  ===",
+        "                         ####",
+        "   @  ?                  ####                                >",
+        "##########        ###########                   ######%%%%######",
+        "##########^^^^^^^^###########^^^^^^^^^^^^^^^^^^^######^^^^######"
+      ],
+      "marks": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "                                              aaa",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "signs": [
+        {"pt-BR": "decore enquanto o sol passa.", "en": "memorize while the sun goes by."}
+      ],
+      "events": [
+        {"when": {"start": true}, "do": [{"orbit": "a", "radius": [3, 2], "period": 3}, {"dark": 0}, {"wait": 1.6}, {"dark": 4}]},
+        {"when": {"every": 5}, "repeat": true, "do": [{"dark": 0}, {"flash": 0.12}, {"sfx": "hum"}, {"wait": 1.2}, {"dark": 4}]}
+      ]
+    },
+    {
+      "name": {"pt-BR": "Horizonte de Eventos", "en": "Event Horizon"},
+      "map": [
+        "*                              ###################     ´    ´",
+        "*                              ###################     *    *",
+        "*                                        vvv",
+        "*                                                  °",
+        "*    °                                          ·",
+        "*",
+        "*               ·                                              °",
+        "* ·           °",
+        "*      °                     °",
+        "*       ·",
+        "*          °                                        °         °",
+        "*                              °",
+        "*",
+        "*",
+        "*",
+        "* @                                                           >",
+        " #########   #######         ######               ######   #####",
+        " #########^^^#######^^^^^^^^^######^^^^^^^^^^^^^^^######^^^#####"
+      ],
+      "marks": [
+        "z    SS         G                                 I    m    n",
+        "z    SS         G                                 I    m    n",
+        "z    SS         G                                 I",
+        "z    SS         G              H                  I",
+        "z    SS         G              H                  I",
+        "z    SS         G              H                  I",
+        "z    SS         G              H                  I",
+        "z    SS         G              H                  I",
+        "z    SS         G              H                  I",
+        "z    SS         G              H                  I",
+        "z    SS         G              H                  I",
+        "z    SS         G              H                  I",
+        "z    SS         G              H                  I",
+        "z    SS         G              H                  I",
+        "z    SS         G              H                  I",
+        "z    SS         G              H                  I",
+        "",
+        ""
+      ],
+      "fields": {"pull": {"at": [0, 0, 64, 18], "push": [-3, 0], "off": true}},
+      "events": [
+        {"when": {"start": true, "deaths": 8}, "do": [{"ease": 1.5}]},
+        {"when": {"zone": "I"}, "do": [{"move": "m", "by": [-4, 14], "speed": 8, "loop": "wrap", "linear": true}]},
+        {"when": {"zone": "I", "time": 0.8}, "do": [{"move": "n", "by": [-4, 14], "speed": 8, "loop": "wrap", "linear": true}]},
+        {"when": {"zone": "S"}, "do": [{"say": {"pt-BR": "algo está engolindo a estação.", "en": "something is swallowing the station."}}, {"shake": 0.3}, {"move": "z", "by": [63, 0], "speed": 5, "linear": true}]},
+        {"when": {"zone": "G"}, "do": [{"say": {"pt-BR": "gerador de gravidade: falhando.", "en": "gravity generator: failing."}}, {"weight": 0.6}, {"glitch": 0.2}]},
+        {"when": {"zone": "H"}, "do": [{"gravity": -1}, {"say": {"pt-BR": "gerador de gravidade: ao contrário.", "en": "gravity generator: backwards."}}]},
+        {"when": {"zone": "I"}, "do": [{"gravity": 1}, {"field": "pull", "on": true}, {"say": {"pt-BR": "não olhe para trás.", "en": "don't look back."}}]}
+      ]
+    }
+  ]
+}

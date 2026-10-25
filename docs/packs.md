@@ -44,6 +44,8 @@ label shown instead of the level number) and `ending` (a closing scene after the
 | `signs`  | text for each `?`, in reading order |
 | `words`  | localized solid text, `{ "at": [x, y], "text": {...}, "group": "a" }` |
 | `dark`   | sight radius in cells (0 means no darkness) |
+| `weight` | how hard gravity pulls (1 by default, `0.6` jumps like on the moon) |
+| `fields` | zones that change how you fall while you're inside them (see below) |
 | `events` | traps (see below) |
 
 Map tiles
@@ -54,6 +56,23 @@ Map tiles
 *  saw             ~  acid              >  exit
 ?  sign            @  start             any other character is a solid letter
 ```
+
+## Fields
+
+A field takes over gravity while the middle of the player is inside its zone, and lets go
+as soon as they leave. It's keyed by a zone letter from `marks`, or covers a rect with `at`
+(its name then works as a zone too). Every key is optional.
+
+```json
+"fields": {
+  "A": { "gravity": -1, "weight": 0.3 },
+  "wind": { "at": [1, 2, 61, 14], "push": [12, 0], "off": true }
+}
+```
+
+`gravity` and `weight` replace the level's own while you're inside, and `push` carries you
+along in cells per second, easing in and out at the edges. `"off": true` starts it switched
+off, for the `field` action to turn on. A field that's on shows motes that flow the way it pulls.
 
 ## Events
 
@@ -70,8 +89,14 @@ order. The first key of each step is the action and the rest are its options.
   An event fires once by default. With `"repeat": true` it fires every time it happens again.
 - **Actions** `show`, `hide`, `wobble`, `fall` (`land`, `speed`, `dir`: `-1` falls up), `move`
   (`by`, `speed`, `loop`, `linear`, `wait`), `stop`, `swap` (`to`, `from`: only these tiles),
-  `fill` (`with`), `gravity`, `controls`, `speed`, `tide`, `dark`, `say`, `sfx`, `shake`,
-  `glitch`, `flash`, `flag`, `fire`, `wait`, `kill`, `win`, `ease`.
+  `fill` (`with`), `gravity`, `weight`, `field` (`on`), `controls`, `speed`, `tide`, `dark`,
+  `say`, `sfx`, `shake`, `glitch`, `flash`, `flag`, `fire`, `wait`, `kill`, `win`, `ease`.
+- **Moving in circles** `{ "orbit": "a", "radius": [16, 6], "period": 8, "at": 0.5 }` sends a
+  group around a loop (sizes in cells, `period` in seconds per lap). `at` says where on the loop
+  the group starts (`0` right, `0.25` below, `0.5` left, `0.75` above) and `"dir": -1` goes the
+  other way. Sent again to a group that's already orbiting, it keeps its place and only changes
+  pace or direction. `"loop": "wrap"` on a `move` starts over from the beginning instead of
+  coming back, like a meteor falling again from the top.
   `show`, `fall`, `move`, `swap` and `fill` make a sound; `"quiet": true` silences them.
 - **Mercy** `ease` gives every trap set off after it more time (`1.6` = wobbles 60% longer,
   moves and tides take 60% longer). Paired with `deaths` it helps whoever is stuck without
@@ -92,4 +117,6 @@ waves like `sawtooth` and `square`.
 
 A pack can optionally ship an ES module that exports `register(api)`. The API offers
 `registerAction(name, fn)`, `registerTrigger(name, fn)` and `registerTile(char, def)`.
-`assets/packs/base/script.js` is a real example, it adds the `typewrite` action.
+`assets/packs/base/script.js` is a real example. It adds the `typewrite` and `warp` actions
+(`{ "warp": [x, y], "flip": true }`, where `null` keeps that axis), the `typed`
+trigger, the `·` `°` stars, the `´` meteor tail and the `¤` wormhole mouth as tiles.
