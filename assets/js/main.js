@@ -17,6 +17,9 @@ import { Ending } from './scenes/ending.js';
 import { Credits } from './scenes/credits.js';
 
 const PHOSPHOR = '#8cffa0';
+// A 60 Hz frame is exactly two steps, so the accumulator sits right on a step boundary
+// and timing jitter would turn 2-2-2 into 1-3-1-3. Letting a step run this early keeps it even.
+const SLACK = 0.002;
 const TOUCH_SIZES = [0.85, 1, 1.25];   // small, medium, large buttons (and lanes)
 
 // '#rrggbb' or 'rgb(r,g,b)' (a tinted color) -> 'r, g, b', for rgba() in CSS.
@@ -39,8 +42,7 @@ class App {
     // Only iOS needs it, and only before the game is added to the home screen.
     if (navigator.standalone === false) touchIcon();
     setLang(this.save.lang);
-    await loadStrings('assets/i18n/');
-    this.worlds = await loadPacks('assets/packs/');
+    [, this.worlds] = await Promise.all([loadStrings('assets/i18n/'), loadPacks('assets/packs/')]);
     const params = new URLSearchParams(location.search);
     if (params.has('dev')) window.app = this;
     this.progress = new Progress(this.save, this.worlds, params.has('dev'));
@@ -80,7 +82,7 @@ class App {
       acc += dt;
       this.input.poll();
       this.fitScreen();
-      while (acc >= STEP) {
+      while (acc >= STEP - SLACK) {
         this.update(STEP);
         this.input.endStep();
         acc -= STEP;

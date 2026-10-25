@@ -69,15 +69,56 @@ export function drawLive(screen, level, pal, time, found = false) {
   }
 }
 
+// A glyph's glow at one blur, in device pixels. shadowBlur is costly to paint
+// every frame, so each step of the glow is drawn once, shadow only, and reused.
+// (fx, fy): where it sits within a device pixel, to a quarter, so it lines up with the glyph.
+const glows = { scale: 0, map: new Map() };
+const glowPad = (blur, s) => Math.ceil(blur * 2 / s) + 2;   // room around the cell, virtual pixels
+function glow(screen, ch, color, blur, fx, fy) {
+  const s = screen.scale, key = `${ch}${color}${blur}:${fx}:${fy}`;
+  // An exit riding a moving body visits every phase: start over rather than grow without end.
+  if (glows.scale !== s || glows.map.size > 160) { glows.scale = s; glows.map.clear(); }
+  let canvas = glows.map.get(key);
+  if (!canvas) {
+    const pad = glowPad(blur, s), w = CW + pad * 2, h = CH + pad * 2;
+    canvas = document.createElement('canvas');
+    canvas.width = Math.ceil(w * s) + 1;
+    canvas.height = Math.ceil(h * s) + 1;
+    const l = canvas.getContext('2d');
+    // The glyph itself lands off the canvas; its shadow (offset in device pixels) lands here.
+    l.setTransform(s, 0, 0, s, fx, fy);
+    l.font = FONT_BOLD;
+    l.textAlign = 'center';
+    l.textBaseline = 'middle';
+    l.fillStyle = l.shadowColor = color;
+    l.shadowBlur = blur;
+    l.shadowOffsetX = w * s;
+    l.fillText(ch, pad + CW / 2 - w, pad + CH / 2 + 1);
+    glows.map.set(key, canvas);
+  }
+  return canvas;
+}
+
+// Draws a glyph's glow pixel for pixel, as it was drawn: scaling it again would soften it.
+function drawGlow(screen, ch, px, py, color, blur) {
+  const ctx = screen.ctx, m = ctx.getTransform(), s = screen.scale;
+  const pad = glowPad(blur, s);
+  const dx = m.e + (px - pad) * s, dy = m.f + (py - pad) * s, ix = Math.floor(dx), iy = Math.floor(dy);
+  const canvas = glow(screen, ch, color, blur, Math.round((dx - ix) * 4) / 4, Math.round((dy - iy) * 4) / 4);
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.drawImage(canvas, ix, iy);
+  ctx.restore();
+}
+
 function drawTile(screen, t, ch, px, py, pal, time, x, y, found) {
   if (t.anim) return screen.glyph(animGlyph(t, time, x, y), px, py, pal[t.color]);
   if (t.exit) {
     // The way out breathes, so it reads as "the goal" even in a busy room.
     const ctx = screen.ctx;
+    drawGlow(screen, t.glyph, px, py, screen.color(pal.exit), Math.round((6 + 4 * Math.sin(time * 4)) * 2) / 2);
     ctx.save();
     ctx.font = FONT_BOLD;
-    ctx.shadowColor = screen.color(pal.exit);
-    ctx.shadowBlur = 6 + 4 * Math.sin(time * 4);
     screen.glyph(t.glyph, px, py, pal.exit);
     ctx.restore();
     return;

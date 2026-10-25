@@ -10,7 +10,8 @@ let lang = FALLBACK;
 export async function loadStrings(base) {
   await Promise.all(LANGS.map(async (l) => {
     const res = await fetch(`${base}${l}.json`);
-    tables[l] = await res.json();
+    // Merged under whatever is there: packs load alongside and may have added strings already.
+    tables[l] = { ...(await res.json()), ...tables[l] };
   }));
 }
 

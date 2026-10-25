@@ -57,6 +57,18 @@ jobs:
           console.log(`ok: ${packs.length} pack(s)`);
           JS
 
+      - name: Check preloads
+        run: |
+          # index.html preloads every module, and every preload points at a real file.
+          fail=0
+          for f in $(find assets/js -name '*.js' ! -path assets/js/main.js); do
+            grep -q "href=\"$f\"" index.html || { echo "not preloaded: $f"; fail=1; }
+          done
+          for f in $(grep -o 'rel="[a-z]*preload" href="[^"]*"' index.html | sed 's/.*href="//; s/"$//'); do
+            [ -f "$f" ] || { echo "preload of a missing file: $f"; fail=1; }
+          done
+          exit $fail
+
       - name: Smoke test
         run: |
           python3 -m http.server 8000 >/dev/null 2>&1 &
