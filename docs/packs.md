@@ -119,4 +119,6 @@ A pack can optionally ship an ES module that exports `register(api)`. The API of
 `registerAction(name, fn)`, `registerTrigger(name, fn)` and `registerTile(char, def)`.
 `assets/packs/base/script.js` is a real example. It adds the `typewrite` and `warp` actions
 (`{ "warp": [x, y], "flip": true }`, where `null` keeps that axis), the `typed`
-trigger, the `·` `°` stars, the `´` meteor tail and the `¤` wormhole mouth as tiles.
+trigger, and these tiles: the `·` `°` stars, the `´` meteor tail and the `¤` wormhole mouth;
+the `¦` curtain, `│` rope and `º` audience (none of them solid); the `•` footlight and `§`
+sandbag (both solid); and `╱ ╲ ─ ┆ ╭ ╮ ╰ ╯` for painted scenery you can't stand on.

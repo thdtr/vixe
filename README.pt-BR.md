@@ -2,7 +2,7 @@
 
 [English](README.md) · **Português**
 
-Um jogo de plataforma de ~210 KB feito só de texto. Inspirado em *Level Devil*.
+Um jogo de plataforma de ~235 KB feito só de texto. Inspirado em *Level Devil*.
 
 **Jogue em <https://vixe.online>**
 
