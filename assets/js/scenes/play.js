@@ -347,14 +347,38 @@ export class Play {
     }
   }
 
+  // A radial gradient over the whole map is costly to paint every frame, so the
+  // circle of light is drawn once into its own canvas and only the dark around it is filled.
   drawDark(screen, pal) {
-    const ctx = screen.ctx, p = this.player;
-    const x = p.cx, y = p.cy + MAP_Y, r = this.dark * CW;
-    const g = ctx.createRadialGradient(x, y, r * 0.35, x, y, r);
-    g.addColorStop(0, 'rgba(0,0,0,0)');
-    g.addColorStop(1, screen.color(pal.bg));
-    ctx.fillStyle = g;
-    ctx.fillRect(-8, MAP_Y, MAP_W + 16, MAP_H);
+    const ctx = screen.ctx, p = this.player, s = screen.scale;
+    const r = this.dark * CW, bg = screen.color(pal.bg), key = `${r}:${bg}:${s}`;
+    if (this.darkMask?.key !== key) {
+      const c = document.createElement('canvas'), size = Math.ceil(r * 2 * s), m = size / 2;
+      c.width = c.height = size;
+      const l = c.getContext('2d'), g = l.createRadialGradient(m, m, m * 0.35, m, m, m);
+      g.addColorStop(0, 'rgba(0,0,0,0)');
+      g.addColorStop(1, bg);
+      l.fillStyle = g;
+      l.fillRect(0, 0, size, size);
+      this.darkMask = { key, canvas: c };
+    }
+    const x0 = p.cx - r, y0 = p.cy + MAP_Y - r, x1 = x0 + r * 2, y1 = y0 + r * 2;
+    const left = -8, right = MAP_W + 8, top = MAP_Y, bottom = MAP_Y + MAP_H;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(left, top, right - left, bottom - top);
+    ctx.clip();
+    ctx.drawImage(this.darkMask.canvas, x0, y0, r * 2, r * 2);
+    // The mask's border is solid dark too, so the fills reach 1px into it: no seam.
+    ctx.fillStyle = bg;
+    if (y0 > top) ctx.fillRect(left, top, right - left, y0 - top + 1);
+    if (y1 < bottom) ctx.fillRect(left, y1 - 1, right - left, bottom - y1 + 1);
+    const a = Math.max(top, y0), b = Math.min(bottom, y1);
+    if (b > a) {
+      if (x0 > left) ctx.fillRect(left, a, x0 - left + 1, b - a);
+      if (x1 < right) ctx.fillRect(x1 - 1, a, right - x1 + 1, b - a);
+    }
+    ctx.restore();
   }
 
   // Tears the picture into shifted strips and sprinkles junk glyphs.
