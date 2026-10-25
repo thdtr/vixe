@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0f0d0b">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="An ASCII platformer that doesn't play fair.">
+<title>VIXE</title>
+<link rel="canonical" href="https://vixe.online/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="VIXE">
+<meta property="og:description" content="An ASCII platformer that doesn't play fair.">
+<meta property="og:url" content="https://vixe.online/">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="assets/css/style.css">
+<script type="module" src="assets/js/main.js"></script>
+</head>
+<body>
+<main id="stage">
+  <canvas id="screen" aria-label="VIXE"></canvas>
+</main>
+
+<div id="touch" hidden>
+  <div class="lane left">
+    <span class="pad left"></span>
+    <span class="pad right"></span>
+  </div>
+  <div class="lane right">
+    <span class="pad jump"></span>
+  </div>
+  <button class="pause" data-action="pause" data-hold="restart" aria-label="pause"></button>
+</div>
+
+<div id="rotate"><pre>
+ .--.
+ |@ |      .------.
+ |  |  -&gt;  | @  &gt; |
+ |  |      '------'
+ '--'</pre><p></p></div>
+
+<pre id="boot">loading...</pre>
+<noscript><pre>Este jogo precisa de JavaScript. / This game needs JavaScript.</pre></noscript>
+<!-- nothing to see here. keep walking. -->
+</body>
+</html>

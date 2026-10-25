@@ -1,0 +1,169 @@
+:root {
+  --bg: #0f0d0b;
+  --fg: #e9dcc3;
+  --dim: #6f6355;
+  --mono: 'DejaVu Sans Mono', 'Cascadia Mono', 'Noto Sans Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  font: 14px/1.4 var(--mono);
+}
+
+body {
+  display: grid;
+  place-items: center;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+#stage { position: relative; line-height: 0; }
+#screen { display: block; }
+
+/* Scanlines: one CSS gradient, zero per-frame cost. */
+body.scanlines #stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 62%, rgba(0, 0, 0, 0.35));
+}
+
+#boot {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--dim);
+  font: inherit;
+}
+body.ready #boot { display: none; }
+
+/* Touch controls. The zones are generous and invisible: the left half of the
+   screen steers, the right half jumps. With body.lanes the picture leaves a
+   lane on each side (--lane, set by screen.js) and the pads are drawn there,
+   off the level. Without lanes nothing is drawn over the level but the pause.
+   --ui and --glow are "r, g, b" from the current world's palette; --size and
+   --alpha come from the options (main.js). body.swap trades the two lanes. */
+#touch {
+  --ui: 233, 220, 195;
+  --glow: 242, 193, 78;
+  --size: 1;
+  --alpha: 1;
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  touch-action: none;
+}
+/* In the touch options the controls are only on show: taps go to the menu. */
+#touch.preview, #touch.preview .pause { pointer-events: none; }
+
+.lane {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--lane, 180px);
+  pointer-events: none;
+}
+.lane.left, body.swap .lane.right { left: env(safe-area-inset-left); right: auto; }
+.lane.right, body.swap .lane.left { right: env(safe-area-inset-right); left: auto; }
+body.lanes .lane:has(.pad.on) {
+  background: linear-gradient(to top, rgba(var(--glow), 0.1), transparent calc(100px + env(safe-area-inset-bottom)));
+}
+
+/* Shapes, not glyphs: '<', '>' and '^' already mean things in the level. */
+.pad {
+  position: absolute;
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  height: calc(68px * var(--size));
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 6px;
+  border: 1px solid rgba(var(--ui), calc(0.22 * var(--alpha)));
+  border-radius: 16px;
+  background: rgba(var(--ui), calc(0.06 * var(--alpha)));
+  color: rgba(var(--ui), calc(0.55 * var(--alpha)));
+  font: 12px var(--mono);
+  letter-spacing: 1px;
+  transition: background-color 60ms, box-shadow 60ms;
+}
+/* The outer pad keeps clear of the screen edge, where a swipe means "go back". */
+.pad.left { left: max(4px, calc(12px - env(safe-area-inset-left))); right: calc(50% + 2px); }
+.pad.right { left: calc(50% + 2px); right: 4px; }
+body.swap .pad.left { left: 4px; }
+body.swap .pad.right { right: max(4px, calc(12px - env(safe-area-inset-right))); }
+.pad.jump { left: 50%; width: min(calc(100% - 12px), calc(96px * var(--size))); transform: translateX(-50%); }
+.pad::before { content: ''; width: 14px; height: 16px; background: currentColor; }
+.pad.left::before { clip-path: polygon(100% 0, 0 50%, 100% 100%); }
+.pad.right::before { clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.pad.jump::before { width: 18px; height: 12px; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+/* The glow reaches past the thumb, so the press shows even under it, at any --alpha. */
+.pad.on {
+  color: rgb(var(--glow));
+  background: rgba(var(--glow), 0.22);
+  border-color: rgba(var(--glow), 0.75);
+  box-shadow: 0 0 18px 6px rgba(var(--glow), 0.35);
+}
+body:not(.lanes) .pad { visibility: hidden; }
+
+/* Always top right: centered over the right lane, or in the corner without lanes. */
+.pause {
+  position: absolute;
+  top: calc(6px + env(safe-area-inset-top));
+  right: calc(env(safe-area-inset-right) + (var(--lane) - 48px) / 2);
+  width: 48px;
+  height: 44px;
+  border: 0;
+  color: rgba(var(--ui), 0.6);
+  pointer-events: auto;
+  /* Held, a bar fills underneath; when it is full the level restarts (input.js HOLD). */
+  background: linear-gradient(rgb(var(--glow)), rgb(var(--glow))) no-repeat 50% 100% / 0 3px;
+}
+.pause.on {
+  color: rgb(var(--glow));
+  background-size: 32px 3px;
+  transition: background-size 0.5s linear;
+}
+.pause::before, .pause::after {
+  content: '';
+  position: absolute;
+  top: 14px;
+  width: 5px;
+  height: 16px;
+  border-radius: 1px;
+  background: currentColor;
+}
+.pause::before { left: 16px; }
+.pause::after { right: 16px; }
+body:not(.lanes) .pause { right: calc(env(safe-area-inset-right) + 2px); }
+
+#rotate {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  background: var(--bg);
+  place-content: center;
+  text-align: center;
+  gap: 18px;
+  color: var(--dim);
+}
+#rotate pre { font: 16px/1.15 var(--mono); color: var(--fg); text-align: left; }
+
+/* Phones only: upright tablets are wide enough to play. Same query in main.js. */
+@media (orientation: portrait) and (pointer: coarse) and (max-width: 599px) {
+  #rotate { display: grid; }
+}

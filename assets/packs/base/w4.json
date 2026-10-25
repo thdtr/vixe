@@ -1,0 +1,427 @@
+{
+  "id": "w4",
+  "name": {"pt-BR": "Entrelinhas", "en": "Between the Lines"},
+  "tagline": {"pt-BR": "não acredite em tudo que lê.", "en": "don't believe everything you read."},
+  "palette": {
+    "bg": "#ebe4d2", "dots": "#d6ccb4", "wall": "#2b251d", "wallDim": "#b5a88d",
+    "girder": "#6b5a40", "hazard": "#b8321f", "exit": "#1f6b4f", "player": "#17130e",
+    "text": "#2b251d", "accent": "#a8461f", "hud": "#2b251d", "dim": "#8f826a"
+  },
+  "music": {
+    "bpm": 92,
+    "voices": [
+      {"wave": "triangle", "v": 0.28, "notes": "c2 . g1 . a1 . e1 . f1 . c2 . g1 . . ."},
+      {"wave": "square", "v": 0.02, "notes": "e4 . . g4 . . c5 . . . . . b4 . . . a4 . . . . . g4 . . . . . . . . ."}
+    ]
+  },
+  "ending": "main",
+  "levels": [
+    {
+      "name": {"pt-BR": "Leia", "en": "Read"},
+      "map": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "   @  ?                                                     >",
+        "###########                                         ############",
+        "###########                                         ############"
+      ],
+      "signs": [
+        {"pt-BR": "as palavras aguentam o seu peso.", "en": "words can hold your weight."}
+      ],
+      "words": [
+        {"at": [14, 14], "text": {"pt-BR": "PULE", "en": "JUMP"}},
+        {"at": [21, 12], "text": {"pt-BR": "NAS", "en": "ON"}},
+        {"at": [27, 13], "text": {"pt-BR": "PALAVRAS", "en": "WORDS"}},
+        {"at": [36, 11], "text": {"pt-BR": "CONFIE", "en": "TRUST"}, "group": "c"},
+        {"at": [43, 13], "text": {"pt-BR": "SALTE", "en": "LEAP"}}
+      ],
+      "events": [
+        {"when": {"stand": "c"}, "do": [{"wobble": "c", "time": 0.35}, {"fall": "c", "land": false}]}
+      ]
+    },
+    {
+      "name": {"pt-BR": "Placas", "en": "Signs"},
+      "map": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "                              ############",
+        "                              ############",
+        "                              vvvvvvvvvvvv",
+        "",
+        "   @    ?            ?             ?                    ?  >",
+        "################################################################",
+        "################################################################"
+      ],
+      "marks": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "                  A",
+        "                  A           ssssssssssss",
+        "                  A",
+        "                  A",
+        "                   aaaaa",
+        "                   aaaaa"
+      ],
+      "hidden": "s",
+      "signs": [
+        {"pt-BR": "cuidado: buraco à frente.", "en": "careful: hole ahead."},
+        {"pt-BR": "aqui é seguro.", "en": "it's safe here."},
+        {"pt-BR": "pule!", "en": "jump!"},
+        {"pt-BR": "isto não é uma armadilha.", "en": "this is not a trap."}
+      ],
+      "events": [
+        {"when": {"zone": "A"}, "do": [{"fall": "a"}]},
+        {"when": {"jump": true, "zone": [30, 13, 12, 3]}, "do": [{"show": "s"}]},
+        {"when": {"typed": ["porta", "door", "exit", "saida"]}, "repeat": true, "do": [{"say": {"pt-BR": "não é assim que funciona.", "en": "that's not how this works."}, "time": 2}]}
+      ]
+    },
+    {
+      "name": {"pt-BR": "Errata", "en": "Errata"},
+      "map": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "   @  ?                                                      >",
+        "",
+        "################################    ############################"
+      ],
+      "marks": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "            B                D",
+        "            B                D",
+        "            B                D",
+        "            B                D",
+        "",
+        ""
+      ],
+      "signs": [
+        {"pt-BR": "errata: o chão é uma sugestão (pág. 1).", "en": "errata: the floor is a suggestion (p. 1)."}
+      ],
+      "words": [
+        {"at": [0, 16], "text": {"pt-BR": "AQUI_O_CHÃO_É___", "en": "THE_FLOOR_IS____"}},
+        {"at": [16, 16], "text": {"pt-BR": "DURO", "en": "HARD"}, "group": "b"},
+        {"at": [20, 16], "text": {"pt-BR": "_E_SEMPRE___", "en": "_AND_ALWAYS_"}},
+        {"at": [32, 16], "text": {"pt-BR": "RETO", "en": "FLAT"}, "group": "d"},
+        {"at": [36, 16], "text": {"pt-BR": "_DO_INÍCIO_AO_FIM_DA_LINHA__", "en": "_FROM_START_TO_END_OF_LINE__"}}
+      ],
+      "events": [
+        {"when": {"zone": "B"}, "do": [{"swap": "b", "to": "^"}, {"sfx": "glitch"}]},
+        {"when": {"zone": "D"}, "do": [{"wobble": "d", "time": 0.2}, {"fall": "d", "land": false}]}
+      ]
+    },
+    {
+      "name": {"pt-BR": "Datilografia", "en": "Typewriter"},
+      "map": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "   @                                                        >",
+        "##########                                            ##########",
+        "##########                                            ##########"
+      ],
+      "marks": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "       AA                                   EEEE",
+        "       AA                                   EEEE",
+        "       AA                                   EEEE",
+        "       AA                                   EEEE",
+        "",
+        ""
+      ],
+      "hidden": "ab",
+      "words": [
+        {"at": [10, 16], "text": {"pt-BR": "ESTA_PONTE_ESTÁ_SENDO_ESCRITA_AGORA___", "en": "THIS_BRIDGE_IS_BEING_WRITTEN_RIGHT_NOW"}, "group": "a"},
+        {"at": [48, 16], "text": {"pt-BR": "...FIM", "en": "...END"}, "group": "b"}
+      ],
+      "events": [
+        {"when": {"zone": "A"}, "do": [{"typewrite": "a", "rate": 9}]},
+        {"when": {"zone": "E"}, "do": [{"say": {"pt-BR": "espera. estou pensando.", "en": "wait. I'm thinking."}, "time": 2}]},
+        {"when": {"zone": "E", "idle": 0.8}, "do": [{"typewrite": "b", "rate": 6}]}
+      ]
+    },
+    {
+      "name": {"pt-BR": "Nota de Rodapé", "en": "Footnote"},
+      "map": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "                                                     ---",
+        "",
+        "                                                ---",
+        "   @                                          *               >",
+        "              *                *",
+        ""
+      ],
+      "marks": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "                                              w",
+        "",
+        ""
+      ],
+      "words": [
+        {"at": [0, 16], "text": {"pt-BR": "TODO_ASTERISCO", "en": "EVERY_ASTERISK"}},
+        {"at": [15, 16], "text": {"pt-BR": "_LEVA_A_UMA_NOTA", "en": "_LEADS_TO_A_NOTE"}},
+        {"at": [32, 16], "text": {"pt-BR": "_", "en": "_"}},
+        {"at": [33, 16], "text": {"pt-BR": "AH", "en": "OH"}, "group": "x"},
+        {"at": [35, 16], "text": {"pt-BR": "_ELA_EXPLICA", "en": "_IT_EXPLAINS"}},
+        {"at": [47, 16], "text": {"pt-BR": "_UMA_SERRA._FIM__", "en": "_A_SAW._THE_END__"}},
+        {"at": [0, 17], "text": {"pt-BR": "*_NOTA:_ISTO_É_UMA_SERRA._SEMPRE_FOI.", "en": "*_NOTE:_THIS_IS_A_SAW._IT_ALWAYS_WAS."}},
+        {"at": [56, 10], "text": {"pt-BR": "PREÇO:$", "en": "PRICE:$"}}
+      ],
+      "events": [
+        {"when": {"start": true}, "do": [{"move": "w", "by": [7, 0], "speed": 3, "loop": true, "quiet": true}]},
+        {"when": {"jump": true, "zone": [27, 12, 5, 4]}, "do": [{"swap": "x", "to": "*"}]}
+      ]
+    },
+    {
+      "name": {"pt-BR": "Parágrafo", "en": "Paragraph"},
+      "map": [
+        "",
+        "",
+        "",
+        "   @",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "                                                             >",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "words": [
+        {"at": [2, 4], "text": {"pt-BR": "ERA_UMA_VEZ_UM_ARROBA_QUE__", "en": "ONCE_THERE_WAS_AN_AT_SIGN__"}},
+        {"at": [2, 6], "text": {"pt-BR": "ANDAVA_SEMPRE_PARA_A_DIREITA_______", "en": "THAT_ALWAYS_WALKED_TO_THE__________"}},
+        {"at": [2, 8], "text": {"pt-BR": "COMO_QUEM_LÊ._LINHA_APÓS_LINHA____________", "en": "RIGHT._LIKE_READING._LINE_BY______________"}},
+        {"at": [2, 10], "text": {"pt-BR": "ELE_CONFIAVA_NAS_PALAVRAS._ELAS________________", "en": "LINE._IT_TRUSTED_THE_WORDS._THEY_______________"}},
+        {"at": [2, 12], "text": {"pt-BR": "NEM_SEMPRE_CONFIAVAM_NELE._MAS_ELE____________________", "en": "DID_NOT_ALWAYS_TRUST_IT_BACK._BUT_IT__________________"}},
+        {"at": [2, 14], "text": {"pt-BR": "CHEGOU_AO_FIM_DO_PARÁGRAFO_MESMO_ASSIM._FIM_________________", "en": "REACHED_THE_END_OF_THE_PARAGRAPH_ANYWAY._END________________"}},
+        {"at": [30, 6], "text": {"pt-BR": "____", "en": "____"}, "group": "a"},
+        {"at": [30, 8], "text": {"pt-BR": "^^^^", "en": "^^^^"}},
+        {"at": [39, 8], "text": {"pt-BR": "__", "en": "__"}, "group": "b"},
+        {"at": [51, 12], "text": {"pt-BR": "___", "en": "___"}, "group": "c"},
+        {"at": [51, 14], "text": {"pt-BR": "^^^", "en": "^^^"}}
+      ],
+      "events": [
+        {"when": {"zone": [25, 3, 2, 1]}, "do": [{"fall": "a", "land": false}]},
+        {"when": {"zone": [37, 7, 1, 1]}, "do": [{"swap": "b", "to": "^"}]},
+        {"when": {"stand": "c"}, "do": [{"fall": "c", "land": false}]}
+      ]
+    },
+    {
+      "name": {"pt-BR": "Ctrl+Z", "en": "Ctrl+Z"},
+      "map": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "   @                                                      >",
+        "################################################################",
+        "################################################################"
+      ],
+      "marks": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "           YY                                       UU",
+        "           YY                                       UU",
+        "           YY                                       UU",
+        "           YY                                       UU    d",
+        "                    fffffffffffffffffffff",
+        "                    fffffffffffffffffffff"
+      ],
+      "hidden": "r",
+      "words": [
+        {"at": [18, 14], "text": {"pt-BR": "REFAZ", "en": "REDO_"}, "group": "r"},
+        {"at": [26, 14], "text": {"pt-BR": "REFAZ", "en": "REDO_"}, "group": "r"},
+        {"at": [34, 14], "text": {"pt-BR": "REFAZ", "en": "REDO_"}, "group": "r"}
+      ],
+      "events": [
+        {"when": {"zone": "U"}, "do": [{"say": "ctrl+z", "time": 1.5}, {"glitch": 0.4}, {"fall": "f", "land": false}, {"move": "d", "by": [0, -4], "speed": 20, "wait": true, "quiet": true}, {"move": "d", "by": [-53, 0], "speed": 40, "wait": true, "quiet": true}, {"move": "d", "by": [0, 4], "speed": 20, "wait": true, "quiet": true}, {"say": "ctrl+y", "time": 1.5}, {"typewrite": "r", "rate": 10}]},
+        {"when": {"zone": "Y", "flag": "back"}, "do": [{"move": "d", "by": [3, 0], "speed": 6}]},
+        {"when": {"zone": "U"}, "do": [{"flag": "back"}]}
+      ]
+    },
+    {
+      "name": {"pt-BR": "Fim", "en": "The End"},
+      "map": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "   @                                                ?        >",
+        "#######                                       ##################",
+        "#######                                       ##################",
+        "#######                                       ##################",
+        "#######                                       ##################",
+        "#######                                       ##################",
+        "#######                                       ##################",
+        "#######                                       ##################"
+      ],
+      "signs": [
+        {"pt-BR": "esta porta é honesta. juro.", "en": "this door is honest. I swear."}
+      ],
+      "words": [
+        {"at": [10, 11], "text": {"pt-BR": "#####", "en": "#####"}, "group": "f"},
+        {"at": [10, 12], "text": {"pt-BR": "#    ", "en": "#    "}, "group": "f"},
+        {"at": [10, 13], "text": {"pt-BR": "#### ", "en": "#### "}, "group": "f"},
+        {"at": [10, 14], "text": {"pt-BR": "#    ", "en": "#    "}, "group": "f"},
+        {"at": [10, 15], "text": {"pt-BR": "#    ", "en": "#####"}, "group": "f"},
+        {"at": [19, 11], "text": {"pt-BR": "#####", "en": "#### "}, "group": "i"},
+        {"at": [19, 12], "text": {"pt-BR": "  #  ", "en": "#   #"}, "group": "i"},
+        {"at": [19, 13], "text": {"pt-BR": "  #  ", "en": "#   #"}, "group": "i"},
+        {"at": [19, 14], "text": {"pt-BR": "  #  ", "en": "#   #"}, "group": "i"},
+        {"at": [19, 15], "text": {"pt-BR": "#####", "en": "#   #"}, "group": "i"},
+        {"at": [28, 11], "text": {"pt-BR": "#####", "en": "#### "}, "group": "m"},
+        {"at": [28, 12], "text": {"pt-BR": "# # #", "en": "#   #"}, "group": "m"},
+        {"at": [28, 13], "text": {"pt-BR": "# # #", "en": "#   #"}, "group": "m"},
+        {"at": [28, 14], "text": {"pt-BR": "#   #", "en": "#   #"}, "group": "m"},
+        {"at": [28, 15], "text": {"pt-BR": "#   #", "en": "#### "}, "group": "m"},
+        {"at": [37, 11], "text": {"pt-BR": "#### ", "en": "#### "}, "group": "q"},
+        {"at": [37, 12], "text": {"pt-BR": "    #", "en": "    #"}, "group": "q"},
+        {"at": [37, 13], "text": {"pt-BR": "  ## ", "en": "  ## "}, "group": "q"},
+        {"at": [37, 14], "text": {"pt-BR": "     ", "en": "     "}, "group": "q"},
+        {"at": [37, 15], "text": {"pt-BR": "  #  ", "en": "  #  "}, "group": "q"}
+      ],
+      "events": [
+        {"when": {"stand": "f"}, "do": [{"wobble": "f", "time": 0.3}, {"fall": "f", "land": false}]},
+        {"when": {"stand": "i"}, "do": [{"wobble": "i", "time": 0.3}, {"fall": "i", "land": false}]},
+        {"when": {"stand": "m"}, "do": [{"wobble": "m", "time": 0.3}, {"fall": "m", "land": false}]},
+        {"when": {"stand": "q"}, "do": [{"wobble": "q", "time": 0.3}, {"fall": "q", "land": false}]}
+      ]
+    }
+  ]
+}
