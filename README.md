@@ -2,7 +2,7 @@
 
 **English** · [Português](README.pt-BR.md)
 
-A ~210 KB platformer made entirely of text. Inspired by *Level Devil*.
+A ~235 KB platformer made entirely of text. Inspired by *Level Devil*.
 
 **Play it at <https://vixe.online>**
 

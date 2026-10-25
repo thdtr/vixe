@@ -106,4 +106,6 @@ brilhantes como `sawtooth` e `square`.
 `registerAction(name, fn)`, `registerTrigger(name, fn)` e `registerTile(char, def)`.
 `assets/packs/base/script.js` é um exemplo real: adiciona as ações `typewrite` e `warp`
 (`{ "warp": [x, y], "flip": true }`, onde `null` mantém aquele eixo), o gatilho `typed`,
-as estrelas `·` `°`, o rastro de meteoro `´` e a boca de buraco de minhoca `¤` como tiles.
+e estes tiles: as estrelas `·` `°`, o rastro de meteoro `´` e a boca de buraco de minhoca `¤`;
+a cortina `¦`, a corda `│` e a plateia `º` (nenhum deles é sólido); a ribalta `•` e o saco de
+areia `§` (os dois sólidos); e `╱ ╲ ─ ┆ ╭ ╮ ╰ ╯` para cenário pintado, onde não dá para pisar.

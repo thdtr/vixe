@@ -28,6 +28,16 @@ export function register({ registerAction, registerTrigger, registerTile }) {
   registerTile('´', { glyph: '´', color: 'accent' });
   registerTile('¤', { color: 'exit', anim: 'O0o0' });
 
+  // Backstage: curtain folds and ropes (never solid), the audience down in the pit,
+  // footlights set into the stage floor and the sandbags that hold the scenery up.
+  registerTile('¦', { glyph: '¦', color: 'wallDim' });
+  registerTile('│', { glyph: '│', color: 'dim' });
+  registerTile('º', { color: 'dim', anim: 'º'.repeat(60) + 'o' });
+  registerTile('•', { solid: true, color: 'accent', anim: '•'.repeat(40) + '·' });
+  registerTile('§', { solid: true, glyph: '§', color: 'girder' });
+  // Painted flats: scenery you can look at but never stand on.
+  for (const ch of '╱╲─┆╭╮╰╯') registerTile(ch, { glyph: ch, color: 'dots' });
+
   // Throws you to another cell and keeps your speed: { "warp": [x, y], "flip": true }
   // null keeps that axis, so [null, 2] drops you back in from the top, right where you fell.
   // Land beside the other mouth, not inside its zone, or you'll be sent straight back.
