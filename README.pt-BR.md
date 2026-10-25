@@ -53,9 +53,7 @@ Fases novas entram no jogo como packs. Crie uma pasta em `assets/packs/`, coloqu
 o pack tiver algum erro, o jogo pula ele e continua funcionando. A campanha principal é um
 pack como qualquer outro, então `assets/packs/base/` serve de exemplo completo.
 
-Para testar uma fase sem jogar as anteriores, abra o jogo com `?dev&play=w1.1` no endereço,
-trocando `w1.1` pelo mundo e número da fase. Todos os tiles, eventos e o formato da música
-estão em [docs/packs.pt-BR.md](docs/packs.pt-BR.md).
+Todos os tiles, eventos e o formato da música estão em [docs/packs.pt-BR.md](docs/packs.pt-BR.md).
 
 ## Licença
 

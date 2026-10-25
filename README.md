@@ -53,9 +53,7 @@ worlds in it, and add the folder name to `assets/packs/manifest.json`. If a pack
 error, the game skips it and keeps running. The main campaign is a pack like any other, so
 `assets/packs/base/` doubles as a complete example.
 
-To jump straight to a level, add `?dev&play=w1.1` to the URL, swapping `w1.1` for the world
-and level number. Every tile, event and the music format are covered in
-[docs/packs.md](docs/packs.md).
+Every tile, event and the music format are covered in [docs/packs.md](docs/packs.md).
 
 ## License
 
