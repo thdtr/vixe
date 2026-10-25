@@ -6,7 +6,7 @@ Um jogo de plataforma de ~180 KB feito só de texto. Inspirado em *Level Devil*.
 
 **Jogue em <https://vixe.online>**
 
-[![CI](https://github.com/thiagorodriguesdutra/vixe/actions/workflows/ci.yml/badge.svg)](https://github.com/thiagorodriguesdutra/vixe/actions/workflows/ci.yml)
+[![CI](https://github.com/thdtr/vixe/actions/workflows/ci.yml/badge.svg)](https://github.com/thdtr/vixe/actions/workflows/ci.yml)
 
 ![Gameplay do VIXE](docs/trailer.pt-BR.gif)
 
