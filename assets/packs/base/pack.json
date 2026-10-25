@@ -1,6 +1,6 @@
 {
   "id": "base",
   "name": { "pt-BR": "Vixe", "en": "Vixe" },
-  "worlds": ["w1.json", "w2.json", "w3.json", "w4.json", "w5.json"],
+  "worlds": ["w1.json", "w2.json", "w3.json", "w4.json", "w6.json", "w5.json"],
   "script": "script.js"
 }
