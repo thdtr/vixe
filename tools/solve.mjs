@@ -6,6 +6,7 @@
 //   node tools/solve.mjs w1.3 --deaths 8      as if the player had died 8 times (mercy rules)
 //   node tools/solve.mjs w1.3 --replay "R20 RJ6 R10"   play a script and say what happened
 //   node tools/solve.mjs w1.3 --budget 400000  search longer before giving up
+//   node tools/solve.mjs w1.3 --patience 3     how much a second costs (default: 10, then 2, then 0.5)
 //   node tools/solve.mjs w1.3 --beam 2000      sweep forward in time instead, keeping the 2000
 //                                              most promising moments (finds waits and detours)
 //
@@ -24,7 +25,7 @@ const NAMES = (d, j) => (d > 0 ? 'R' : d < 0 ? 'L' : 'N') + (j ? 'J' : '');
 
 const args = process.argv.slice(2);
 const opt = (name, fallback) => { const i = args.indexOf(`--${name}`); return i >= 0 ? args.splice(i, 2)[1] : fallback; };
-const beam = Number(opt('beam', 0)), budget = Number(opt('budget', 250000)), deaths = Number(opt('deaths', 0)), replay = opt('replay', null), limit = Number(opt('time', 60));
+const beam = Number(opt('beam', 0)), patiences = opt('patience', '10,2,0.5').split(',').map(Number), budget = Number(opt('budget', 250000)), deaths = Number(opt('deaths', 0)), replay = opt('replay', null), limit = Number(opt('time', 60));
 
 class Heap {
   constructor() { this.a = []; }
@@ -80,7 +81,7 @@ const compact = (moves) => {
   return out.map(([d, j, n]) => NAMES(d, j) + n).join(' ');
 };
 
-function solve(world, index) {
+function solve(world, index, patience) {
   const play = makePlay(world, index, deaths);
   if (play.fx.some((f) => f.update)) return { result: 'skipped', why: 'effects act on the player' };
   const heap = new Heap(), seen = new Set();
@@ -106,7 +107,7 @@ function solve(world, index) {
       seen.add(k);
       const hh = h();
       if (hh < best) { best = hh; bestPath = [...n.path, [d, j]]; }
-      heap.push({ f: play.time * 10 + hh * 1.6, g: play.time, snap: snapshot(play), path: [...n.path, [d, j]] });
+      heap.push({ f: play.time * patience + hh * 1.6, g: play.time, snap: snapshot(play), path: [...n.path, [d, j]] });
     }
   }
   return { result: 'unsolved', nodes, closest: best.toFixed(1), path: bestPath };
@@ -164,7 +165,12 @@ for (const [w, i] of targets) {
     if (r.result !== 'win') failed++;
     continue;
   }
-  const r = beam ? sweep(w, i) : solve(w, i);
+  // Hurry first; if that fails, try again willing to wait longer and longer.
+  let r;
+  for (const p of beam ? [0] : patiences) {
+    r = beam ? sweep(w, i) : solve(w, i, p);
+    if (r.result !== 'unsolved') break;
+  }
   const ms = (performance.now() - t0).toFixed(0);
   if (r.result === 'win') console.log(`${id} ${name}: solved in ${r.time.toFixed(2)}s (${r.nodes} tries, ${ms} ms)\n    ${compact(r.path)}`);
   else if (r.result === 'skipped') console.log(`${id} ${name}: skipped (${r.why})`);

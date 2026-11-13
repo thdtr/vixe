@@ -179,7 +179,7 @@
         },
         {
           "when": {"flag": "up", "zone": "U"},
-          "do": [{"chase": "d", "flee": 5, "speed": 14, "min": [-26, 0], "max": [0, 0]}, {"wait": 0.5}, {"collapse": "p", "from": "right", "rate": 8.5}]
+          "do": [{"chase": "d", "flee": 5, "speed": 14, "min": [-11, 0], "max": [14, 0]}, {"wait": 0.5}, {"collapse": "p", "from": "right", "rate": 8.5}]
         }
       ]
     },

@@ -2,7 +2,7 @@
 
 **English** · [Português](README.pt-BR.md)
 
-A ~240 KB platformer made entirely of text. Inspired by *Level Devil*.
+A ~420 KB platformer made entirely of text. Inspired by *Level Devil*.
 
 **Play it at <https://vixe.online>**
 
@@ -10,7 +10,7 @@ A ~240 KB platformer made entirely of text. Inspired by *Level Devil*.
 
 ![VIXE gameplay](docs/trailer.gif)
 
-40 levels across 5 worlds, and maybe something else tucked away. Play with a keyboard, a
+48 levels across 6 worlds, and maybe something else tucked away. Play with a keyboard, a
 gamepad or a touchscreen, and install it as an app on your phone. The game uses no images,
 fonts or libraries. Everything is drawn with characters and every sound is synthesized on
 the fly.
@@ -53,7 +53,9 @@ worlds in it, and add the folder name to `assets/packs/manifest.json`. If a pack
 error, the game skips it and keeps running. The main campaign is a pack like any other, so
 `assets/packs/base/` doubles as a complete example.
 
-Every tile, event and the music format are covered in [docs/packs.md](docs/packs.md).
+Every tile, event, mechanism, effect and the music format are covered in
+[docs/packs.md](docs/packs.md). The game's own code also runs headless, so
+`node tools/solve.mjs w1.3` can tell you whether a level can be beaten, and how.
 
 ## License
 

@@ -23,7 +23,6 @@
   "levels": [
     {
       "name": {"pt-BR": "Pequeno Passo", "en": "One Small Step"},
-      "weight": 0.6,
       "map": [
         "   °",
         "                 °           °",
@@ -40,8 +39,8 @@
         "",
         "",
         "",
-        "   @  ?                                                   >",
-        "##############        ##############       #####################",
+        "   @  ?                               ¡                   >",
+        "##############        ######░░░░####       #####################",
         "##############^^^^^^^^##############^^^^^^^#####################"
       ],
       "marks": [
@@ -64,8 +63,10 @@
         "",
         ""
       ],
+      "weight": 0.6,
       "signs": [{"pt-BR": "um pequeno passo.", "en": "one small step."}],
-      "events": [{"when": {"zone": "A"}, "do": [{"say": {"pt-BR": "até a porta flutua aqui.", "en": "even the door floats up here."}}, {"move": "e", "by": [0, -5], "speed": 2.5}]}]
+      "events": [{"when": {"zone": "A"}, "do": [{"say": {"pt-BR": "até a porta flutua aqui.", "en": "even the door floats up here."}}, {"move": "e", "by": [0, -5], "speed": 2.5}]}],
+      "mechs": {"crumble": {"delay": 0.4, "chain": 0.06}, "pop": {"reach": 2.4}}
     },
     {
       "name": {"pt-BR": "Feixe Trator", "en": "Tractor Beam"},
@@ -85,7 +86,7 @@
         "",
         "",
         "",
-        "   @  ?",
+        "   @  ?                             ¡",
         "############                      ############^^^^^^############",
         "############^^^^^^^^^^^^^^^^^^^^^^##############################"
       ],
@@ -114,11 +115,11 @@
       "events": [
         {"when": {"every": 4, "fewerDeaths": 6}, "repeat": true, "do": [{"field": "B", "on": false}, {"wait": 1.4}, {"field": "B", "on": true}]},
         {"when": {"every": 4, "deaths": 6}, "repeat": true, "do": [{"field": "B", "on": false}, {"wait": 0.9}, {"field": "B", "on": true}]}
-      ]
+      ],
+      "mechs": {"pop": {"reach": 1.6}}
     },
     {
       "name": {"pt-BR": "Órbita", "en": "Orbit"},
-      "weight": 0.6,
       "map": [
         "",
         "            °",
@@ -132,7 +133,7 @@
         "     °                     ##########                  °     >",
         "                             ######                 ############",
         "                               $                 ·  ############",
-        "           ===",
+        "           ░░░",
         "                                                 °",
         "",
         " ° @  ?                           ·                         °",
@@ -159,16 +160,17 @@
         "",
         ""
       ],
+      "weight": 0.6,
       "signs": [{"pt-BR": "tudo gira em torno de algo.", "en": "everything goes around something."}],
       "events": [
         {"when": {"start": true, "deaths": 6}, "do": [{"ease": 1.4}]},
         {"when": {"start": true}, "do": [{"orbit": "a", "radius": [16, 6], "period": 8, "at": 0.5}, {"orbit": "b", "radius": [16, 6], "period": 8, "at": 0}]},
         {"when": {"stand": "a", "zone": "T"}, "do": [{"say": {"pt-BR": "contramão.", "en": "wrong way."}}, {"orbit": "a", "dir": -1}]}
-      ]
+      ],
+      "mechs": {"crumble": {"delay": 0.45}}
     },
     {
       "name": {"pt-BR": "Chuva de Meteoros", "en": "Meteor Shower"},
-      "weight": 0.6,
       "map": [
         "       ·   °       ´       ´       ´       ´       ´   *#*",
         "             °     *       *  °    *       *  °   °*",
@@ -185,7 +187,7 @@
         "",
         "",
         "",
-        "   @  ?                                                     >",
+        "   @  ?                          ¡                          >",
         "########################    ############    ####################",
         "########################^^^^############^^^^####################"
       ],
@@ -209,6 +211,7 @@
         "",
         ""
       ],
+      "weight": 0.6,
       "signs": [{"pt-BR": "faça um pedido.", "en": "make a wish."}],
       "events": [
         {"when": {"start": true, "deaths": 6}, "do": [{"ease": 1.4}]},
@@ -218,7 +221,8 @@
         {"when": {"time": 1.35}, "do": [{"move": "d", "by": [-5, 14], "speed": 9, "loop": "wrap", "linear": true}]},
         {"when": {"time": 0.2}, "do": [{"move": "e", "by": [-5, 14], "speed": 9, "loop": "wrap", "linear": true}]},
         {"when": {"zone": "A"}, "do": [{"fall": "z"}]}
-      ]
+      ],
+      "mechs": {"pop": {"reach": 2}}
     },
     {
       "name": {"pt-BR": "Câmara de Vácuo", "en": "Airlock"},
@@ -238,7 +242,7 @@
         "#                                            >                ##",
         "#                                           ===               ##",
         "#                                                             ##",
-        "#  @    ?                                                     ##",
+        "#  @    ?                             †††                     ##",
         "######################            ######################======##",
         "######################^^^^^^^^^^^^######################      ##"
       ],
@@ -276,7 +280,8 @@
           "repeat": true,
           "do": [{"hide": "d"}, {"field": "W", "on": true}, {"shake": 0.2}, {"wait": 2.6}, {"field": "W", "on": false}, {"show": "d"}]
         }
-      ]
+      ],
+      "mechs": {"pulse": {"period": 1.6, "on": 0.6, "warn": 0.4, "wave": 0.1}}
     },
     {
       "name": {"pt-BR": "Buraco de Minhoca", "en": "Wormhole"},
@@ -336,8 +341,6 @@
     },
     {
       "name": {"pt-BR": "Lado Escuro da Lua", "en": "Dark Side of the Moon"},
-      "weight": 0.6,
-      "dark": 4,
       "map": [
         "    ° ·                                           °  °",
         "                                         °",
@@ -352,7 +355,7 @@
         "",
         "                                    ===",
         "                         ####                 ===",
-        "                         ####  ===",
+        "                         ####  ░░░",
         "                         ####",
         "   @  ?                  ####                                >",
         "##########        ###########                   ######%%%%######",
@@ -378,11 +381,14 @@
         "",
         ""
       ],
+      "weight": 0.6,
+      "dark": 4,
       "signs": [{"pt-BR": "decore enquanto o sol passa.", "en": "memorize while the sun goes by."}],
       "events": [
         {"when": {"start": true}, "do": [{"orbit": "a", "radius": [3, 2], "period": 3}, {"dark": 0}, {"wait": 1.6}, {"dark": 4}]},
         {"when": {"every": 5}, "repeat": true, "do": [{"dark": 0}, {"flash": 0.12}, {"sfx": "hum"}, {"wait": 1.2}, {"dark": 4}]}
-      ]
+      ],
+      "mechs": {"crumble": {"delay": 0.4}}
     },
     {
       "name": {"pt-BR": "Horizonte de Eventos", "en": "Event Horizon"},

@@ -35,6 +35,7 @@ jobs:
           # The game ships native ES modules with no package.json; tell node so.
           echo '{"type":"module"}' > package.json
           find assets sw.js -name '*.js' -print0 | xargs -0 -n1 node --check
+          find tools -name '*.mjs' -print0 | xargs -0 -n1 node --check
           rm package.json
 
       - name: Check packs
@@ -56,6 +57,13 @@ jobs:
           if (bad) process.exit(1);
           console.log(`ok: ${packs.length} pack(s)`);
           JS
+
+      - name: Check levels
+        run: |
+          # Every level loads, names only real traps, and survives a few seconds of play.
+          echo '{"type":"module"}' > package.json
+          node tools/check.mjs
+          rm package.json
 
       - name: Check preloads
         run: |

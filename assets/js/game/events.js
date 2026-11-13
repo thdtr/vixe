@@ -107,13 +107,14 @@ export const actions = {
   stop: (p, id) => { body(p, id).motion = null; },
 
   // Stalks the player (or keeps away, with "flee": gap in cells) along "axis" ("x", "y" or
-  // "xy"), at up to "speed" cells/s, never past "min"/"max" ([dx, dy] cells from where it is).
+  // "xy"), at up to "speed" cells/s, never past "min"/"max": [dx, dy] cells from where the
+  // map drew it, wherever it has moved since.
   chase(p, id, s) {
     const b = body(p, id), lo = s.min ?? [-64, -18], hi = s.max ?? [64, 18];
     b.motion = {
       type: 'chase', axis: s.axis ?? 'x', flee: !!s.flee, gap: (s.flee || 0) * CW,
       speed: (s.speed ?? 6) * CW / ease(p), accel: (s.accel ?? 30) * CW / ease(p), v: [0, 0],
-      min: [b.ox + lo[0] * CW, b.oy + lo[1] * CH], max: [b.ox + hi[0] * CW, b.oy + hi[1] * CH],
+      min: [lo[0] * CW, lo[1] * CH], max: [hi[0] * CW, hi[1] * CH],
     };
   },
 

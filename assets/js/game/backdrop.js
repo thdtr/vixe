@@ -1,4 +1,4 @@
-import { MAP_W, MAP_H } from '../config.js';
+import { MAP_W, MAP_H, VIEW_W, VIEW_H } from '../config.js';
 import { Level } from './level.js';
 import { Particles } from './render.js';
 import { fxDefs, makeFx } from './fx.js';
@@ -43,5 +43,12 @@ export class Backdrop {
 
   front(screen) {
     for (const f of this.fx) f.front?.(screen, this);
+  }
+
+  // The whole scenery behind a menu, seen through a glass of the background color.
+  paint(screen, dim = 0) {
+    this.back(screen);
+    this.front(screen);
+    if (dim) screen.fill(0, 0, VIEW_W, VIEW_H, this.world.palette.bg, dim);
   }
 }

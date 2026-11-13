@@ -94,6 +94,7 @@ export class Options {
 
   update(dt) {
     this.time += dt;
+    this.app.backdrop(this.app.home()).update(dt);
     if (this.app.input.backed()) return this.page === 'touch' ? this.open('main') : this.leave();
     const menu = this.menus[this.page], before = menu.index;
     menu.update(this.app);
@@ -103,6 +104,7 @@ export class Options {
   draw(screen) {
     const pal = this.app.palette(), menu = this.menus[this.page];
     screen.begin(pal.bg);
+    this.app.backdrop(this.app.home()).paint(screen, 0.8);
     screen.center(t(this.page === 'touch' ? 'opt.touchControls' : 'menu.options'), 2, pal.hud);
     menu.draw(screen, menu.visible.length > 7 ? 4 : 5, pal, this.time);
   }

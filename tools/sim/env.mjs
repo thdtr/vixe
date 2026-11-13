@@ -22,13 +22,19 @@ const { Play } = await load('assets/js/scenes/play.js');
 const { registerTile } = await load('assets/js/game/tiles.js');
 const { actions, triggers } = await load('assets/js/game/events.js');
 const { registerFx } = await load('assets/js/game/fx.js');
+const { registerMotion } = await load('assets/js/game/motion.js');
+const { registerMechanism } = await load('assets/js/game/mechanisms.js');
+const { registerActor } = await load('assets/js/game/actors.js');
 const { mergeStrings } = await load('assets/js/core/i18n.js');
 await load('assets/js/fx/index.js');
 export { STEP };
 
 // Every world of every pack in the manifest, scripts registered, as the game loads them.
 export async function loadWorlds() {
-  const api = { registerTile, registerFx, registerAction: (n, f) => { actions[n] = f; }, registerTrigger: (n, f) => { triggers[n] = f; } };
+  const api = {
+    registerTile, registerFx, registerMotion, registerMechanism, registerActor,
+    registerAction: (n, f) => { actions[n] = f; }, registerTrigger: (n, f) => { triggers[n] = f; },
+  };
   const worlds = [];
   for (const id of json('assets/packs/manifest.json').packs) {
     const dir = `assets/packs/${id}/`, pack = json(dir + 'pack.json');

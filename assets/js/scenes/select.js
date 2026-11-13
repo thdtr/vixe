@@ -1,4 +1,4 @@
-import { CW, CH, COLS, VIEW_W, VIEW_H } from '../config.js';
+import { CW, CH, COLS } from '../config.js';
 import { t, loc } from '../core/i18n.js';
 
 const GRID_COL = 27;     // where level cells start
@@ -103,12 +103,7 @@ export class Select {
     screen.begin(pal.bg);
     // The world under the cursor, seen through a dark glass.
     const shown = this.worlds[this.row];
-    if (progress.worldOpen(shown)) {
-      const back = app.backdrop(shown);
-      back.back(screen);
-      back.front(screen);
-      screen.fill(0, 0, VIEW_W, VIEW_H, pal.bg, 0.72);
-    }
+    if (progress.worldOpen(shown)) app.backdrop(shown).paint(screen, 0.72);
     screen.center(t('select.title'), 1, pal.hud);
 
     // Under a finger: a soft block behind whatever will be chosen on release.
