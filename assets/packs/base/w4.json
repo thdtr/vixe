@@ -14,6 +14,11 @@
       {"wave": "square", "v": 0.02, "notes": "e4 . . g4 . . c5 . . . . . b4 . . . a4 . . . . . g4 . . . . . . . . ."}
     ]
   },
+  "fx": [
+    {"type": "paper", "id": "scene"},
+    {"type": "texture", "pattern": "ink", "colors": ["#ebe4d2", "#b5a88d", "#6b5a40", "#2b251d"], "alpha": 0.6, "depth": 0.05},
+    {"type": "vignette", "strength": 0.35, "color": "#8f826a"}
+  ],
   "levels": [
     {
       "name": {"pt-BR": "Leia", "en": "Read"},
@@ -37,9 +42,7 @@
         "###########                                         ############",
         "###########                                         ############"
       ],
-      "signs": [
-        {"pt-BR": "as palavras aguentam o seu peso.", "en": "words can hold your weight."}
-      ],
+      "signs": [{"pt-BR": "as palavras aguentam o seu peso.", "en": "words can hold your weight."}],
       "words": [
         {"at": [14, 14], "text": {"pt-BR": "PULE", "en": "JUMP"}},
         {"at": [21, 12], "text": {"pt-BR": "NAS", "en": "ON"}},
@@ -47,9 +50,7 @@
         {"at": [36, 11], "text": {"pt-BR": "CONFIE", "en": "TRUST"}, "group": "c"},
         {"at": [43, 13], "text": {"pt-BR": "SALTE", "en": "LEAP"}}
       ],
-      "events": [
-        {"when": {"stand": "c"}, "do": [{"wobble": "c", "time": 0.35}, {"fall": "c", "land": false}]}
-      ]
+      "events": [{"when": {"stand": "c"}, "do": [{"wobble": "c", "time": 0.35}, {"fall": "c", "land": false}]}]
     },
     {
       "name": {"pt-BR": "Placas", "en": "Signs"},
@@ -103,7 +104,11 @@
       "events": [
         {"when": {"zone": "A"}, "do": [{"fall": "a"}]},
         {"when": {"jump": true, "zone": [30, 13, 12, 3]}, "do": [{"show": "s"}]},
-        {"when": {"typed": ["porta", "door", "exit", "saida"]}, "repeat": true, "do": [{"say": {"pt-BR": "não é assim que funciona.", "en": "that's not how this works."}, "time": 2}]}
+        {
+          "when": {"typed": ["porta", "door", "exit", "saida"]},
+          "repeat": true,
+          "do": [{"say": {"pt-BR": "não é assim que funciona.", "en": "that's not how this works."}, "time": 2}]
+        }
       ]
     },
     {
@@ -148,9 +153,7 @@
         "",
         ""
       ],
-      "signs": [
-        {"pt-BR": "errata: o chão é uma sugestão (pág. 1).", "en": "errata: the floor is a suggestion (p. 1)."}
-      ],
+      "signs": [{"pt-BR": "errata: o chão é uma sugestão (pág. 1).", "en": "errata: the floor is a suggestion (p. 1)."}],
       "words": [
         {"at": [0, 16], "text": {"pt-BR": "AQUI_O_CHÃO_É___", "en": "THE_FLOOR_IS____"}},
         {"at": [16, 16], "text": {"pt-BR": "DURO", "en": "HARD"}, "group": "b"},
@@ -363,7 +366,19 @@
         {"at": [34, 14], "text": {"pt-BR": "REFAZ", "en": "REDO_"}, "group": "r"}
       ],
       "events": [
-        {"when": {"zone": "U"}, "do": [{"say": "ctrl+z", "time": 1.5}, {"glitch": 0.4}, {"fall": "f", "land": false}, {"move": "d", "by": [0, -4], "speed": 20, "wait": true, "quiet": true}, {"move": "d", "by": [-53, 0], "speed": 40, "wait": true, "quiet": true}, {"move": "d", "by": [0, 4], "speed": 20, "wait": true, "quiet": true}, {"say": "ctrl+y", "time": 1.5}, {"typewrite": "r", "rate": 10}]},
+        {
+          "when": {"zone": "U"},
+          "do": [
+            {"say": "ctrl+z", "time": 1.5},
+            {"glitch": 0.4},
+            {"fall": "f", "land": false},
+            {"move": "d", "by": [0, -4], "speed": 20, "wait": true, "quiet": true},
+            {"move": "d", "by": [-53, 0], "speed": 40, "wait": true, "quiet": true},
+            {"move": "d", "by": [0, 4], "speed": 20, "wait": true, "quiet": true},
+            {"say": "ctrl+y", "time": 1.5},
+            {"typewrite": "r", "rate": 10}
+          ]
+        },
         {"when": {"zone": "Y", "flag": "back"}, "do": [{"move": "d", "by": [3, 0], "speed": 6}]},
         {"when": {"zone": "U"}, "do": [{"flag": "back"}]}
       ]
@@ -390,9 +405,7 @@
         "#######                                       ##################",
         "#######                                       ##################"
       ],
-      "signs": [
-        {"pt-BR": "esta porta é honesta. juro.", "en": "this door is honest. I swear."}
-      ],
+      "signs": [{"pt-BR": "esta porta é honesta. juro.", "en": "this door is honest. I swear."}],
       "words": [
         {"at": [10, 11], "text": {"pt-BR": "#####", "en": "#####"}, "group": "f"},
         {"at": [10, 12], "text": {"pt-BR": "#    ", "en": "#    "}, "group": "f"},

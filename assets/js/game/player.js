@@ -26,6 +26,8 @@ export class Player {
     this.idle = 0;
     this.squash = 0;
     this.revealed = [];
+    this.under = [];          // what the feet rest on: [{ t, i, body }] (i: grid index, -1 for a body)
+    this.conveyor = 0;        // a belt's pull while standing on it, px/s (set by mechanisms.js)
   }
 
   get rect() { return { x: this.x, y: this.y, w: P.w, h: P.h }; }
@@ -54,6 +56,7 @@ export class Player {
     this.jumped = false;
     if (this.buffer > 0 && this.coyote > 0) {
       if (this.ground?.vx) this.vx += this.ground.vx;   // leap off moving things with their momentum
+      if (this.ground) this.vx += this.conveyor;
       this.vy = -P.jump * g * (this.swim && !this.ground ? P.stroke : 1);
       this.buffer = this.coyote = 0;
       this.ground = null;
@@ -73,7 +76,7 @@ export class Player {
     d.y = approach(d.y, (push?.[1] || 0) * CH, P.driftAccel * dt);
 
     this.revealed.length = 0;
-    this.moveX((this.vx + d.x) * dt, level);
+    this.moveX((this.vx + d.x + (this.ground ? this.conveyor : 0)) * dt, level);
     this.ground = this.moveY((this.vy + d.y) * dt, level);
 
     this.landed = !wasGrounded && !!this.ground;
@@ -111,6 +114,7 @@ export class Player {
     const g = this.gdir, prev = this.y;
     let ground = null;
     this.y += dy;
+    this.under.length = 0;
     level.query(this.probe('y'), (px, py, t, i, body) => {
       if (t.oneway) {
         // Only blocks you while falling onto it from its "top" side.
@@ -118,12 +122,23 @@ export class Player {
         if (g > 0 ? prev + P.h > py + 0.01 : prev < py + CH - 0.01) return;
       } else if (!t.solid) return;
       this.y = dy > 0 ? Math.min(this.y, py - P.h) : Math.max(this.y, py + CH);
-      if (dy * g > 0) ground = body || ground || 'static';
+      if (dy * g > 0) {
+        ground = body || ground || 'static';
+        this.under.push({ t, i, body });
+      }
       else if (this.vy * g < 0) this.vy = 0;
       if (t.hidden) this.revealed.push(i);
     });
     if (ground) this.vy = 0;
     return ground;
+  }
+
+  // Thrown up by a spring: power is a share of a full jump.
+  launch(power) {
+    this.vy = -P.jump * power * this.gdir;
+    this.ground = null;
+    this.coyote = 0;
+    this.squash = -0.4;
   }
 
   // Riding a moving body.

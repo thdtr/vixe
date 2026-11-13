@@ -1,5 +1,6 @@
-import { CW, CH, MAP_COLS, MAP_ROWS, MAP_H, PHYS } from '../config.js';
+import { CW, CH, MAP_COLS, MAP_ROWS, PHYS } from '../config.js';
 import { tileOf } from './tiles.js';
+import { motions } from './motion.js';
 import { loc } from '../core/i18n.js';
 
 // Level data:
@@ -220,43 +221,10 @@ export class Level {
       if (b.wobble > 0) b.wobble = Math.max(0, b.wobble - dt);
       const m = b.motion;
       if (!m) { b.vx = 0; continue; }
-      let nx = b.ox, ny = b.oy, wrapped = false;
-
-      if (m.type === 'fall') {
-        m.vy = Math.min(m.vy + PHYS.bodyGravity * dt, PHYS.bodyMaxFall);
-        ny += m.vy * dt * m.dir;
-        if (m.land && this.bodyBlocked(b, nx, ny)) {
-          ny = m.dir > 0 ? Math.floor(ny / CH) * CH : Math.ceil(ny / CH) * CH;
-          while (this.bodyBlocked(b, nx, ny) && Math.abs(ny - b.oy) >= 1) ny -= CH * m.dir;
-          b.motion = null;
-          result ??= 'land';
-        } else if (Math.abs(ny) > MAP_H + CH * 2) {
-          b.visible = false;
-          b.motion = null;
-        }
-      } else if (m.type === 'move') {
-        const was = m.t;
-        m.t += dt * m.speed / m.len;
-        let p = m.t;
-        if (m.loop === 'wrap') {
-          // Back to the start in one jump, like a meteor that falls again from the top.
-          wrapped = Math.floor(p) > Math.floor(was);
-          p %= 1;
-        } else if (m.loop) {
-          p %= 2;
-          if (p > 1) p = 2 - p;
-        } else if (p >= 1) {
-          p = 1;
-          b.motion = null;
-        }
-        const e = m.loop || m.linear ? p : p * p * (3 - 2 * p);
-        nx = m.fx + (m.tx - m.fx) * e;
-        ny = m.fy + (m.ty - m.fy) * e;
-      } else if (m.type === 'orbit') {
-        m.a += dt * m.dir * Math.PI * 2 / m.period;
-        nx = m.cx + Math.cos(m.a) * m.rx;
-        ny = m.cy + Math.sin(m.a) * m.ry;
-      }
+      const step = motions[m.type];
+      if (!step) { b.motion = null; continue; }
+      const { x: nx, y: ny, wrapped = false, landed = false } = step(b, m, dt, this, player);
+      if (landed) result ??= 'land';
 
       const dx = nx - b.ox, dy = ny - b.oy;
       b.ox = nx;

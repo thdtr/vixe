@@ -14,6 +14,12 @@
       {"wave": "sine", "v": 0.08, "notes": "a4 . . . . . f4 . . . e4 . . . . . d4 . . . . . . . c4 . . . . . . ."}
     ]
   },
+  "fx": [
+    {"type": "mirror", "id": "scene"},
+    {"type": "texture", "pattern": "crystal", "colors": ["#0b0c12", "#1a1d33", "#2f3560", "#4a5390"], "alpha": 0.8},
+    {"type": "dust", "kind": "spores", "count": 30, "colors": ["#5a6390", "#7df0c6"]},
+    {"type": "vignette", "strength": 0.65}
+  ],
   "levels": [
     {
       "name": {"pt-BR": "De Ponta-Cabeça", "en": "Upside Down"},
@@ -58,14 +64,8 @@
         ""
       ],
       "hidden": "p",
-      "signs": [
-        {"pt-BR": "às vezes o teto é o chão.", "en": "sometimes the ceiling is the floor."}
-      ],
-      "events": [
-        {"when": {"zone": "F"}, "do": [{"gravity": -1}]},
-        {"when": {"zone": "P"}, "do": [{"show": "p"}]},
-        {"when": {"zone": "N"}, "do": [{"gravity": 1}]}
-      ]
+      "signs": [{"pt-BR": "às vezes o teto é o chão.", "en": "sometimes the ceiling is the floor."}],
+      "events": [{"when": {"zone": "F"}, "do": [{"gravity": -1}]}, {"when": {"zone": "P"}, "do": [{"show": "p"}]}, {"when": {"zone": "N"}, "do": [{"gravity": 1}]}]
     },
     {
       "name": {"pt-BR": "Contramão", "en": "Wrong Way"},
@@ -110,13 +110,8 @@
         ""
       ],
       "hidden": "bc",
-      "signs": [
-        {"pt-BR": "siga em frente. sempre.", "en": "keep going forward. always."}
-      ],
-      "events": [
-        {"when": {"zone": "R"}, "do": [{"show": "b"}, {"controls": "reverse"}]},
-        {"when": {"zone": "N"}, "do": [{"show": "c"}, {"controls": "normal"}]}
-      ]
+      "signs": [{"pt-BR": "siga em frente. sempre.", "en": "keep going forward. always."}],
+      "events": [{"when": {"zone": "R"}, "do": [{"show": "b"}, {"controls": "reverse"}]}, {"when": {"zone": "N"}, "do": [{"show": "c"}, {"controls": "normal"}]}]
     },
     {
       "name": {"pt-BR": "Apagão", "en": "Blackout"},
@@ -189,9 +184,7 @@
         "##############      ##############      ########################",
         "##############      ##############      ########################"
       ],
-      "events": [
-        {"when": {"every": 1.6}, "repeat": true, "do": [{"gravity": "flip"}]}
-      ]
+      "events": [{"when": {"every": 1.6}, "repeat": true, "do": [{"gravity": "flip"}]}]
     },
     {
       "name": {"pt-BR": "Pressa", "en": "Rush"},
@@ -237,7 +230,10 @@
       ],
       "events": [
         {"when": {"start": true}, "do": [{"speed": 1.6}, {"say": {"pt-BR": "pressa.", "en": "hurry."}, "time": 1.5}]},
-        {"when": {"zone": "A"}, "do": [{"wait": 0.55}, {"fall": "a"}, {"wait": 0.9}, {"fall": "b"}, {"wait": 0.9}, {"fall": "c"}, {"wait": 0.9}, {"fall": "d"}, {"wait": 0.3}, {"fall": "e"}]}
+        {
+          "when": {"zone": "A"},
+          "do": [{"wait": 0.55}, {"fall": "a"}, {"wait": 0.9}, {"fall": "b"}, {"wait": 0.9}, {"fall": "c"}, {"wait": 0.9}, {"fall": "d"}, {"wait": 0.3}, {"fall": "e"}]
+        }
       ]
     },
     {
@@ -282,9 +278,7 @@
         "                        bbbbbbbbbbb",
         "                        bbbbbbbbbbb"
       ],
-      "signs": [
-        {"pt-BR": "pular tem consequências.", "en": "jumping has consequences."}
-      ],
+      "signs": [{"pt-BR": "pular tem consequências.", "en": "jumping has consequences."}],
       "events": [
         {"when": {"jump": true}, "repeat": true, "do": [{"gravity": "flip"}]},
         {"when": {"stand": "b"}, "do": [{"wait": 0.6}, {"wobble": "b", "time": 0.3}, {"fall": "b", "land": false}]}
@@ -385,7 +379,13 @@
         {"when": {"zone": "A"}, "do": [{"gravity": -1}]},
         {"when": {"zone": "B"}, "do": [{"controls": "reverse"}]},
         {"when": {"zone": "C"}, "do": [{"gravity": 1}, {"controls": "normal"}]},
-        {"when": {"zone": [56, 12, 2, 4]}, "do": [{"move": "d", "by": [0, -13], "speed": 30}, {"say": {"pt-BR": "a porta tem medo de altura? não. de você.", "en": "is the door afraid of heights? no. of you."}, "time": 3}]},
+        {
+          "when": {"zone": [56, 12, 2, 4]},
+          "do": [
+            {"move": "d", "by": [0, -13], "speed": 30},
+            {"say": {"pt-BR": "a porta tem medo de altura? não. de você.", "en": "is the door afraid of heights? no. of you."}, "time": 3}
+          ]
+        },
         {"when": {"zone": [58, 12, 2, 4]}, "do": [{"gravity": -1}]}
       ]
     }

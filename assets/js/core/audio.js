@@ -23,11 +23,16 @@ const SFX = {
   beam:    [{ wave: 'sawtooth', f: [140, 1100], d: 0.45, v: 0.07 }, { noise: 4000, d: 0.4, v: 0.1 }],
   charge:  [{ wave: 'sine', f: [220, 880], d: 0.8, v: 0.07 }],
   rumble:  [{ noise: 160, d: 0.7, v: 0.3 }],
+  creak:   [{ wave: 'triangle', f: [70, 55], d: 0.25, v: 0.08 }, { noise: 900, d: 0.06, v: 0.06 }],
+  crumble: [{ noise: 500, d: 0.35, v: 0.22 }, { wave: 'triangle', f: [90, 40], d: 0.3, v: 0.1 }],
+  spike:   [{ wave: 'square', f: [1800, 600], d: 0.05, v: 0.06 }, { noise: 6000, d: 0.04, v: 0.08 }],
+  spring:  [{ wave: 'sine', f: [180, 720], d: 0.18, v: 0.14 }, { wave: 'square', f: [360, 1440], d: 0.1, v: 0.03 }],
+  shoot:   [{ noise: 3000, d: 0.06, v: 0.1 }, { wave: 'square', f: [900, 300], d: 0.08, v: 0.04 }],
 };
 
 // Sounds heard over and over drift a little in pitch (noise: in brightness) on each play,
 // so they don't drone. Iconic ones like coin, win and die always sound the same.
-const VARY = { jump: 0.04, tick: 0.03, bonk: 0.05, land: 0.15, thud: 0.12, type: 0.2 };
+const VARY = { jump: 0.04, tick: 0.03, bonk: 0.05, land: 0.15, thud: 0.12, type: 0.2, creak: 0.1, crumble: 0.12, spike: 0.08, shoot: 0.1 };
 
 const NOTE = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
 

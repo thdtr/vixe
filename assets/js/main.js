@@ -7,6 +7,7 @@ import { loadStrings, setLang, t } from './core/i18n.js';
 import { loadPacks } from './core/packs.js';
 import { touchIcon } from './core/icon.js';
 import { Progress } from './game/progress.js';
+import { Backdrop } from './game/backdrop.js';
 import { hash } from './game/render.js';
 import { Title } from './scenes/title.js';
 import { Select } from './scenes/select.js';
@@ -173,10 +174,24 @@ class App {
     }
   }
 
-  // The menus wear the colors of the furthest world you've reached.
-  palette() {
+  // The menus wear the colors (and the scenery) of the furthest world you've reached.
+  home() {
     const open = this.progress.listed().filter((w) => this.progress.worldOpen(w) && !w.hidden);
-    return (open[open.length - 1] || this.worlds[0]).palette;
+    return open[open.length - 1] || this.worlds[0];
+  }
+
+  palette() {
+    return this.home().palette;
+  }
+
+  // A world's scenery for a menu to draw behind itself, kept while it's in use.
+  backdrop(world, map) {
+    const key = `${world.id}:${map ? map.join('|') : ''}`;
+    if (this.backdropKey !== key) {
+      this.backdropKey = key;
+      this.backdropNow = new Backdrop(world, map);
+    }
+    return this.backdropNow;
   }
 
   applySettings() {

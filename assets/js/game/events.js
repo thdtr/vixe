@@ -22,7 +22,30 @@ export const triggers = {
   fewerDeaths: (p, v) => p.attempt < v,
   collected: (p) => p.collected,
   flag: (p, v) => !!p.flags[v],
+  // Closer than r cells: "near": "a" (a group, 2 cells), { "group": "a", "r": 3 } or [x, y, r].
+  near: (p, v) => distance(p, v) < (Array.isArray(v) ? v[2] : v.r ?? 2) * CW,
+  // Anywhere under a group, as it is now: the cue for a ceiling to drop.
+  below(p, id) {
+    const b = p.level.group(id), r = p.player.rect;
+    if (!b.visible || !b.cells.length) return false;
+    const x0 = b.box.x0 * CW + b.ox, x1 = (b.box.x1 + 1) * CW + b.ox, bottom = (b.box.y1 + 1) * CH + b.oy;
+    return r.x + r.w > x0 && r.x < x1 && r.y >= bottom - 1;
+  },
+  past: (p, x) => p.player.cx > x * CW,
+  before: (p, x) => p.player.cx < x * CW,
+  airborne: (p, v) => !p.player.ground === !!v,
+  grounded: (p, v) => !!p.player.ground === !!v,
 };
+
+// From the player's middle to a point, or to the nearest edge of a group.
+function distance(p, v) {
+  const pl = p.player;
+  if (Array.isArray(v)) return Math.hypot(pl.cx - (v[0] + 0.5) * CW, pl.cy - (v[1] + 0.5) * CH);
+  const b = p.level.group(typeof v === 'string' ? v : v.group);
+  if (!b.visible || !b.cells.length) return Infinity;
+  const x0 = b.box.x0 * CW + b.ox, x1 = (b.box.x1 + 1) * CW + b.ox, y0 = b.box.y0 * CH + b.oy, y1 = (b.box.y1 + 1) * CH + b.oy;
+  return Math.hypot(Math.max(x0 - pl.cx, 0, pl.cx - x1), Math.max(y0 - pl.cy, 0, pl.cy - y1));
+}
 
 const body = (p, id) => p.level.group(id);
 // Mercy: { "ease": 1.6 } gives every trap set off after it 60% more time.
@@ -82,6 +105,41 @@ export const actions = {
   },
 
   stop: (p, id) => { body(p, id).motion = null; },
+
+  // Stalks the player (or keeps away, with "flee": gap in cells) along "axis" ("x", "y" or
+  // "xy"), at up to "speed" cells/s, never past "min"/"max" ([dx, dy] cells from where it is).
+  chase(p, id, s) {
+    const b = body(p, id), lo = s.min ?? [-64, -18], hi = s.max ?? [64, 18];
+    b.motion = {
+      type: 'chase', axis: s.axis ?? 'x', flee: !!s.flee, gap: (s.flee || 0) * CW,
+      speed: (s.speed ?? 6) * CW / ease(p), accel: (s.accel ?? 30) * CW / ease(p), v: [0, 0],
+      min: [b.ox + lo[0] * CW, b.oy + lo[1] * CH], max: [b.ox + hi[0] * CW, b.oy + hi[1] * CH],
+    };
+  },
+
+  // The floor gives way column by column: { "collapse": "a", "from": "left" | "right" |
+  // "player", "rate": 14 (columns/s), "wobble": 0.15 }. The columns become groups "a:<x>".
+  collapse(p, id, s) {
+    const b = body(p, id), cols = new Map();
+    for (const c of b.take()) {
+      if (!cols.has(c.x)) cols.set(c.x, []);
+      cols.get(c.x).push(c);
+    }
+    const xs = [...cols.keys()], from = s.from ?? 'player';
+    const origin = from === 'left' ? Math.min(...xs) : from === 'right' ? Math.max(...xs) : p.player.cx / CW;
+    const rate = (s.rate ?? 14) / ease(p), wob = (s.wobble ?? 0.15) * ease(p);
+    for (const x of xs) {
+      const sub = body(p, `${id}:${x}`);
+      for (const c of cols.get(x)) sub.add(c);
+      Object.assign(sub, { ox: b.ox, oy: b.oy, visible: b.visible });
+      const k = Math.abs(x + 0.5 - origin);
+      p.events.script([{ wobble: sub.id, time: wob }, { fall: sub.id, land: false, quiet: true }], k / rate);
+    }
+    if (!s.quiet) p.sfx('crumble', origin * CW);
+  },
+
+  // Sets an actor loose (see actors.js): { "spawn": "bolt", "at": [x, y], "dir": [-1, 0] }
+  spawn: (p, type, s) => { p.actors.spawn(type, s, p); },
 
   // Turns every tile of a group into another one: { "swap": "a", "to": "^" }
   swap(p, id, s) {

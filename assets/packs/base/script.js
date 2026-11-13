@@ -24,7 +24,7 @@ export function register({ registerAction, registerTrigger, registerTile }) {
 
   // Orbit: stars to look at, a meteor's tail (never solid) and the mouth of a wormhole.
   registerTile('·', { glyph: '·', color: 'dots' });
-  registerTile('°', { color: 'dim', anim: '°'.repeat(30) + '+*+·' });
+  registerTile('°', { color: 'dim', anim: '°'.repeat(30) + '+°+·' });
   registerTile('´', { glyph: '´', color: 'accent' });
   registerTile('¤', { color: 'exit', anim: 'O0o0' });
 

@@ -1,6 +1,7 @@
 import { CW, CH, MAP_COLS, MAP_ROWS, MAP_Y, PHYS, FONT_BOLD } from '../config.js';
 import { tileOf } from './tiles.js';
 import { hash } from '../art/math.js';
+import { tones } from './palette.js';
 
 // Re-exported: the menus use it for their own textures.
 export { hash };
@@ -25,15 +26,49 @@ function enclosed(test, x, y) {
 
 // Walls are outlined: only cells touching air get a '#', the inside stays
 // mostly hollow with a faint grain. Big masses read as shapes, not noise.
-function wallGlyph(inside, x, y) {
-  if (!inside) return ['#', 'wall'];
-  const n = hash(x, y);
-  return n < 0.12 ? ['.', 'wallDim'] : n < 0.16 ? ["'", 'wallDim'] : n < 0.18 ? [':', 'wallDim'] : null;
+// The outline is lit from above: tops catch the light, undersides fall back.
+function wallGlyph(look, x, y) {
+  if (enclosed(look, x, y)) {
+    const n = hash(x, y);
+    return n < 0.12 ? ['.', 'wallDim'] : n < 0.16 ? ["'", 'wallDim'] : n < 0.18 ? [':', 'wallDim'] : null;
+  }
+  if (!look(x, y - 1)) return ['#', 'wallLit'];
+  if (!look(x - 1, y) || !look(x + 1, y)) return ['#', 'wallSide'];
+  return ['#', look(x, y + 1) ? 'wallSide' : 'wallUnder'];
+}
+
+// A static wall cell as drawn, for mechanisms that draw their own (a floor that crumbles).
+export function wallGlyphAt(level, x, y) {
+  return wallGlyph((a, b) => wallLook(level, a, b), x, y);
+}
+
+export const color = (pal, role) => pal[role] ?? tones(pal)[role];
+
+// Soft shadow in the air under ledges and beside walls, so the scenery behind sits back.
+// It fades down from the ledge in thin bands rather than filling whole cells.
+function drawShade(screen, ctx, level, pal) {
+  const { shadow, shade: k } = tones(pal), solid = (x, y) => y >= 0 && y < MAP_ROWS && wallLook(level, x, y);
+  const BAND = CH / 6;
+  for (let y = 0; y < MAP_ROWS; y++) {
+    for (let x = 0; x < MAP_COLS; x++) {
+      if (tileOf(level.at(x, y))) continue;
+      const px = x * CW, py = y * CH + MAP_Y;
+      const top = solid(x, y - 1) ? 0 : solid(x, y - 2) ? 6 : -1;
+      if (top >= 0) {
+        for (let b = 0; b < 6; b++) screen.fill(px, py + b * BAND, CW, BAND, shadow, 0.5 * k * Math.pow(0.78, top + b), ctx);
+      }
+      for (const [dx, from] of [[-1, 0], [1, CW]]) {
+        if (!solid(x + dx, y)) continue;
+        for (let b = 0; b < 3; b++) screen.fill(from === 0 ? px + b * 2 : px + CW - (b + 1) * 2, py, 2, CH, shadow, 0.22 * k * (1 - b / 3), ctx);
+      }
+    }
+  }
 }
 
 // Everything that doesn't move or animate: drawn once into the screen cache.
 export function drawStatic(screen, ctx, level, pal) {
   const look = (x, y) => wallLook(level, x, y);
+  drawShade(screen, ctx, level, pal);
   for (let y = 0; y < MAP_ROWS; y++) {
     for (let x = 0; x < MAP_COLS; x++) {
       const ch = level.at(x, y);
@@ -42,9 +77,9 @@ export function drawStatic(screen, ctx, level, pal) {
         if (hash(x + 7, y * 3) < 0.035) screen.glyph('.', x * CW, y * CH + MAP_Y, pal.dots, ctx);
         continue;
       }
-      if (t.anim || t.exit || t.pickup || t.hidden) continue;
-      const g = t.wall ? wallGlyph(enclosed(look, x, y), x, y) : [t.glyph || ch, t.color || 'wall'];
-      if (g) screen.glyph(g[0], x * CW, y * CH + MAP_Y, pal[g[1]], ctx);
+      if (t.anim || t.exit || t.pickup || t.hidden || t.live) continue;
+      const g = t.wall ? wallGlyph(look, x, y) : [t.glyph || ch, t.color || 'wall'];
+      if (g) screen.glyph(g[0], x * CW, y * CH + MAP_Y, color(pal, g[1]), ctx);
     }
   }
 }
@@ -56,12 +91,19 @@ function animGlyph(t, time, x, y) {
 // Animated static tiles: saws, acid, exits, pickups.
 // found: this level's secret is already in the save, so its '$' is drawn as a ghost.
 export function drawLive(screen, level, pal, time, found = false) {
+  // A glint runs along the spikes now and then, so the teeth catch the eye.
+  const sweep = (time * 0.45) % 1.6, glint = tones(pal).glint, ctx = screen.ctx;
   for (let i = 0; i < level.grid.length; i++) {
     const ch = level.grid[i];
     if (ch === ' ') continue;
     const t = tileOf(ch);
-    if (!t.anim && !t.exit && !t.pickup) continue;
     const x = i % MAP_COLS, y = (i / MAP_COLS) | 0;
+    if (t.hazard && !t.anim && !t.live) {
+      const k = 1 - Math.abs(sweep - (x + y * 0.5) / MAP_COLS) * 14;
+      if (k > 0) { ctx.globalAlpha = k; screen.glyph(t.glyph || ch, x * CW, y * CH + MAP_Y, glint); ctx.globalAlpha = 1; }
+      continue;
+    }
+    if (!t.anim && !t.exit && !t.pickup) continue;
     drawTile(screen, t, ch, x * CW, y * CH + MAP_Y, pal, time, x, y, found);
   }
 }
@@ -118,6 +160,13 @@ function drawTile(screen, t, ch, px, py, pal, time, x, y, found) {
     ctx.font = FONT_BOLD;
     screen.glyph(t.glyph, px, py, pal.exit);
     ctx.restore();
+    // Motes drifting up out of it, like light through a door left ajar.
+    for (let k = 0; k < 3; k++) {
+      const u = (time * 0.7 + k / 3 + x * 0.13) % 1;
+      ctx.globalAlpha = (1 - u) * 0.8;
+      screen.glyph(u < 0.5 ? "'" : '.', px + Math.sin(time * 2 + k * 2.1) * 4, py - 4 - u * 16, pal.exit);
+    }
+    ctx.globalAlpha = 1;
     return;
   }
   if (t.pickup) return screen.glyph(t.glyph, px, py + Math.sin(time * 3 + x) * 1.5, found ? pal.dim : pal.exit);
@@ -135,8 +184,8 @@ export function drawBodies(screen, level, pal, time, found = false) {
       if (!t) continue;
       const px = c.x * CW + b.ox + jx, py = c.y * CH + b.oy + MAP_Y;
       if (t.wall) {
-        const g = wallGlyph(enclosed(look, c.x, c.y), c.x, c.y);
-        if (g) screen.glyph(g[0], px, py, pal[g[1]]);
+        const g = wallGlyph(look, c.x, c.y);
+        if (g) screen.glyph(g[0], px, py, color(pal, g[1]));
       } else if (!t.hidden) {
         drawTile(screen, t, c.ch, px, py, pal, time, c.x, c.y, found);
       }
@@ -185,6 +234,12 @@ export function drawTide(screen, tide, pal, time) {
 
 export function drawPlayer(screen, p, pal, size = 1) {
   const ctx = screen.ctx;
+  // A faint halo: the one warm thing in every room.
+  if (size > 0.2) {
+    ctx.globalAlpha = 0.55 * size;
+    drawGlow(screen, '@', p.x + PHYS.w / 2 - CW / 2, (p.gdir > 0 ? p.y + PHYS.h - CH : p.y) + MAP_Y, screen.color(pal.player), 5);
+    ctx.globalAlpha = 1;
+  }
   const sy = (1 - p.squash) * size, sx = (1 + p.squash * 0.6) * size;
   // Anchored at the feet (the head, upside down) so squash looks grounded.
   ctx.save();
@@ -196,6 +251,24 @@ export function drawPlayer(screen, p, pal, size = 1) {
   if (p.crown) {
     ctx.fillStyle = screen.color(pal.exit);
     ctx.fillText('w', 0, -CH - 4);
+  }
+  ctx.restore();
+}
+
+// Afterimages left behind when moving fast: [{ x, y, facing, gdir, age }].
+export function drawTrail(screen, trail, pal) {
+  const ctx = screen.ctx, ghost = tones(pal).ghost;
+  ctx.save();
+  ctx.font = FONT_BOLD;
+  for (const g of trail) {
+    ctx.globalAlpha = Math.max(0, 0.35 - g.age * 1.6);
+    if (ctx.globalAlpha <= 0) continue;
+    ctx.fillStyle = screen.color(ghost);
+    ctx.save();
+    ctx.translate(g.x + PHYS.w / 2, (g.gdir > 0 ? g.y + PHYS.h : g.y) + MAP_Y);
+    ctx.scale(g.facing, g.gdir);
+    ctx.fillText('@', 0, -CH / 2 + 1);
+    ctx.restore();
   }
   ctx.restore();
 }

@@ -99,7 +99,7 @@ const SHIMMERS = {
   // Glow rising from below, flickering like a furnace behind the plates.
   heat(x, y, t, hy) {
     const c = Math.pow(hy / HH, 2.2) * (0.6 + 0.4 * noise(x * 0.04, y * 0.05 - t * 1.6));
-    return c < 0.32 ? null : [c, c > 0.55 ? '*' : '\''];
+    return c < 0.32 ? null : [c, c > 0.55 ? ':' : '\''];
   },
   // A slow scanner band sweeping down.
   scan(x, y, t, hy) {

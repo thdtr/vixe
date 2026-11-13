@@ -14,6 +14,12 @@
       {"wave": "square", "v": 0.03, "notes": ". . . . e3 . . . . . . . d3 . c3 . . . . . . . . . . . . . . . . ."}
     ]
   },
+  "fx": [
+    {"type": "cellar", "id": "scene"},
+    {"type": "texture", "pattern": "brick", "colors": ["#0f0d0b", "#2a211a", "#4a3a2c", "#6b5640"], "alpha": 0.7},
+    {"type": "dust", "count": 50, "colors": ["#51473c", "#cdbb9c"]},
+    {"type": "vignette", "strength": 0.75}
+  ],
   "levels": [
     {
       "name": {"pt-BR": "Ande", "en": "Walk"},
@@ -57,12 +63,8 @@
         "                              aaaa",
         "                              aaaa"
       ],
-      "signs": [
-        {"pt-BR": "a porta é ali. é só andar.", "en": "the door is right there. just walk."}
-      ],
-      "events": [
-        {"when": {"zone": "A"}, "do": [{"fall": "a"}]}
-      ]
+      "signs": [{"pt-BR": "a porta é ali. é só andar.", "en": "the door is right there. just walk."}],
+      "events": [{"when": {"zone": "A"}, "do": [{"fall": "a"}]}]
     },
     {
       "name": {"pt-BR": "Pontas", "en": "Points"},
@@ -107,10 +109,7 @@
         ""
       ],
       "hidden": "bc",
-      "events": [
-        {"when": {"zone": "A"}, "do": [{"show": "b"}]},
-        {"when": {"zone": "B"}, "do": [{"show": "c"}]}
-      ]
+      "events": [{"when": {"zone": "A"}, "do": [{"show": "b"}]}, {"when": {"zone": "B"}, "do": [{"show": "c"}]}]
     },
     {
       "name": {"pt-BR": "A Porta Foge", "en": "The Runaway Door"},
@@ -203,10 +202,7 @@
         "",
         ""
       ],
-      "events": [
-        {"when": {"zone": "A"}, "do": [{"fall": "c"}]},
-        {"when": {"zone": "B"}, "delay": 0.12, "do": [{"fall": "e"}]}
-      ]
+      "events": [{"when": {"zone": "A"}, "do": [{"fall": "c"}]}, {"when": {"zone": "B"}, "delay": 0.12, "do": [{"fall": "e"}]}]
     },
     {
       "name": {"pt-BR": "Fé", "en": "Faith"},
@@ -250,12 +246,8 @@
         "",
         ""
       ],
-      "signs": [
-        {"pt-BR": "tenha fé.", "en": "have faith."}
-      ],
-      "events": [
-        {"when": {"start": true, "deaths": 4}, "do": [{"fill": "S", "with": "#", "quiet": true}]}
-      ]
+      "signs": [{"pt-BR": "tenha fé.", "en": "have faith."}],
+      "events": [{"when": {"start": true, "deaths": 4}, "do": [{"fill": "S", "with": "#", "quiet": true}]}]
     },
     {
       "name": {"pt-BR": "Não Pule", "en": "Don't Jump"},
@@ -300,13 +292,8 @@
         ""
       ],
       "hidden": "s",
-      "signs": [
-        {"pt-BR": "não pule.", "en": "don't jump."},
-        {"pt-BR": "agora pule.", "en": "now jump."}
-      ],
-      "events": [
-        {"when": {"jump": true, "zone": "A"}, "do": [{"show": "s"}]}
-      ]
+      "signs": [{"pt-BR": "não pule.", "en": "don't jump."}, {"pt-BR": "agora pule.", "en": "now jump."}],
+      "events": [{"when": {"jump": true, "zone": "A"}, "do": [{"show": "s"}]}]
     },
     {
       "name": {"pt-BR": "Escada", "en": "Stairs"},
@@ -352,7 +339,10 @@
       ],
       "events": [
         {"when": {"start": true, "deaths": 8}, "do": [{"ease": 1.8}]},
-        {"when": {"start": true, "deaths": 8, "fewerDeaths": 9}, "do": [{"say": {"pt-BR": "tá bom. os degraus vão esperar um pouco.", "en": "fine. the steps will wait a bit."}, "time": 3}]},
+        {
+          "when": {"start": true, "deaths": 8, "fewerDeaths": 9},
+          "do": [{"say": {"pt-BR": "tá bom. os degraus vão esperar um pouco.", "en": "fine. the steps will wait a bit."}, "time": 3}]
+        },
         {"when": {"stand": "a"}, "do": [{"wobble": "a", "time": 0.3}, {"fall": "a", "land": false}]},
         {"when": {"stand": "b"}, "do": [{"wobble": "b", "time": 0.3}, {"fall": "b", "land": false}]},
         {"when": {"stand": "c"}, "do": [{"wobble": "c", "time": 0.3}, {"fall": "c", "land": false}]},
@@ -405,7 +395,40 @@
         "        aaaabbbbccccddddeeeeffffgggghhhhiiiijjjjkkkkllllmmmmnnnn"
       ],
       "events": [
-        {"when": {"zone": "A"}, "do": [{"wait": 0.6}, {"fall": "a"}, {"wait": 0.45}, {"fall": "b"}, {"wait": 0.45}, {"fall": "c"}, {"wait": 0.45}, {"fall": "d"}, {"wait": 0.45}, {"fall": "e"}, {"wait": 0.45}, {"fall": "f"}, {"wait": 0.45}, {"fall": "g"}, {"wait": 0.45}, {"fall": "h"}, {"wait": 0.45}, {"fall": "i"}, {"wait": 0.45}, {"fall": "j"}, {"wait": 0.45}, {"fall": "k"}, {"wait": 0.45}, {"fall": "l"}, {"wait": 0.45}, {"fall": "m"}, {"wait": 0.45}, {"fall": "n"}, {"wait": 0.45}]},
+        {
+          "when": {"zone": "A"},
+          "do": [
+            {"wait": 0.6},
+            {"fall": "a"},
+            {"wait": 0.45},
+            {"fall": "b"},
+            {"wait": 0.45},
+            {"fall": "c"},
+            {"wait": 0.45},
+            {"fall": "d"},
+            {"wait": 0.45},
+            {"fall": "e"},
+            {"wait": 0.45},
+            {"fall": "f"},
+            {"wait": 0.45},
+            {"fall": "g"},
+            {"wait": 0.45},
+            {"fall": "h"},
+            {"wait": 0.45},
+            {"fall": "i"},
+            {"wait": 0.45},
+            {"fall": "j"},
+            {"wait": 0.45},
+            {"fall": "k"},
+            {"wait": 0.45},
+            {"fall": "l"},
+            {"wait": 0.45},
+            {"fall": "m"},
+            {"wait": 0.45},
+            {"fall": "n"},
+            {"wait": 0.45}
+          ]
+        },
         {"when": {"zone": "B"}, "do": [{"move": "z", "by": [0, -3], "speed": 10}]}
       ]
     }

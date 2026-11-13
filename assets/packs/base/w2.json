@@ -14,6 +14,20 @@
       {"wave": "square", "v": 0.025, "notes": "b3 . . . . . . . a3 . . . g3 . . . b3 . . . . . . . d4 . . . b3 . . ."}
     ]
   },
+  "fx": [
+    {"type": "foundry", "id": "scene"},
+    {
+      "type": "texture",
+      "pattern": "plate",
+      "colors": ["#0c0e0f", "#1c2428", "#33424a", "#52646c"],
+      "alpha": 0.75,
+      "shimmer": "heat",
+      "light": ["#5a1a05", "#ff6a1a", "#ffd27a"],
+      "strength": 0.8
+    },
+    {"type": "dust", "kind": "embers", "count": 38, "colors": ["#ff6a3d", "#ffd25a"]},
+    {"type": "vignette", "strength": 0.7, "fog": ["#ff5a1a", 0.22]}
+  ],
   "levels": [
     {
       "name": {"pt-BR": "Travessia", "en": "Crossing"},
@@ -107,7 +121,14 @@
         ""
       ],
       "events": [
-        {"when": {"start": true}, "do": [{"move": "a", "by": [8, 0], "speed": 5, "loop": true}, {"move": "b", "by": [8, 0], "speed": 7, "loop": true}, {"move": "c", "by": [8, 0], "speed": 4, "loop": true}]},
+        {
+          "when": {"start": true},
+          "do": [
+            {"move": "a", "by": [8, 0], "speed": 5, "loop": true},
+            {"move": "b", "by": [8, 0], "speed": 7, "loop": true},
+            {"move": "c", "by": [8, 0], "speed": 4, "loop": true}
+          ]
+        },
         {"when": {"jump": true, "zone": [36, 10, 18, 6]}, "do": [{"move": "c", "by": [0, -3], "speed": 30}]}
       ]
     },
@@ -154,7 +175,14 @@
         ""
       ],
       "events": [
-        {"when": {"start": true}, "do": [{"move": "a", "by": [0, 6], "speed": 6, "loop": true, "quiet": true}, {"move": "b", "by": [0, 6], "speed": 5, "loop": true, "quiet": true}, {"move": "c", "by": [0, 6], "speed": 8, "loop": true, "quiet": true}]},
+        {
+          "when": {"start": true},
+          "do": [
+            {"move": "a", "by": [0, 6], "speed": 6, "loop": true, "quiet": true},
+            {"move": "b", "by": [0, 6], "speed": 5, "loop": true, "quiet": true},
+            {"move": "c", "by": [0, 6], "speed": 8, "loop": true, "quiet": true}
+          ]
+        },
         {"when": {"zone": "F"}, "do": [{"swap": "f", "to": "*"}, {"sfx": "trap"}]}
       ]
     },
@@ -202,7 +230,10 @@
       ],
       "events": [
         {"when": {"start": true, "deaths": 8}, "do": [{"ease": 1.6}]},
-        {"when": {"start": true, "deaths": 8, "fewerDeaths": 9}, "do": [{"say": {"pt-BR": "o elevador foi lubrificado. de nada.", "en": "the elevator got oiled. you're welcome."}, "time": 3}]},
+        {
+          "when": {"start": true, "deaths": 8, "fewerDeaths": 9},
+          "do": [{"say": {"pt-BR": "o elevador foi lubrificado. de nada.", "en": "the elevator got oiled. you're welcome."}, "time": 3}]
+        },
         {"when": {"stand": "a"}, "do": [{"move": "a", "by": [0, -6], "speed": 2.5, "wait": true}, {"wobble": "a", "time": 0.5}, {"fall": "a", "land": false}]},
         {"when": {"zone": "C"}, "do": [{"fall": "c"}]}
       ]
@@ -250,8 +281,23 @@
         ""
       ],
       "events": [
-        {"when": {"start": true}, "do": [{"move": "a", "by": [0, 5], "speed": 5, "loop": true}, {"move": "b", "by": [0, -5], "speed": 5.5, "loop": true}, {"move": "c", "by": [0, 5], "speed": 6, "loop": true}, {"move": "d", "by": [0, -5], "speed": 5.5, "loop": true}]},
-        {"when": {"zone": [58, 12, 2, 4]}, "do": [{"move": "e", "by": [0, -3], "speed": 20, "wait": true}, {"move": "e", "by": [-9, 0], "speed": 25, "wait": true, "quiet": true}, {"move": "e", "by": [0, 3], "speed": 20, "quiet": true}]}
+        {
+          "when": {"start": true},
+          "do": [
+            {"move": "a", "by": [0, 5], "speed": 5, "loop": true},
+            {"move": "b", "by": [0, -5], "speed": 5.5, "loop": true},
+            {"move": "c", "by": [0, 5], "speed": 6, "loop": true},
+            {"move": "d", "by": [0, -5], "speed": 5.5, "loop": true}
+          ]
+        },
+        {
+          "when": {"zone": [58, 12, 2, 4]},
+          "do": [
+            {"move": "e", "by": [0, -3], "speed": 20, "wait": true},
+            {"move": "e", "by": [-9, 0], "speed": 25, "wait": true, "quiet": true},
+            {"move": "e", "by": [0, 3], "speed": 20, "quiet": true}
+          ]
+        }
       ]
     },
     {
@@ -297,9 +343,9 @@
         ""
       ],
       "events": [
-        {"when": {"time": 1.0}, "do": [{"tide": 1.3, "to": 1}, {"sfx": "trap"}]},
+        {"when": {"time": 1}, "do": [{"tide": 1.3, "to": 1}, {"sfx": "trap"}]},
         {"when": {"stand": "p"}, "do": [{"wobble": "p", "time": 0.25}, {"fall": "p"}]},
-        {"when": {"zone": "Q"}, "do": [{"tide": 2.0, "to": 1}]}
+        {"when": {"zone": "Q"}, "do": [{"tide": 2, "to": 1}]}
       ]
     },
     {
@@ -344,10 +390,7 @@
         "                                                  fff",
         "                                                  fff"
       ],
-      "signs": [
-        {"pt-BR": "nada a temer no escuro.", "en": "nothing to fear in the dark."},
-        {"pt-BR": "viu? nada.", "en": "see? nothing."}
-      ],
+      "signs": [{"pt-BR": "nada a temer no escuro.", "en": "nothing to fear in the dark."}, {"pt-BR": "viu? nada.", "en": "see? nothing."}],
       "dark": 9,
       "hidden": "s",
       "events": [
@@ -400,8 +443,11 @@
       "events": [
         {"when": {"start": true, "deaths": 8}, "do": [{"ease": 1.6}]},
         {"when": {"start": true, "deaths": 8, "fewerDeaths": 9}, "do": [{"say": {"pt-BR": "baixei o fogo. só um pouco.", "en": "I turned the heat down. a little."}, "time": 3}]},
-        {"when": {"start": true}, "do": [{"move": "s", "by": [4, 0], "speed": 3, "loop": true, "quiet": true}, {"move": "t", "by": [4, 0], "speed": 4, "loop": true, "quiet": true}]},
-        {"when": {"time": 1.5}, "do": [{"tide": 1.0, "to": 2}, {"sfx": "trap"}]},
+        {
+          "when": {"start": true},
+          "do": [{"move": "s", "by": [4, 0], "speed": 3, "loop": true, "quiet": true}, {"move": "t", "by": [4, 0], "speed": 4, "loop": true, "quiet": true}]
+        },
+        {"when": {"time": 1.5}, "do": [{"tide": 1, "to": 2}, {"sfx": "trap"}]},
         {"when": {"zone": "Q"}, "do": [{"tide": 1.6, "to": 2}, {"shake": 0.3}]},
         {"when": {"zone": "G"}, "do": [{"wobble": "g", "time": 0.35}, {"fall": "g"}]}
       ]
