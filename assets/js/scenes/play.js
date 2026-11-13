@@ -282,7 +282,7 @@ export class Play {
     }
     // Afterimages when moving fast, a puff of dust from running feet.
     for (const g of this.trail) g.age += dt;
-    if (this.ticks % 3 === 0 && (Math.abs(p.vx) > 90 || Math.abs(p.vy) > 260)) this.trail.push({ x: p.x, y: p.y, facing: p.facing, gdir: p.gdir, pose: pose(p), age: 0 });
+    if (this.ticks % 3 === 0 && (Math.abs(p.vx) > 90 || Math.abs(p.vy) > 260)) this.trail.push({ x: p.x, y: p.y, facing: p.facing, gdir: p.gdir, pose: pose(p, this.time), age: 0 });
     if (this.trail.length && this.trail[0].age > 0.25) this.trail.shift();
     if (p.ground && Math.abs(p.vx) > 80 && this.ticks % 14 === 0) {
       this.particles.burst(p.cx - p.facing * 3, feet, '.', 1, 30, pal.dim, { angle: -Math.PI / 2 * p.gdir - p.facing * 0.6, spread: 0.6, gravity: 40, life: 0.35 });
@@ -353,8 +353,8 @@ export class Play {
 
     const p = this.player;
     if (this.state === 'play') drawTrail(screen, this.trail, pal);
-    if (this.state === 'play') drawPlayer(screen, p, pal);
-    else if (this.state === 'win') drawPlayer(screen, p, pal, Math.max(0, this.stateT / 0.55));
+    if (this.state === 'play') drawPlayer(screen, p, pal, 1, this.time);
+    else if (this.state === 'win') drawPlayer(screen, p, pal, Math.max(0, this.stateT / 0.55), this.time);
     this.actors.draw(screen, pal, this);
     this.particles.draw(screen);
     if (this.level.tide) drawTide(screen, this.level.tide, pal, this.time);

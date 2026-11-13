@@ -63,11 +63,11 @@ export class Ending {
       screen.center(shown, top + i, i === this.lines.length - 1 ? pal.dim : this.kind === 'true' ? pal.accent : pal.text, line.length);
     });
 
-    // A small epilogue: the '@' finally walks somewhere without being lied to.
+    // A small epilogue: the player finally walks somewhere without being lied to.
     const x = ((this.time * 22) % (COLS * CW + 40)) - 20;
     for (let c = 0; c < COLS; c++) screen.glyph(c % 2 ? '=' : '-', c * CW, 18 * CH, pal.dots);
     const walking = { ground: true, vx: 22, gdir: 1, stride: this.time * 22 };
-    drawFigure(screen, x + CW / 2, 18 * CH, { pose: pose(walking), color: pal.player, crown: app.save.flags.crown ? pal.exit : null });
+    drawFigure(screen, x + CW / 2, 18 * CH, { pose: pose(walking, this.time), pal, crown: !!app.save.flags.crown });
     if (this.chars >= this.total && Math.sin(this.time * 5) > 0) screen.text('>', COLS - 3, 19, pal.exit);
   }
 }

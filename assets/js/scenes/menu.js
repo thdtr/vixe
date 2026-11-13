@@ -83,7 +83,7 @@ export class Menu {
       const hit = { x: (col - 5) * CW, y: r * CH - gap * CH / 2, w: (label.length + 10) * CW, h: CH * (gap + 1), index: i };
       if (i === this.held) screen.fill(hit.x, hit.y + 2, hit.w, hit.h - 4, pal.accent, 0.16);
       screen.text(label, col, r, selected || i === this.held ? pal.accent : pal.text);
-      if (selected) screen.glyph('@', (col - 3) * CW + Math.sin(time * 6) * 1.5, r * CH, pal.player);
+      if (selected) screen.glyph('▶', (col - 3) * CW + Math.sin(time * 6) * 1.5, r * CH, pal.player);
       this.hits.push(hit);
     });
   }

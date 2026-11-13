@@ -2,6 +2,7 @@ import { CW, CH, MAP_COLS, MAP_ROWS, MAP_Y, PHYS, FONT_BOLD } from '../config.js
 import { tileOf } from './tiles.js';
 import { hash } from '../art/math.js';
 import { tones } from './palette.js';
+import { FIGURE, CROWN, FIGURES, pose, glints, setInk } from './figures.js';
 
 // Re-exported: the menus use it for their own textures.
 export { hash };
@@ -232,63 +233,47 @@ export function drawTide(screen, tide, pal, time) {
   ctx.globalAlpha = 1;
 }
 
-// The player: a small @ for a head over a pair of legs that move, drawn from the feet up
-// (the head, upside down), so squash and stretch stay planted. Glyphs mirror with facing.
-const FACE = FONT_BOLD.slice(FONT_BOLD.indexOf('px ') + 3);
-const HEAD = `bold 12px ${FACE}`, LIMB = `bold 9px ${FACE}`;
-const STRIDE = ['/|', '||', '|\\', '/\\'];
+// The player is one of the figures in figures.js, drawn from the feet up (the head, upside
+// down), so squash and stretch stay planted. Glyphs mirror with facing.
+export { pose };
 
-// What the body is doing: { legs: two glyphs, arms: two glyphs or null }.
-export function pose(p) {
-  if (!p.ground) {
-    const v = p.vy * p.gdir;
-    if (v < -60) return { legs: '\\/', arms: null };       // rising: knees tucked
-    if (v > 280) return { legs: '||', arms: '\\/' };       // falling hard: arms up
-    return { legs: '/\\', arms: null };
-  }
-  if (Math.abs(p.vx) > 15) return { legs: STRIDE[Math.floor(p.stride / 6) % 4], arms: null };
-  return { legs: '/\\', arms: null };
-}
-
-// x, feet: where the feet are, in screen pixels. sx, sy: squash and stretch.
-export function drawFigure(screen, x, feet, { facing = 1, gdir = 1, sx = 1, sy = 1, pose: body, color, crown = null }) {
-  const ctx = screen.ctx;
+// x, feet: where the feet are, in screen pixels. sx, sy: squash and stretch. color, when
+// set, paints the whole figure in it (an afterimage); otherwise it wears the palette.
+export function drawFigure(screen, x, feet, { facing = 1, gdir = 1, sx = 1, sy = 1, pose: s, pal, color = null, crown = false }) {
+  const ctx = screen.ctx, gold = crown && CROWN === 'brilho';
+  const c = {
+    body: color ?? (gold ? pal.exit : pal.player), bg: pal.bg,
+    hazard: color ?? pal.hazard, exit: color ?? pal.exit, accent: color ?? pal.accent ?? pal.exit,
+    light: '#ffffff', crown: crown && CROWN !== 'brilho', style: CROWN, px: screen.scale,
+  };
+  setInk((k) => screen.color(k));
   ctx.save();
   ctx.translate(x, feet);
   ctx.scale(sx * facing, sy * gdir);
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillStyle = screen.color(color);
-  ctx.font = HEAD;
-  ctx.fillText('@', 0, -12);
-  ctx.font = LIMB;
-  ctx.fillText(body.legs[0], -2.4, -3.6);
-  ctx.fillText(body.legs[1], 2.4, -3.6);
-  if (body.arms) {
-    ctx.fillText(body.arms[0], -6.2, -12.5);
-    ctx.fillText(body.arms[1], 6.2, -12.5);
-  }
-  if (crown) {
-    ctx.font = FONT_BOLD;
-    ctx.fillStyle = screen.color(crown);
-    ctx.fillText('w', 0, -23);
-  }
+  FIGURES[FIGURE].draw(ctx, s, c);
   ctx.restore();
+  if (gold && !color) {
+    ctx.save();
+    ctx.translate(x, feet);
+    ctx.scale(1, gdir);
+    glints(ctx, s.t, pal.exit);
+    ctx.restore();
+  }
 }
 
 const feetOf = (p) => (p.gdir > 0 ? p.y + PHYS.h : p.y) + MAP_Y;
 
-export function drawPlayer(screen, p, pal, size = 1) {
+export function drawPlayer(screen, p, pal, size = 1, time = 0) {
   const ctx = screen.ctx;
   // A faint halo: the one warm thing in every room.
   if (size > 0.2) {
     ctx.globalAlpha = 0.55 * size;
-    drawGlow(screen, '@', p.x + PHYS.w / 2 - CW / 2, (p.gdir > 0 ? p.y + PHYS.h - CH : p.y) + MAP_Y, screen.color(pal.player), 5);
+    drawGlow(screen, FIGURES[FIGURE].glow ?? '●', p.x + PHYS.w / 2 - CW / 2, (p.gdir > 0 ? p.y + PHYS.h - CH : p.y) + MAP_Y, screen.color(pal.player), 5);
     ctx.globalAlpha = 1;
   }
   drawFigure(screen, p.x + PHYS.w / 2, feetOf(p), {
     facing: p.facing, gdir: p.gdir, sx: (1 + p.squash * 0.6) * size, sy: (1 - p.squash) * size,
-    pose: pose(p), color: pal.player, crown: p.crown ? pal.exit : null,
+    pose: pose(p, time), pal, crown: !!p.crown,
   });
 }
 
@@ -299,7 +284,7 @@ export function drawTrail(screen, trail, pal) {
     const a = 0.35 - g.age * 1.6;
     if (a <= 0) continue;
     ctx.globalAlpha = a;
-    drawFigure(screen, g.x + PHYS.w / 2, feetOf(g), { facing: g.facing, gdir: g.gdir, pose: g.pose, color: ghost });
+    drawFigure(screen, g.x + PHYS.w / 2, feetOf(g), { facing: g.facing, gdir: g.gdir, pose: g.pose, pal, color: ghost });
   }
   ctx.globalAlpha = 1;
 }
