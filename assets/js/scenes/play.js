@@ -3,6 +3,7 @@ import { Level, overlaps } from '../game/level.js';
 import { Player } from '../game/player.js';
 import { Events } from '../game/events.js';
 import { drawStatic, drawLive, drawBodies, drawFields, drawTide, drawPlayer, drawTrail, pose, Particles } from '../game/render.js';
+import { SLEEP } from '../game/figures.js';
 import { veil } from './menu.js';
 import { t, loc } from '../core/i18n.js';
 import { Menu } from './menu.js';
@@ -287,7 +288,7 @@ export class Play {
     if (p.ground && Math.abs(p.vx) > 80 && this.ticks % 14 === 0) {
       this.particles.burst(p.cx - p.facing * 3, feet, '.', 1, 30, pal.dim, { angle: -Math.PI / 2 * p.gdir - p.facing * 0.6, spread: 0.6, gravity: 40, life: 0.35 });
     }
-    if (p.idle > 20 && this.ticks % 100 === 0) {
+    if (p.idle > SLEEP && this.ticks % 100 === 0) {
       this.particles.burst(p.cx + 4, p.y, 'zZ', 1, 12, pal.dim, { angle: -1.2, spread: 0.4, gravity: -6, life: 1.6 });
     }
 

@@ -41,17 +41,21 @@ export function fit(ctx, ch, x, y, w, h, color) {
 
 // What the body is doing, from the player (or anything shaped like one) and the clock:
 // pose is 'idle', 'run', 'rise', 'apex' or 'fallHard'; frame steps through the walk cycle.
+// Left alone long enough (when the zZ start), the player falls asleep.
 export function pose(p, t = 0) {
   const vy = (p.vy ?? 0) * (p.gdir ?? 1), vx = p.vx ?? 0;
   let name;
   if (!p.ground) name = vy < -60 ? 'rise' : vy > 280 ? 'fallHard' : 'apex';
   else name = Math.abs(vx) > 15 ? 'run' : 'idle';
   const landing = !!p.ground && (p.squash ?? 0) > 0.12;
+  const sleep = name === 'idle' && (p.idle ?? 0) > SLEEP;
   return {
-    pose: name, frame: Math.floor((p.stride ?? 0) / 6) % 4, t, vx, vy, landing,
-    blink: name === 'idle' && !landing && t % 2.3 > 2.15,
+    pose: name, frame: Math.floor((p.stride ?? 0) / 6) % 4, t, vx, vy, landing, sleep,
+    blink: name === 'idle' && !landing && !sleep && t % 2.3 > 2.15,
   };
 }
+
+export const SLEEP = 20;   // seconds without input before the player dozes off
 
 const STRIDE = ['/|', '||', '|\\', '/\\'];
 function legsOf(s) {
@@ -61,7 +65,7 @@ function legsOf(s) {
   return '/\\';
 }
 function eyeOf(s) {
-  if (s.blink) return '-';
+  if (s.blink || s.sleep) return '-';
   if (s.landing) return '^';
   if (s.pose === 'fallHard') return 'O';
   return '•';
@@ -367,10 +371,12 @@ export const FIGURES = {
   },
 
   // The one in the game: helmet with a tinted visor, backpack and boots. The pack fires a
-  // little jet on the way up.
+  // little jet on the way up. Asleep, it sits with its legs out, leans back on the pack
+  // and nods off.
   astronauta: {
     draw(ctx, s, c) {
       const k = c.body;
+      if (s.sleep) return this.sleep(ctx, s, c);
       if (s.pose === 'rise') fit(ctx, '♦', -4.4, -2.6, 1.8, 3 * (1 + 0.2 * Math.sin(s.t * 31)), c.hazard);
       fit(ctx, '█', -4.3, -7, 2.2, 5, blend(k, c.bg, 0.35));
       const up = s.pose === 'rise' ? [-0.8, -0.8] : lift(s);
@@ -382,6 +388,24 @@ export const FIGURES = {
       eyes(ctx, s, 1.1, -11.8, 1.3, k, 0.55);
       fit(ctx, '/', 3.3, -13, null, 1.6, blend(c.accent, c.light, 0.5));
       crown(ctx, s, c, -17.7, 5.4, 3.2);
+    },
+    sleep(ctx, s, c) {
+      const k = c.body, breath = Math.sin(s.t * 1.6);
+      fit(ctx, '█', 2, -1.2, 6, 2.4, k);
+      ctx.save();
+      ctx.translate(0, -2.2);
+      ctx.rotate(-0.14);
+      fit(ctx, '█', -4.3, -2.6, 2.2, 5, blend(k, c.bg, 0.35));
+      fit(ctx, '█', 0, -2.3, 7, 4.6, k);
+      ctx.translate(0, -3.6 + breath * 0.35);
+      ctx.rotate(0.3 + breath * 0.05);
+      fit(ctx, '●', 0, -4, 9.6, 8.6, k);
+      fit(ctx, '●', 1.3, -4, 6.4, 5, blend(c.bg, c.accent, 0.3));
+      fit(ctx, '-', -0.3, -3.6, 2, 0.7, k);
+      fit(ctx, '-', 2.5, -3.6, 2, 0.7, k);
+      fit(ctx, '/', 3.3, -5.2, null, 1.6, blend(c.accent, c.light, 0.5));
+      crown(ctx, s, c, -9.9, 5.4, 3.2);
+      ctx.restore();
     },
   },
 };
