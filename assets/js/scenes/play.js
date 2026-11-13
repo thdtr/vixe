@@ -2,10 +2,13 @@ import { CW, CH, COLS, MAP_COLS, MAP_Y, MAP_W, MAP_H, PHYS, VIEW_W, VIEW_H } fro
 import { Level, overlaps } from '../game/level.js';
 import { Player } from '../game/player.js';
 import { Events } from '../game/events.js';
-import { drawStatic, drawLive, drawBodies, drawFields, drawTide, drawPlayer, Particles } from '../game/render.js';
+import { drawStatic, drawLive, drawBodies, drawFields, drawTide, drawPlayer, drawTrail, Particles } from '../game/render.js';
+import { veil } from './menu.js';
 import { t, loc } from '../core/i18n.js';
 import { Menu } from './menu.js';
-import { makeFx } from '../game/fx.js';
+import { makeFx, fxDefs } from '../game/fx.js';
+import { Mechanisms } from '../game/mechanisms.js';
+import { Actors } from '../game/actors.js';
 
 // Deaths on one level (all tries, saved) before the pause menu offers to skip it.
 const SKIP_AFTER = 25;
@@ -61,6 +64,8 @@ export class Play {
     this.player = new Player(this.level.spawn);
     this.player.crown = !!this.app.save.flags.crown;
     this.events = new Events(this.def.events);
+    this.mechs = new Mechanisms(this.level, this.def.mechs);
+    this.actors = new Actors();
     this.time = 0;
     this.ticks = 0;
     this.state = 'play';
@@ -80,7 +85,8 @@ export class Play {
     this.flags = {};
     this.collected = false;
     this.particles.list.length = 0;
-    this.fx = makeFx(this.def.fx, this);
+    this.trail = [];
+    this.fx = makeFx(fxDefs(this.world, this.def), this);
   }
 
   get inputMode() { return this.paused ? 'menu' : 'play'; }
@@ -252,6 +258,8 @@ export class Play {
     const jump = input.held('jump') || input.held('up');
     this.applyFields();
     for (const f of this.fx) f.update?.(dt, this);
+    this.mechs.update(dt, this);
+    this.actors.update(dt, this);
     if (this.state !== 'play') return;
     p.update(dt, { dir, jump, jumpPressed: input.pressed('jump') || input.pressed('up') }, this.level);
 
@@ -271,6 +279,13 @@ export class Play {
       this.sfx('land', p.cx);
       this.buzz(8);
       this.particles.burst(p.cx, feet, '.,', 4, 50, pal.wall, { angle: -Math.PI / 2 * p.gdir, spread: 2.4, life: 0.3 });
+    }
+    // Afterimages when moving fast, a puff of dust from running feet.
+    for (const g of this.trail) g.age += dt;
+    if (this.ticks % 3 === 0 && (Math.abs(p.vx) > 90 || Math.abs(p.vy) > 260)) this.trail.push({ x: p.x, y: p.y, facing: p.facing, gdir: p.gdir, age: 0 });
+    if (this.trail.length && this.trail[0].age > 0.25) this.trail.shift();
+    if (p.ground && Math.abs(p.vx) > 80 && this.ticks % 14 === 0) {
+      this.particles.burst(p.cx - p.facing * 3, feet, '.', 1, 30, pal.dim, { angle: -Math.PI / 2 * p.gdir - p.facing * 0.6, spread: 0.6, gravity: 40, life: 0.35 });
     }
     if (p.idle > 20 && this.ticks % 100 === 0) {
       this.particles.burst(p.cx + 4, p.y, 'zZ', 1, 12, pal.dim, { angle: -1.2, spread: 0.4, gravity: -6, life: 1.6 });
@@ -301,7 +316,7 @@ export class Play {
         this.collect(px, py);
       }
     });
-    if (dead) this.kill();
+    if (dead || this.mechs.hurts(r, this)) this.kill();
     else if (exit) this.win();
   }
 
@@ -332,12 +347,15 @@ export class Play {
     screen.cached(`${this.def.id}:${this.level.key}`, (l) => drawStatic(screen, l, this.level, pal), ox, oy);
     const found = this.app.save.secrets.includes(this.def.id);
     drawLive(screen, this.level, pal, this.time, found);
+    this.mechs.draw(screen, pal, this);
     drawBodies(screen, this.level, pal, this.time, found);
     if (this.level.fields.size) drawFields(screen, this.level, pal, this.time);
 
     const p = this.player;
+    if (this.state === 'play') drawTrail(screen, this.trail, pal);
     if (this.state === 'play') drawPlayer(screen, p, pal);
     else if (this.state === 'win') drawPlayer(screen, p, pal, Math.max(0, this.stateT / 0.55));
+    this.actors.draw(screen, pal, this);
     this.particles.draw(screen);
     if (this.level.tide) drawTide(screen, this.level.tide, pal, this.time);
     for (const f of this.fx) f.front?.(screen, this);
@@ -345,6 +363,7 @@ export class Play {
     if (this.dark) this.drawDark(screen, pal);
     if (this.glitch > 0) this.drawGlitch(screen, pal);
     ctx.setTransform(screen.scale, 0, 0, screen.scale, 0, 0);
+    this.drawBanner(screen, pal);
     this.drawHud(screen, pal);
     if (this.flash > 0) screen.fill(0, 0, VIEW_W, VIEW_H, pal.player, Math.min(0.8, this.flash * 4));
     if (this.paused) {
@@ -405,7 +424,23 @@ export class Play {
     }
   }
 
+  // The level's name across the room the first time in, fading as you start to move.
+  drawBanner(screen, pal) {
+    const k = this.attempt ? 0 : Math.min(1, Math.max(0, 2.2 - this.time) * 1.5) * Math.min(1, this.time * 4);
+    if (k <= 0.01) return;
+    const ctx = screen.ctx, name = loc(this.def.name).toUpperCase().split('').join(' ');
+    const code = `${this.app.progress.code(this.world)} - ${this.index + 1}`;
+    ctx.globalAlpha = k;
+    veil(screen, 6.4, 9.6, Math.max(name.length, 14) + 8, pal.bg, 0.92);
+    ctx.globalAlpha = k;
+    screen.center(code, 7, pal.dim);
+    screen.center(name, 8.5, pal.accent);
+    ctx.globalAlpha = 1;
+  }
+
   drawHud(screen, pal) {
+    screen.fill(0, CH - 1, VIEW_W, 1, pal.dots, 0.9);
+    screen.fill(0, 19 * CH, VIEW_W, 1, pal.dots, 0.6);
     const code = `${this.app.progress.code(this.world)}-${this.index + 1}`;
     screen.text(code, 1, 0, pal.accent);
     screen.text(loc(this.def.name).toUpperCase(), code.length + 2, 0, pal.hud);

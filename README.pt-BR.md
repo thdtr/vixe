@@ -2,7 +2,7 @@
 
 [English](README.md) · **Português**
 
-Um jogo de plataforma de ~240 KB feito só de texto. Inspirado em *Level Devil*.
+Um jogo de plataforma de ~420 KB feito só de texto. Inspirado em *Level Devil*.
 
 **Jogue em <https://vixe.online>**
 
@@ -10,7 +10,7 @@ Um jogo de plataforma de ~240 KB feito só de texto. Inspirado em *Level Devil*.
 
 ![Gameplay do VIXE](docs/trailer.pt-BR.gif)
 
-São 40 fases em 5 mundos, e talvez mais alguma coisa escondida. Dá para jogar no teclado,
+São 48 fases em 6 mundos, e talvez mais alguma coisa escondida. Dá para jogar no teclado,
 no controle ou no toque, e no celular ele pode ser instalado como app. O jogo não usa
 nenhuma imagem, fonte ou biblioteca. Tudo é desenhado com caracteres e todo som é
 sintetizado na hora.
@@ -53,7 +53,9 @@ Fases novas entram no jogo como packs. Crie uma pasta em `assets/packs/`, coloqu
 o pack tiver algum erro, o jogo pula ele e continua funcionando. A campanha principal é um
 pack como qualquer outro, então `assets/packs/base/` serve de exemplo completo.
 
-Todos os tiles, eventos e o formato da música estão em [docs/packs.pt-BR.md](docs/packs.pt-BR.md).
+Todos os tiles, eventos, mecanismos, efeitos e o formato da música estão em
+[docs/packs.pt-BR.md](docs/packs.pt-BR.md). O próprio código do jogo também roda sem tela,
+então `node tools/solve.mjs w1.3` diz se uma fase pode ser vencida, e como.
 
 ## Licença
 

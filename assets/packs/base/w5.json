@@ -15,10 +15,21 @@
     "bpm": 100,
     "voices": [
       {"wave": "triangle", "v": 0.22, "notes": "a1 . . . e2 . . . e2 . . . f1 . . . c2 . . . c2 . . . d2 . . . a2 . . . a2 . . . e1 . . . b1 . . . g#1 . . ."},
-      {"wave": "square", "v": 0.03, "cut": 1800, "notes": "e5 . . . . . a5 . . . b5 . c6 . . . . . b5 . . . a5 . f5 . . . . . a5 . . . d5 . e5 . . . . . . . . . g#4 . a4 . . . . . c5 . . . e5 . a5 . . . . . g5 . . . f5 . e5 . . . d5 . . . b4 . . . a4 . . . . . . . . . . ."},
+      {
+        "wave": "square",
+        "v": 0.03,
+        "cut": 1800,
+        "notes": "e5 . . . . . a5 . . . b5 . c6 . . . . . b5 . . . a5 . f5 . . . . . a5 . . . d5 . e5 . . . . . . . . . g#4 . a4 . . . . . c5 . . . e5 . a5 . . . . . g5 . . . f5 . e5 . . . d5 . . . b4 . . . a4 . . . . . . . . . . ."
+      },
       {"wave": "sine", "v": 0.035, "notes": "c4 - - - - - - - - - - - c4 - - - - - - - - - - - d4 - - - - - - - - - - - b3 - - - - - - - - - - -"}
     ]
   },
+  "fx": [
+    {"type": "stage", "id": "scene"},
+    {"type": "texture", "pattern": "planks", "colors": ["#0a0507", "#2a1015", "#4a2228", "#7a3a3a"], "alpha": 0.75},
+    {"type": "dust", "count": 36, "colors": ["#6e4a4a", "#ffcc55"]},
+    {"type": "vignette", "strength": 0.8}
+  ],
   "levels": [
     {
       "name": {"pt-BR": "Terceiro Sinal", "en": "Third Bell"},
@@ -63,16 +74,23 @@
         ""
       ],
       "dark": 3,
-      "signs": [
-        {"pt-BR": "o espetáculo não pode parar.", "en": "the show must go on."}
-      ],
-      "words": [
-        {"at": [25, 3], "text": {"pt-BR": "ATO I — CENA 1", "en": "ACT I — SCENE 1"}}
-      ],
+      "signs": [{"pt-BR": "o espetáculo não pode parar.", "en": "the show must go on."}],
+      "words": [{"at": [25, 3], "text": {"pt-BR": "ATO I — CENA 1", "en": "ACT I — SCENE 1"}}],
       "events": [
         {"when": {"start": true}, "delay": 0.4, "do": [{"say": {"pt-BR": "[primeiro sinal]", "en": "[first bell]"}, "time": 1.1}, {"flash": 0.08}, {"sfx": "hum"}]},
         {"when": {"time": 1.6}, "do": [{"say": {"pt-BR": "[segundo sinal]", "en": "[second bell]"}, "time": 1.1}, {"flash": 0.08}, {"sfx": "hum"}, {"dark": 6}]},
-        {"when": {"time": 2.8}, "do": [{"say": {"pt-BR": "[terceiro sinal]", "en": "[third bell]"}, "time": 1.1}, {"flash": 0.08}, {"sfx": "hum"}, {"dark": 0}, {"wait": 0.9}, {"say": {"pt-BR": "[sobe o pano]", "en": "[curtain up]"}, "time": 1.6}, {"move": "c", "by": [0, -16], "speed": 7, "quiet": true}]},
+        {
+          "when": {"time": 2.8},
+          "do": [
+            {"say": {"pt-BR": "[terceiro sinal]", "en": "[third bell]"}, "time": 1.1},
+            {"flash": 0.08},
+            {"sfx": "hum"},
+            {"dark": 0},
+            {"wait": 0.9},
+            {"say": {"pt-BR": "[sobe o pano]", "en": "[curtain up]"}, "time": 1.6},
+            {"move": "c", "by": [0, -16], "speed": 7, "quiet": true}
+          ]
+        },
         {"when": {"zone": "A"}, "do": [{"say": {"pt-BR": "[alçapão à frente]", "en": "[trapdoor ahead]"}, "time": 1.4}, {"wobble": "a", "time": 0.6}, {"fall": "a", "land": false}]},
         {"when": {"zone": "B"}, "do": [{"say": {"pt-BR": "[desce o contrapeso]", "en": "[sandbag coming down]"}, "time": 1.6}, {"wobble": "s", "time": 0.3}, {"fall": "s"}]}
       ]
@@ -119,22 +137,130 @@
         "          aaaaaabbbbbbccccccddddddeeeeeeffffff    gggggggggg",
         ""
       ],
-      "signs": [
-        {"pt-BR": "preste atenção no diretor.", "en": "listen to the director."}
-      ],
-      "words": [
-        {"at": [25, 3], "text": {"pt-BR": "ATO I — CENA 2", "en": "ACT I — SCENE 2"}}
-      ],
+      "signs": [{"pt-BR": "preste atenção no diretor.", "en": "listen to the director."}],
+      "words": [{"at": [25, 3], "text": {"pt-BR": "ATO I — CENA 2", "en": "ACT I — SCENE 2"}}],
       "events": [
-        {"id": "d3", "when": {"flag": "cue"}, "do": [{"say": {"pt-BR": "[alçapão 3]", "en": "[trapdoor 3]"}, "time": 1.4}, {"wobble": "c", "time": 0.5}, {"move": "c", "by": [0, 6], "speed": 16, "wait": true, "quiet": true}, {"sfx": "trap"}, {"wait": 1.0}, {"move": "c", "by": [0, -6], "speed": 16, "wait": true, "quiet": true}]},
-        {"id": "d1", "when": {"flag": "cue"}, "do": [{"say": {"pt-BR": "[alçapão 1]", "en": "[trapdoor 1]"}, "time": 1.4}, {"wobble": "a", "time": 0.5}, {"move": "a", "by": [0, 6], "speed": 16, "wait": true, "quiet": true}, {"sfx": "trap"}, {"wait": 1.0}, {"move": "a", "by": [0, -6], "speed": 16, "wait": true, "quiet": true}]},
-        {"id": "d5", "when": {"flag": "cue"}, "do": [{"say": {"pt-BR": "[alçapão 5]", "en": "[trapdoor 5]"}, "time": 1.4}, {"wobble": "e", "time": 0.5}, {"move": "e", "by": [0, 6], "speed": 16, "wait": true, "quiet": true}, {"sfx": "trap"}, {"wait": 1.0}, {"move": "e", "by": [0, -6], "speed": 16, "wait": true, "quiet": true}]},
-        {"id": "d2", "when": {"flag": "cue"}, "do": [{"say": {"pt-BR": "[alçapão 2]", "en": "[trapdoor 2]"}, "time": 1.4}, {"wobble": "b", "time": 0.5}, {"move": "b", "by": [0, 6], "speed": 16, "wait": true, "quiet": true}, {"sfx": "trap"}, {"wait": 1.0}, {"move": "b", "by": [0, -6], "speed": 16, "wait": true, "quiet": true}]},
-        {"id": "d6", "when": {"flag": "cue"}, "do": [{"say": {"pt-BR": "[alçapão 6]", "en": "[trapdoor 6]"}, "time": 1.4}, {"wobble": "f", "time": 0.5}, {"move": "f", "by": [0, 6], "speed": 16, "wait": true, "quiet": true}, {"sfx": "trap"}, {"wait": 1.0}, {"move": "f", "by": [0, -6], "speed": 16, "wait": true, "quiet": true}]},
-        {"id": "d4", "when": {"flag": "cue"}, "do": [{"say": {"pt-BR": "[alçapão 4]", "en": "[trapdoor 4]"}, "time": 1.4}, {"wobble": "d", "time": 0.5}, {"move": "d", "by": [0, 6], "speed": 16, "wait": true, "quiet": true}, {"sfx": "trap"}, {"wait": 1.0}, {"move": "d", "by": [0, -6], "speed": 16, "wait": true, "quiet": true}]},
-        {"when": {"start": true}, "delay": 0.8, "do": [{"fire": "d3"}, {"wait": 1}, {"fire": "d1"}, {"wait": 1}, {"fire": "d5"}, {"wait": 1}, {"fire": "d2"}, {"wait": 1}, {"fire": "d6"}, {"wait": 1}, {"fire": "d4"}, {"wait": 1}]},
-        {"when": {"every": 6}, "delay": 0.8, "repeat": true, "do": [{"fire": "d3"}, {"wait": 1}, {"fire": "d1"}, {"wait": 1}, {"fire": "d5"}, {"wait": 1}, {"fire": "d2"}, {"wait": 1}, {"fire": "d6"}, {"wait": 1}, {"fire": "d4"}, {"wait": 1}]},
-        {"when": {"zone": "S"}, "repeat": true, "do": [{"say": {"pt-BR": "[alçapão 7]", "en": "[trapdoor 7]"}, "time": 1.4}, {"wobble": "g", "time": 0.5}, {"move": "g", "by": [0, 6], "speed": 16, "wait": true, "quiet": true}, {"sfx": "trap"}, {"wait": 1.0}, {"move": "g", "by": [0, -6], "speed": 16, "wait": true, "quiet": true}]}
+        {
+          "id": "d3",
+          "when": {"flag": "cue"},
+          "do": [
+            {"say": {"pt-BR": "[alçapão 3]", "en": "[trapdoor 3]"}, "time": 1.4},
+            {"wobble": "c", "time": 0.5},
+            {"move": "c", "by": [0, 6], "speed": 16, "wait": true, "quiet": true},
+            {"sfx": "trap"},
+            {"wait": 1},
+            {"move": "c", "by": [0, -6], "speed": 16, "wait": true, "quiet": true}
+          ]
+        },
+        {
+          "id": "d1",
+          "when": {"flag": "cue"},
+          "do": [
+            {"say": {"pt-BR": "[alçapão 1]", "en": "[trapdoor 1]"}, "time": 1.4},
+            {"wobble": "a", "time": 0.5},
+            {"move": "a", "by": [0, 6], "speed": 16, "wait": true, "quiet": true},
+            {"sfx": "trap"},
+            {"wait": 1},
+            {"move": "a", "by": [0, -6], "speed": 16, "wait": true, "quiet": true}
+          ]
+        },
+        {
+          "id": "d5",
+          "when": {"flag": "cue"},
+          "do": [
+            {"say": {"pt-BR": "[alçapão 5]", "en": "[trapdoor 5]"}, "time": 1.4},
+            {"wobble": "e", "time": 0.5},
+            {"move": "e", "by": [0, 6], "speed": 16, "wait": true, "quiet": true},
+            {"sfx": "trap"},
+            {"wait": 1},
+            {"move": "e", "by": [0, -6], "speed": 16, "wait": true, "quiet": true}
+          ]
+        },
+        {
+          "id": "d2",
+          "when": {"flag": "cue"},
+          "do": [
+            {"say": {"pt-BR": "[alçapão 2]", "en": "[trapdoor 2]"}, "time": 1.4},
+            {"wobble": "b", "time": 0.5},
+            {"move": "b", "by": [0, 6], "speed": 16, "wait": true, "quiet": true},
+            {"sfx": "trap"},
+            {"wait": 1},
+            {"move": "b", "by": [0, -6], "speed": 16, "wait": true, "quiet": true}
+          ]
+        },
+        {
+          "id": "d6",
+          "when": {"flag": "cue"},
+          "do": [
+            {"say": {"pt-BR": "[alçapão 6]", "en": "[trapdoor 6]"}, "time": 1.4},
+            {"wobble": "f", "time": 0.5},
+            {"move": "f", "by": [0, 6], "speed": 16, "wait": true, "quiet": true},
+            {"sfx": "trap"},
+            {"wait": 1},
+            {"move": "f", "by": [0, -6], "speed": 16, "wait": true, "quiet": true}
+          ]
+        },
+        {
+          "id": "d4",
+          "when": {"flag": "cue"},
+          "do": [
+            {"say": {"pt-BR": "[alçapão 4]", "en": "[trapdoor 4]"}, "time": 1.4},
+            {"wobble": "d", "time": 0.5},
+            {"move": "d", "by": [0, 6], "speed": 16, "wait": true, "quiet": true},
+            {"sfx": "trap"},
+            {"wait": 1},
+            {"move": "d", "by": [0, -6], "speed": 16, "wait": true, "quiet": true}
+          ]
+        },
+        {
+          "when": {"start": true},
+          "delay": 0.8,
+          "do": [
+            {"fire": "d3"},
+            {"wait": 1},
+            {"fire": "d1"},
+            {"wait": 1},
+            {"fire": "d5"},
+            {"wait": 1},
+            {"fire": "d2"},
+            {"wait": 1},
+            {"fire": "d6"},
+            {"wait": 1},
+            {"fire": "d4"},
+            {"wait": 1}
+          ]
+        },
+        {
+          "when": {"every": 6},
+          "delay": 0.8,
+          "repeat": true,
+          "do": [
+            {"fire": "d3"},
+            {"wait": 1},
+            {"fire": "d1"},
+            {"wait": 1},
+            {"fire": "d5"},
+            {"wait": 1},
+            {"fire": "d2"},
+            {"wait": 1},
+            {"fire": "d6"},
+            {"wait": 1},
+            {"fire": "d4"},
+            {"wait": 1}
+          ]
+        },
+        {
+          "when": {"zone": "S"},
+          "repeat": true,
+          "do": [
+            {"say": {"pt-BR": "[alçapão 7]", "en": "[trapdoor 7]"}, "time": 1.4},
+            {"wobble": "g", "time": 0.5},
+            {"move": "g", "by": [0, 6], "speed": 16, "wait": true, "quiet": true},
+            {"sfx": "trap"},
+            {"wait": 1},
+            {"move": "g", "by": [0, -6], "speed": 16, "wait": true, "quiet": true}
+          ]
+        }
       ]
     },
     {
@@ -179,19 +305,37 @@
         "                         pppppp",
         ""
       ],
-      "signs": [
-        {"pt-BR": "a rubrica chega quando chega.", "en": "the cues come when they come."}
-      ],
-      "words": [
-        {"at": [44, 3], "text": {"pt-BR": "ATO II — CENA 1", "en": "ACT II — SCENE 1"}}
-      ],
+      "signs": [{"pt-BR": "a rubrica chega quando chega.", "en": "the cues come when they come."}],
+      "words": [{"at": [44, 3], "text": {"pt-BR": "ATO II — CENA 1", "en": "ACT II — SCENE 1"}}],
       "events": [
         {"when": {"start": true, "deaths": 10}, "do": [{"ease": 1.4}]},
-        {"when": {"start": true}, "do": [{"move": "p", "by": [0, -8], "speed": 3, "loop": true, "quiet": true}, {"move": "r", "by": [-8, 0], "speed": 3, "loop": true, "quiet": true}]},
+        {
+          "when": {"start": true},
+          "do": [{"move": "p", "by": [0, -8], "speed": 3, "loop": true, "quiet": true}, {"move": "r", "by": [-8, 0], "speed": 3, "loop": true, "quiet": true}]
+        },
         {"when": {"zone": "A"}, "do": [{"wobble": "a", "time": 0.25}, {"fall": "a"}, {"wait": 0.5}, {"say": {"pt-BR": "[cuidado em cima]", "en": "[heads up]"}, "time": 1.2}]},
         {"when": {"zone": "B"}, "do": [{"wobble": "b", "time": 0.25}, {"fall": "b"}, {"wait": 0.5}, {"say": {"pt-BR": "[cuidado em cima]", "en": "[heads up]"}, "time": 1.2}]},
-        {"when": {"every": 2.2}, "repeat": true, "do": [{"move": "q", "by": [0, 2], "speed": 14, "wait": true, "quiet": true}, {"sfx": "thud"}, {"wait": 0.35}, {"move": "q", "by": [0, -2], "speed": 3, "wait": true, "quiet": true}]},
-        {"when": {"every": 2.2}, "delay": 1.1, "repeat": true, "do": [{"move": "w", "by": [0, 2], "speed": 14, "wait": true, "quiet": true}, {"sfx": "thud"}, {"wait": 0.35}, {"move": "w", "by": [0, -2], "speed": 3, "wait": true, "quiet": true}]},
+        {
+          "when": {"every": 2.2},
+          "repeat": true,
+          "do": [
+            {"move": "q", "by": [0, 2], "speed": 14, "wait": true, "quiet": true},
+            {"sfx": "thud"},
+            {"wait": 0.35},
+            {"move": "q", "by": [0, -2], "speed": 3, "wait": true, "quiet": true}
+          ]
+        },
+        {
+          "when": {"every": 2.2},
+          "delay": 1.1,
+          "repeat": true,
+          "do": [
+            {"move": "w", "by": [0, 2], "speed": 14, "wait": true, "quiet": true},
+            {"sfx": "thud"},
+            {"wait": 0.35},
+            {"move": "w", "by": [0, -2], "speed": 3, "wait": true, "quiet": true}
+          ]
+        },
         {"when": {"zone": "D"}, "do": [{"say": {"pt-BR": "[cuidado em cima]", "en": "[heads up]"}, "time": 1.2}]}
       ]
     },
@@ -238,9 +382,7 @@
         ""
       ],
       "hidden": "b",
-      "signs": [
-        {"pt-BR": "a peça muda. o palco fica.", "en": "the play changes. the stage stays."}
-      ],
+      "signs": [{"pt-BR": "a peça muda. o palco fica.", "en": "the play changes. the stage stays."}],
       "words": [
         {"at": [4, 3], "text": {"pt-BR": "ATO II — CENA 2", "en": "ACT II — SCENE 2"}},
         {"at": [10, 14], "text": {"pt-BR": "=NUVEM=", "en": "=CLOUD="}, "group": "a"},
@@ -302,17 +444,41 @@
         ""
       ],
       "hidden": "skm",
-      "signs": [
-        {"pt-BR": "ninguém lê o roteiro inteiro.", "en": "nobody reads the whole script."}
-      ],
-      "words": [
-        {"at": [25, 3], "text": {"pt-BR": "ATO II — CENA 3", "en": "ACT II — SCENE 3"}}
-      ],
+      "signs": [{"pt-BR": "ninguém lê o roteiro inteiro.", "en": "nobody reads the whole script."}],
+      "words": [{"at": [25, 3], "text": {"pt-BR": "ATO II — CENA 3", "en": "ACT II — SCENE 3"}}],
       "events": [
         {"when": {"start": true, "deaths": 10}, "do": [{"ease": 1.4}]},
         {"when": {"zone": "A"}, "do": [{"say": {"pt-BR": "[pule]", "en": "[jump]"}, "time": 1.2}, {"wait": 0.3}, {"show": "s"}]},
-        {"when": {"zone": "B"}, "repeat": true, "do": [{"say": {"pt-BR": "[espere]", "en": "[wait]"}, "time": 1.2}, {"wait": 0.1}, {"move": "w", "by": [0, 13], "speed": 30, "wait": true}, {"wait": 0.6}, {"move": "w", "by": [0, -13], "speed": 8, "wait": true, "quiet": true}]},
-        {"when": {"zone": "C"}, "do": [{"say": {"pt-BR": "[corra]", "en": "[run]"}, "time": 1.2}, {"wait": 0.45}, {"wobble": "f", "time": 0.15}, {"fall": "f", "land": false}, {"wait": 0.15}, {"wobble": "g", "time": 0.15}, {"fall": "g", "land": false}, {"wait": 0.15}, {"wobble": "h", "time": 0.15}, {"fall": "h", "land": false}, {"wait": 0.15}, {"wobble": "i", "time": 0.15}, {"fall": "i", "land": false}, {"wait": 0.15}]},
+        {
+          "when": {"zone": "B"},
+          "repeat": true,
+          "do": [
+            {"say": {"pt-BR": "[espere]", "en": "[wait]"}, "time": 1.2},
+            {"wait": 0.1},
+            {"move": "w", "by": [0, 13], "speed": 30, "wait": true},
+            {"wait": 0.6},
+            {"move": "w", "by": [0, -13], "speed": 8, "wait": true, "quiet": true}
+          ]
+        },
+        {
+          "when": {"zone": "C"},
+          "do": [
+            {"say": {"pt-BR": "[corra]", "en": "[run]"}, "time": 1.2},
+            {"wait": 0.45},
+            {"wobble": "f", "time": 0.15},
+            {"fall": "f", "land": false},
+            {"wait": 0.15},
+            {"wobble": "g", "time": 0.15},
+            {"fall": "g", "land": false},
+            {"wait": 0.15},
+            {"wobble": "h", "time": 0.15},
+            {"fall": "h", "land": false},
+            {"wait": 0.15},
+            {"wobble": "i", "time": 0.15},
+            {"fall": "i", "land": false},
+            {"wait": 0.15}
+          ]
+        },
         {"when": {"zone": "Z"}, "do": [{"say": {"pt-BR": "[pule!]", "en": "[jump!]"}, "time": 1.2}, {"flag": "cue"}]},
         {"when": {"jump": true, "zone": "Z", "flag": "cue"}, "do": [{"show": "k"}]},
         {"when": {"zone": "Y"}, "do": [{"say": {"pt-BR": "[o ponto errou a fala]", "en": "[the prompter fluffed the line]"}, "time": 2}]},
@@ -362,9 +528,7 @@
         ""
       ],
       "fields": {"A": {"gravity": -1, "weight": 0.35}, "B": {"gravity": -1, "weight": 0.35}, "C": {"at": [47, 2, 7, 14], "gravity": -1, "weight": 0.35, "off": true}},
-      "signs": [
-        {"pt-BR": "confie no cabo, não no diretor.", "en": "trust the wire, not the director."}
-      ],
+      "signs": [{"pt-BR": "confie no cabo, não no diretor.", "en": "trust the wire, not the director."}],
       "words": [
         {"at": [25, 2], "text": {"pt-BR": "ATO III — CENA 1", "en": "ACT III — SCENE 1"}},
         {"at": [10, 2], "text": {"pt-BR": "1", "en": "1"}},
@@ -422,17 +586,19 @@
         "LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL"
       ],
       "dark": 3.5,
-      "signs": [
-        {"pt-BR": "decore o palco enquanto há luz.", "en": "learn the stage while the light lasts."}
-      ],
-      "words": [
-        {"at": [4, 3], "text": {"pt-BR": "ATO III — CENA 2", "en": "ACT III — SCENE 2"}},
-        {"at": [55, 9], "text": {"pt-BR": "SAÍDA", "en": "EXIT→"}}
-      ],
+      "signs": [{"pt-BR": "decore o palco enquanto há luz.", "en": "learn the stage while the light lasts."}],
+      "words": [{"at": [4, 3], "text": {"pt-BR": "ATO III — CENA 2", "en": "ACT III — SCENE 2"}}, {"at": [55, 9], "text": {"pt-BR": "SAÍDA", "en": "EXIT→"}}],
       "events": [
         {"when": {"start": true}, "delay": 0.3, "do": [{"dark": 0}, {"flash": 0.1}, {"sfx": "hum"}, {"wait": 1.1}, {"dark": 3.5}]},
         {"when": {"every": 3.5, "zone": "L"}, "repeat": true, "do": [{"dark": 0}, {"flash": 0.1}, {"sfx": "hum"}, {"wait": 1.1}, {"dark": 3.5}]},
-        {"when": {"zone": "M"}, "do": [{"say": {"pt-BR": "[canhão: perdi você]", "en": "[spot: lost you]"}, "time": 1.6}, {"wait": 1.8}, {"say": {"pt-BR": "[a saída é pela direita →]", "en": "[the exit is to the right →]"}, "time": 2.5}]}
+        {
+          "when": {"zone": "M"},
+          "do": [
+            {"say": {"pt-BR": "[canhão: perdi você]", "en": "[spot: lost you]"}, "time": 1.6},
+            {"wait": 1.8},
+            {"say": {"pt-BR": "[a saída é pela direita →]", "en": "[the exit is to the right →]"}, "time": 2.5}
+          ]
+        }
       ]
     },
     {
@@ -479,22 +645,41 @@
       ],
       "hidden": "t",
       "fields": {"N": {"gravity": -1}},
-      "signs": [
-        {"pt-BR": "a cortina não espera ninguém.", "en": "the curtain waits for no one."}
-      ],
-      "words": [
-        {"at": [47, 12], "text": {"pt-BR": "OBRIGADO!", "en": "THANK_YOU"}, "group": "t"}
-      ],
+      "signs": [{"pt-BR": "a cortina não espera ninguém.", "en": "the curtain waits for no one."}],
+      "words": [{"at": [47, 12], "text": {"pt-BR": "OBRIGADO!", "en": "THANK_YOU"}, "group": "t"}],
       "events": [
         {"when": {"start": true, "deaths": 8}, "do": [{"ease": 1.6}]},
-        {"when": {"start": true, "deaths": 8, "fewerDeaths": 9}, "delay": 2.2, "do": [{"say": {"pt-BR": "[a cortina vai descer devagar. é a última, aproveite.]", "en": "[the curtain will come down slowly. it's the last one, enjoy.]"}, "time": 3}]},
-        {"when": {"start": true}, "do": [{"say": {"pt-BR": "[agora é fácil]", "en": "[it's easy now]"}, "time": 1.6}, {"wait": 1.2}, {"move": "c", "by": [0, 14], "speed": 0.75, "linear": true, "quiet": true}, {"sfx": "trap"}, {"move": "s", "by": [6, 0], "speed": 5, "loop": true, "quiet": true}]},
+        {
+          "when": {"start": true, "deaths": 8, "fewerDeaths": 9},
+          "delay": 2.2,
+          "do": [{"say": {"pt-BR": "[a cortina vai descer devagar. é a última, aproveite.]", "en": "[the curtain will come down slowly. it's the last one, enjoy.]"}, "time": 3}]
+        },
+        {
+          "when": {"start": true},
+          "do": [
+            {"say": {"pt-BR": "[agora é fácil]", "en": "[it's easy now]"}, "time": 1.6},
+            {"wait": 1.2},
+            {"move": "c", "by": [0, 14], "speed": 0.75, "linear": true, "quiet": true},
+            {"sfx": "trap"},
+            {"move": "s", "by": [6, 0], "speed": 5, "loop": true, "quiet": true}
+          ]
+        },
         {"when": {"time": 0.6}, "do": [{"move": "m", "by": [-2, 14], "speed": 8, "loop": "wrap", "linear": true, "quiet": true}]},
         {"when": {"time": 1.4}, "do": [{"move": "n", "by": [-2, 14], "speed": 8, "loop": "wrap", "linear": true, "quiet": true}]},
         {"when": {"stand": "p"}, "do": [{"wobble": "p", "time": 0.3}, {"fall": "p", "land": false}]},
         {"when": {"zone": "G"}, "do": [{"say": {"pt-BR": "[não tem rede]", "en": "[there is no net]"}, "time": 1.6}]},
         {"when": {"zone": "H"}, "do": [{"typewrite": "t", "rate": 12}]},
-        {"when": {"zone": "D"}, "do": [{"say": {"pt-BR": "[a porta agradece]", "en": "[the door takes a bow]"}, "time": 1.6}, {"move": "d", "by": [0, 1], "speed": 6, "wait": true, "quiet": true}, {"wait": 0.6}, {"move": "d", "by": [0, -1], "speed": 6, "quiet": true}, {"wait": 0.4}, {"say": {"pt-BR": "[aplausos]", "en": "[applause]"}, "time": 2}]}
+        {
+          "when": {"zone": "D"},
+          "do": [
+            {"say": {"pt-BR": "[a porta agradece]", "en": "[the door takes a bow]"}, "time": 1.6},
+            {"move": "d", "by": [0, 1], "speed": 6, "wait": true, "quiet": true},
+            {"wait": 0.6},
+            {"move": "d", "by": [0, -1], "speed": 6, "quiet": true},
+            {"wait": 0.4},
+            {"say": {"pt-BR": "[aplausos]", "en": "[applause]"}, "time": 2}
+          ]
+        }
       ]
     }
   ]

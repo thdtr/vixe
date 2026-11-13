@@ -110,7 +110,7 @@
      "snow": 30
     },
     {
-     "type": "rock",
+     "type": "texture",
      "caustics": 1
     }
    ],
@@ -233,7 +233,7 @@
      ]
     },
     {
-     "type": "rock",
+     "type": "texture",
      "caustics": 1
     }
    ],
@@ -319,7 +319,7 @@
      ]
     },
     {
-     "type": "rock"
+     "type": "texture"
     },
     {
      "type": "jellies",
@@ -490,7 +490,7 @@
    ],
    "fx": [
     {
-     "type": "rock"
+     "type": "texture"
     },
     {
      "type": "eye",
@@ -607,7 +607,7 @@
      "snow": 40
     },
     {
-     "type": "rock",
+     "type": "texture",
      "caustics": 0.7
     },
     {
@@ -694,7 +694,7 @@
      ]
     },
     {
-     "type": "rock"
+     "type": "texture"
     },
     {
      "type": "serpent",
@@ -798,7 +798,7 @@
    ],
    "fx": [
     {
-     "type": "rock",
+     "type": "texture",
      "colors": [
       "#0a0303",
       "#2a0d08",
@@ -964,7 +964,7 @@
    ],
    "fx": [
     {
-     "type": "rock",
+     "type": "texture",
      "colors": [
       "#08030a",
       "#1d0a1a",

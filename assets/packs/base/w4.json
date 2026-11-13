@@ -14,6 +14,11 @@
       {"wave": "square", "v": 0.02, "notes": "e4 . . g4 . . c5 . . . . . b4 . . . a4 . . . . . g4 . . . . . . . . ."}
     ]
   },
+  "fx": [
+    {"type": "paper", "id": "scene"},
+    {"type": "texture", "pattern": "ink", "colors": ["#ebe4d2", "#b5a88d", "#6b5a40", "#2b251d"], "alpha": 0.6, "depth": 0.05},
+    {"type": "vignette", "strength": 0.35, "color": "#8f826a"}
+  ],
   "levels": [
     {
       "name": {"pt-BR": "Leia", "en": "Read"},
@@ -33,13 +38,11 @@
         "",
         "",
         "",
-        "   @  ?                                                     >",
+        "   @  ?                                               ¡     >",
         "###########                                         ############",
         "###########                                         ############"
       ],
-      "signs": [
-        {"pt-BR": "as palavras aguentam o seu peso.", "en": "words can hold your weight."}
-      ],
+      "signs": [{"pt-BR": "as palavras aguentam o seu peso.", "en": "words can hold your weight."}],
       "words": [
         {"at": [14, 14], "text": {"pt-BR": "PULE", "en": "JUMP"}},
         {"at": [21, 12], "text": {"pt-BR": "NAS", "en": "ON"}},
@@ -47,9 +50,8 @@
         {"at": [36, 11], "text": {"pt-BR": "CONFIE", "en": "TRUST"}, "group": "c"},
         {"at": [43, 13], "text": {"pt-BR": "SALTE", "en": "LEAP"}}
       ],
-      "events": [
-        {"when": {"stand": "c"}, "do": [{"wobble": "c", "time": 0.35}, {"fall": "c", "land": false}]}
-      ]
+      "events": [{"when": {"stand": "c"}, "do": [{"wobble": "c", "time": 0.35}, {"fall": "c", "land": false}]}],
+      "mechs": {"pop": {"reach": 2.2}}
     },
     {
       "name": {"pt-BR": "Placas", "en": "Signs"},
@@ -69,7 +71,7 @@
         "                              ############",
         "                              vvvvvvvvvvvv",
         "",
-        "   @    ?            ?             ?                    ?  >",
+        "   @    ?            ?  ¡¡         ?                    ?¡ >",
         "################################################################",
         "################################################################"
       ],
@@ -103,8 +105,13 @@
       "events": [
         {"when": {"zone": "A"}, "do": [{"fall": "a"}]},
         {"when": {"jump": true, "zone": [30, 13, 12, 3]}, "do": [{"show": "s"}]},
-        {"when": {"typed": ["porta", "door", "exit", "saida"]}, "repeat": true, "do": [{"say": {"pt-BR": "não é assim que funciona.", "en": "that's not how this works."}, "time": 2}]}
-      ]
+        {
+          "when": {"typed": ["porta", "door", "exit", "saida"]},
+          "repeat": true,
+          "do": [{"say": {"pt-BR": "não é assim que funciona.", "en": "that's not how this works."}, "time": 2}]
+        }
+      ],
+      "mechs": {"pop": {"reach": 1.8}}
     },
     {
       "name": {"pt-BR": "Errata", "en": "Errata"},
@@ -124,7 +131,7 @@
         "",
         "",
         "",
-        "   @  ?                                                      >",
+        "   @  ?                                      ¡       ¡       >",
         "",
         "################################    ############################"
       ],
@@ -148,9 +155,7 @@
         "",
         ""
       ],
-      "signs": [
-        {"pt-BR": "errata: o chão é uma sugestão (pág. 1).", "en": "errata: the floor is a suggestion (p. 1)."}
-      ],
+      "signs": [{"pt-BR": "errata: o chão é uma sugestão (pág. 1).", "en": "errata: the floor is a suggestion (p. 1)."}],
       "words": [
         {"at": [0, 16], "text": {"pt-BR": "AQUI_O_CHÃO_É___", "en": "THE_FLOOR_IS____"}},
         {"at": [16, 16], "text": {"pt-BR": "DURO", "en": "HARD"}, "group": "b"},
@@ -161,7 +166,8 @@
       "events": [
         {"when": {"zone": "B"}, "do": [{"swap": "b", "to": "^"}, {"sfx": "glitch"}]},
         {"when": {"zone": "D"}, "do": [{"wobble": "d", "time": 0.2}, {"fall": "d", "land": false}]}
-      ]
+      ],
+      "mechs": {"pop": {"reach": 2}}
     },
     {
       "name": {"pt-BR": "Datilografia", "en": "Typewriter"},
@@ -198,10 +204,10 @@
         "",
         "",
         "",
-        "       AA                                   EEEE",
-        "       AA                                   EEEE",
-        "       AA                                   EEEE",
-        "       AA                                   EEEE",
+        "       AA                             RR    EEEE",
+        "       AA                             RR    EEEE",
+        "       AA                             RR    EEEE",
+        "       AA                             RR    EEEE",
         "",
         ""
       ],
@@ -211,9 +217,10 @@
         {"at": [48, 16], "text": {"pt-BR": "...FIM", "en": "...END"}, "group": "b"}
       ],
       "events": [
-        {"when": {"zone": "A"}, "do": [{"typewrite": "a", "rate": 9}]},
+        {"when": {"zone": "A"}, "do": [{"typewrite": "a", "rate": 8.6}]},
         {"when": {"zone": "E"}, "do": [{"say": {"pt-BR": "espera. estou pensando.", "en": "wait. I'm thinking."}, "time": 2}]},
-        {"when": {"zone": "E", "idle": 0.8}, "do": [{"typewrite": "b", "rate": 6}]}
+        {"when": {"zone": "E", "idle": 0.8}, "do": [{"typewrite": "b", "rate": 6}]},
+        {"when": {"zone": "R"}, "do": [{"say": {"pt-BR": "backspace.", "en": "backspace."}, "time": 1.4}, {"collapse": "a", "from": "left", "rate": 7, "wobble": 0.1}]}
       ]
     },
     {
@@ -270,7 +277,10 @@
       ],
       "events": [
         {"when": {"start": true}, "do": [{"move": "w", "by": [7, 0], "speed": 3, "loop": true, "quiet": true}]},
-        {"when": {"jump": true, "zone": [27, 12, 5, 4]}, "do": [{"swap": "x", "to": "*"}]}
+        {"when": {"jump": true, "zone": [27, 12, 5, 4]}, "do": [{"swap": "x", "to": "*"}]},
+        {"when": {"past": 8}, "do": [{"spawn": "drop", "at": [12, 0], "glyph": "*", "warn": 0.3}]},
+        {"when": {"past": 22}, "do": [{"spawn": "drop", "at": [26, 0], "glyph": "*", "warn": 0.3}]},
+        {"when": {"past": 36}, "do": [{"spawn": "drop", "at": [40, 0], "glyph": "*", "warn": 0.3}]}
       ]
     },
     {
@@ -279,17 +289,17 @@
         "",
         "",
         "",
-        "   @",
+        "   @              ¡",
+        "",
+        "            ¡",
         "",
         "",
         "",
+        "                      ¡",
         "",
         "",
         "",
-        "",
-        "",
-        "",
-        "                                                             >",
+        "                              ¡                              >",
         "",
         "",
         "",
@@ -312,7 +322,8 @@
         {"when": {"zone": [25, 3, 2, 1]}, "do": [{"fall": "a", "land": false}]},
         {"when": {"zone": [37, 7, 1, 1]}, "do": [{"swap": "b", "to": "^"}]},
         {"when": {"stand": "c"}, "do": [{"fall": "c", "land": false}]}
-      ]
+      ],
+      "mechs": {"pop": {"reach": 1.6}}
     },
     {
       "name": {"pt-BR": "Ctrl+Z", "en": "Ctrl+Z"},
@@ -332,7 +343,7 @@
         "",
         "",
         "",
-        "   @                                                      >",
+        "   @                   ¡       ¡                          >",
         "################################################################",
         "################################################################"
       ],
@@ -363,10 +374,23 @@
         {"at": [34, 14], "text": {"pt-BR": "REFAZ", "en": "REDO_"}, "group": "r"}
       ],
       "events": [
-        {"when": {"zone": "U"}, "do": [{"say": "ctrl+z", "time": 1.5}, {"glitch": 0.4}, {"fall": "f", "land": false}, {"move": "d", "by": [0, -4], "speed": 20, "wait": true, "quiet": true}, {"move": "d", "by": [-53, 0], "speed": 40, "wait": true, "quiet": true}, {"move": "d", "by": [0, 4], "speed": 20, "wait": true, "quiet": true}, {"say": "ctrl+y", "time": 1.5}, {"typewrite": "r", "rate": 10}]},
+        {
+          "when": {"zone": "U"},
+          "do": [
+            {"say": "ctrl+z", "time": 1.5},
+            {"glitch": 0.4},
+            {"fall": "f", "land": false},
+            {"move": "d", "by": [0, -4], "speed": 20, "wait": true, "quiet": true},
+            {"move": "d", "by": [-53, 0], "speed": 40, "wait": true, "quiet": true},
+            {"move": "d", "by": [0, 4], "speed": 20, "wait": true, "quiet": true},
+            {"say": "ctrl+y", "time": 1.5},
+            {"typewrite": "r", "rate": 10}
+          ]
+        },
         {"when": {"zone": "Y", "flag": "back"}, "do": [{"move": "d", "by": [3, 0], "speed": 6}]},
         {"when": {"zone": "U"}, "do": [{"flag": "back"}]}
-      ]
+      ],
+      "mechs": {"pop": {"reach": 1.6}}
     },
     {
       "name": {"pt-BR": "Fim", "en": "The End"},
@@ -381,7 +405,7 @@
         "",
         "",
         "",
-        "   @                                                ?        >",
+        "   @                                              ¡ ?   ¡    >",
         "#######                                       ##################",
         "#######                                       ##################",
         "#######                                       ##################",
@@ -390,9 +414,7 @@
         "#######                                       ##################",
         "#######                                       ##################"
       ],
-      "signs": [
-        {"pt-BR": "esta porta é honesta. juro.", "en": "this door is honest. I swear."}
-      ],
+      "signs": [{"pt-BR": "esta porta é honesta. juro.", "en": "this door is honest. I swear."}],
       "words": [
         {"at": [10, 11], "text": {"pt-BR": "#####", "en": "#####"}, "group": "f"},
         {"at": [10, 12], "text": {"pt-BR": "#    ", "en": "#    "}, "group": "f"},
@@ -420,7 +442,8 @@
         {"when": {"stand": "i"}, "do": [{"wobble": "i", "time": 0.3}, {"fall": "i", "land": false}]},
         {"when": {"stand": "m"}, "do": [{"wobble": "m", "time": 0.3}, {"fall": "m", "land": false}]},
         {"when": {"stand": "q"}, "do": [{"wobble": "q", "time": 0.3}, {"fall": "q", "land": false}]}
-      ]
+      ],
+      "mechs": {"pop": {"reach": 2}}
     }
   ]
 }

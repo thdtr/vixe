@@ -1,5 +1,15 @@
 import { CW, CH, COLS } from '../config.js';
 
+// A soft dark band behind centered text, `width` columns wide, from row `top` to row `bottom`,
+// fading out at its edges so it sits in the scenery instead of covering it.
+export function veil(screen, top, bottom, width, color, alpha = 0.78) {
+  const x0 = (COLS - width) / 2 * CW, w = width * CW;
+  for (let k = 0; k < 6; k++) {
+    const grow = (5 - k) * 8;
+    screen.fill(x0 - grow * 1.6, top * CH - grow, w + grow * 3.2, (bottom - top) * CH + grow * 2, color, alpha / 6 * (k < 5 ? 1 : 2));
+  }
+}
+
 // A vertical list of options, driven by keys, pad or taps.
 // item: { label: () => string, run?: () => void, adjust?: (dir) => void, hidden?: () => bool }
 export class Menu {

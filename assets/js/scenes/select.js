@@ -31,6 +31,8 @@ export class Select {
   update(dt) {
     const app = this.app, input = app.input, worlds = this.worlds;
     this.time += dt;
+    const shown = worlds[this.row];
+    if (app.progress.worldOpen(shown)) app.backdrop(shown).update(dt);
     if (input.backed()) return app.go('title');
     const dy = input.axis('up', 'down');
     const dx = input.axis('left', 'right');
@@ -99,6 +101,9 @@ export class Select {
   draw(screen) {
     const app = this.app, pal = app.palette(), progress = app.progress, save = app.save;
     screen.begin(pal.bg);
+    // The world under the cursor, seen through a dark glass.
+    const shown = this.worlds[this.row];
+    if (progress.worldOpen(shown)) app.backdrop(shown).paint(screen, 0.72);
     screen.center(t('select.title'), 1, pal.hud);
 
     // Under a finger: a soft block behind whatever will be chosen on release.

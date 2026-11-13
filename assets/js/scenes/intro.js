@@ -1,4 +1,6 @@
+import { VIEW_W, VIEW_H } from '../config.js';
 import { t, loc } from '../core/i18n.js';
+import { veil } from './menu.js';
 
 // Title card shown the first time you enter a world.
 export class Intro {
@@ -16,6 +18,7 @@ export class Intro {
   update(dt) {
     const input = this.app.input;
     this.time += dt;
+    this.app.backdrop(this.at.world).update(dt);
     const line = loc(this.at.world.tagline);
     const n = Math.min(line.length, Math.floor(Math.max(0, this.time - 0.6) * 30));
     if (n > this.typed) {
@@ -28,8 +31,13 @@ export class Intro {
   }
 
   draw(screen) {
-    const w = this.at.world, pal = w.palette;
+    const w = this.at.world, pal = w.palette, back = this.app.backdrop(w);
     screen.begin(pal.bg);
+    back.back(screen);
+    back.front(screen);
+    // The scenery fades up behind the card while the name is spelled out.
+    screen.fill(0, 0, VIEW_W, VIEW_H, pal.bg, Math.max(0.25, 1 - this.time * 0.9));
+    veil(screen, 6.2, 13.2, Math.max(28, loc(w.tagline).length + 8), pal.bg, 0.85);
     const head = t('intro.world', { n: this.app.progress.code(w) });
     screen.center(head.split('').join(' '), 7, pal.dim);
     const name = loc(w.name).toUpperCase();

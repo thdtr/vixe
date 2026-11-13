@@ -38,6 +38,7 @@ export class Ending {
   update(dt) {
     const input = this.app.input;
     this.time += dt;
+    this.app.backdrop(this.world ?? this.app.home()).update(dt);
     const before = this.chars;
     this.chars = Math.min(this.total, this.chars + dt * 28);
     if (Math.floor(this.chars / 3) > Math.floor(before / 3)) this.app.audio.play('type');
@@ -50,6 +51,8 @@ export class Ending {
   draw(screen) {
     const app = this.app, pal = this.world?.palette || app.palette();
     screen.begin(pal.bg);
+    // The world you just left, fading back as the words come in.
+    app.backdrop(this.world ?? app.home()).paint(screen, Math.max(0.7, 1 - this.time * 0.15));
     let left = Math.floor(this.chars);
     const top = Math.max(1, Math.floor((16 - this.lines.length) / 2));
     this.lines.forEach((line, i) => {

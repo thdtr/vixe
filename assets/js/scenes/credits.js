@@ -12,12 +12,14 @@ export class Credits {
   update(dt) {
     const input = this.app.input;
     this.time += dt;
+    this.app.backdrop(this.app.home()).update(dt);
     if (this.time > 0.4 && (input.confirmed() || input.backed() || input.tap())) this.app.go('title');
   }
 
   draw(screen) {
     const pal = this.app.palette();
     screen.begin(pal.bg);
+    this.app.backdrop(this.app.home()).paint(screen, 0.78);
     const lines = t('credits.body').split('\n');
     const top = Math.floor((ROWS - lines.length) / 2);
     lines.forEach((line, i) => {

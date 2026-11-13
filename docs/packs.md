@@ -31,7 +31,9 @@ A world has an `id`, `name`, `tagline`, `palette`, `music` (see below) and `leve
 palette takes the colors `bg dots wall wallDim girder hazard exit player text accent hud dim`.
 
 Optional fields are `requires` (`{ "world": "w4", "secrets": 4 }`), `hidden`, `code` (a
-label shown instead of the level number) and `ending` (a closing scene after the last level).
+label shown instead of the level number), `ending` (a closing scene after the last level) and
+`fx`, the [effects](#effects) every level of the world shares. A palette may also set the
+tones the renderer otherwise derives from it: `wallLit`, `wallSide`, `wallUnder`, `shadow`, `glint`.
 
 ## Levels
 
@@ -47,6 +49,8 @@ label shown instead of the level number) and `ending` (a closing scene after the
 | `weight` | how hard gravity pulls (1 by default, `0.6` jumps like on the moon) |
 | `fields` | zones that change how you fall while you're inside them (see below) |
 | `events` | traps (see below) |
+| `mechs`  | options for the [mechanisms](#mechanisms) on the map, e.g. `{ "crumble": { "delay": 0.25 } }` |
+| `fx`     | [effects](#effects) for this level, on top of the world's |
 
 Map tiles
 
@@ -55,6 +59,13 @@ Map tiles
 =  solid girder    -  one-way platform  ^ v  spikes (floor / ceiling)
 *  saw             ~  acid              >  exit
 ?  sign            @  start             any other character is a solid letter
+```
+
+Mechanism tiles act on their own, with no events needed (see [Mechanisms](#mechanisms)):
+
+```
+░  crumbling floor (looks like a wall)   ¡  hidden spike that pops up near you
+†  floor spike on a beat   ‡  ceiling spike on a beat   ↑  spring   « »  conveyor belts
 ```
 
 ## Fields
@@ -85,12 +96,27 @@ order. The first key of each step is the action and the rest are its options.
 ```
 
 - **Triggers** `start`, `time`, `every`, `zone` (a letter or `[x, y, w, h]`), `jump`,
-  `land`, `stand` (on top of a group), `idle`, `deaths`, `fewerDeaths`, `collected`, `flag`.
+  `land`, `stand` (on top of a group), `idle`, `deaths`, `fewerDeaths`, `collected`, `flag`,
+  `near` (closer than `r` cells to a group or a cell: `"a"`, `{ "group": "a", "r": 3 }` or
+  `[x, y, r]`), `below` (anywhere under a group, as it is now), `past` and `before` (the
+  player's column is past or before a column), `airborne` and `grounded`.
   An event fires once by default. With `"repeat": true` it fires every time it happens again.
 - **Actions** `show`, `hide`, `wobble`, `fall` (`land`, `speed`, `dir`: `-1` falls up), `move`
   (`by`, `speed`, `loop`, `linear`, `wait`), `stop`, `swap` (`to`, `from`: only these tiles),
   `fill` (`with`), `gravity`, `weight`, `field` (`on`), `controls`, `speed`, `tide`, `dark`,
-  `say`, `sfx`, `shake`, `glitch`, `flash`, `flag`, `fire`, `wait`, `kill`, `win`, `ease`.
+  `say`, `sfx`, `shake`, `glitch`, `flash`, `flag`, `fire`, `wait`, `kill`, `win`, `ease`,
+  `chase`, `collapse`, `spawn` (below).
+- **Stalking and fleeing** `{ "chase": "a", "axis": "x", "speed": 6, "min": [-4, 0], "max": [10, 0] }`
+  makes a group follow the player along an axis (`"x"`, `"y"` or `"xy"`); with `"flee": 4` it
+  keeps 4 cells away instead, like a door that won't wait. It never leaves `min`..`max`, in
+  cells from where the map drew it, so a fleeing door ends up cornered.
+- **Collapsing** `{ "collapse": "a", "from": "left", "rate": 9, "wobble": 0.15 }` drops a group
+  column by column, starting from `"left"`, `"right"` or `"player"`, `rate` columns a second.
+  The columns become groups named `a:<x>`.
+- **Actors** `{ "spawn": "bolt", "at": [62, 15], "dir": [-1, 0], "speed": 18 }` fires a dart
+  that flies until it hits a wall; `{ "spawn": "drop", "at": [30, 4], "warn": 0.4 }` is a
+  stalactite that trembles, then falls. With `"from": "a"` the cell is counted from group `a`
+  where it is now. Paired with `every` and `"repeat": true`, a spawn is a turret.
 - **Moving in circles** `{ "orbit": "a", "radius": [16, 6], "period": 8, "at": 0.5 }` sends a
   group around a loop (sizes in cells, `period` in seconds per lap). `at` says where on the loop
   the group starts (`0` right, `0.25` below, `0.5` left, `0.75` above) and `"dir": -1` goes the
@@ -102,6 +128,29 @@ order. The first key of each step is the action and the rest are its options.
   moves and tides take 60% longer). Paired with `deaths` it helps whoever is stuck without
   turning the trap off: `{ "when": { "start": true, "deaths": 8 }, "do": [ { "ease": 1.6 } ] }`.
   List it first, so it lands before the level's other `start` events.
+
+## Mechanisms
+
+Mechanism tiles work with no events: draw them on the map and tune them per level in `mechs`.
+Every option is optional.
+
+| tile | name | options |
+|------|------|---------|
+| `░` | `crumble` | `delay` (0.32 s before it falls, longer with `ease`), `chain` (0.06 s per cell: the rest of the slab follows, spreading from your feet; 0 turns it off), `respawn` (seconds, 0 = never) |
+| `¡` | `pop` | `reach` (1.4 cells: how close you get before it springs), `hold` (seconds up, 0 = for good), `hint` (show a faint mark) |
+| `†` `‡` | `pulse` | `period` (2 s), `on` (0.8 s up), `warn` (0.45 s of flicker first), `wave` (seconds of delay per column, for ripples), `phase` |
+| `↑` | `spring` | `power` (1.5 jumps) |
+| `«` `»` | `belt` | `speed` (5 cells/s) |
+
+```json
+"mechs": { "crumble": { "delay": 0.25, "chain": 0 }, "pulse": { "period": 1.4, "wave": 0.1 } }
+```
+
+They only act on the static map; inside a group they keep their look and solidity. A script
+adds more with `registerMechanism(name, { tiles, options, setup, update, hurts, draw })`
+(`assets/js/game/mechanisms.js` is the reference), as well as new actors with
+`registerActor` (`assets/js/game/actors.js`) and new kinds of group motion with
+`registerMotion` (`assets/js/game/motion.js`).
 
 ## Music
 
@@ -125,17 +174,53 @@ sandbag (both solid); and `╱ ╲ ─ ┆ ╭ ╮ ╰ ╯` for painted scenery 
 
 ## Effects
 
-A level can list procedural layers in `fx`, drawn behind the map, in front of it, or both:
+Effects are procedural layers drawn behind the map, in front of it, or both. A world lists the
+ones all its levels share in `fx`, and a level adds its own; a level entry with the same `id`
+as a world entry is merged onto it, and `{ "id": "scene", "off": true }` drops it for that level.
 
 ```json
-"fx": [ { "type": "sea", "surface": 7, "rays": 0.8 }, { "type": "light", "ambient": 0.1 } ]
+"fx": [ { "type": "cellar", "id": "scene" }, { "type": "texture", "pattern": "brick" },
+        { "type": "dust", "count": 50 }, { "type": "vignette", "strength": 0.7 } ]
 ```
+
+The core library (`assets/js/fx/`) is open to every pack:
+
+- **Scenery** `cellar` (bricks lit by swinging bulbs, pipes, cobwebs), `foundry` (gears,
+  trusses, chains, a pouring ladle, steam, furnace glow), `mirror` (an endless tunnel that
+  rolls over with gravity, wireframe solids), `paper` (a notebook page: rules, margin, erased
+  text, coffee ring, ink), `stage` (backdrop, valance, followspots, haze), `cosmos` (nebula,
+  galaxy, ringed planet, stars, shooting stars). Without positions they furnish each level
+  differently, seeded by its id.
+- **Walls** `texture` fills the inside of wall masses with `pattern`: `rock`, `brick`,
+  `plate`, `ink`, `planks`, `hull` or `crystal`, darker the deeper it goes, with an optional
+  `shimmer` (`caustics`, `heat`, `scan`, `lamps`).
+- **Atmosphere** `dust` (`kind`: `dust`, `embers`, `ash`, `snow`, `spores`, `glitter`),
+  `vignette` (`strength`, `fog`: `[color, alpha]` rising from the floor), and `light`:
+  darkness with colored lights and real shadows, an optional sonar, and light from any effect
+  that has a `lights()` hook (the cellar's bulbs, the foundry's pour, the stage's spots).
 
 A script registers new types with `registerFx(name, (def, play) => fx)`; `assets/js/game/fx.js`
 lists the hooks an effect can have (`update`, `anim`, `back`, `front`, `lights`, `cmd`), and the
-`{ "fx": "<id>", ... }` trap action talks to one. `assets/packs/abyss/script.js` is the working
-example: a sky, a sea, rock texture, lights with real shadows and sonar, jellyfish, a whirlpool,
-a serpent, magma vents and an eye, all drawn with glyphs on a grid twice as fine as the map.
+`{ "fx": "<id>", ... }` trap action talks to one. Effects draw with the glyph art kit in
+`assets/js/art/` (glyph stamping on a grid twice as fine as the map, noise, color ramps), and
+`assets/packs/abyss/script.js` is a pack-side example: a sky, a sea, jellyfish, a whirlpool, a
+serpent, magma vents and an eye. Scenery should never use the glyphs that mean something in
+play (`@ # * ^ v > $ ?`), so the eye can always tell the backdrop from the level.
 
 A field also takes `"swim": true` (every press of jump is a stroke, as in water) and
 `"motes": false` (the field stays invisible).
+
+## Checking a level
+
+The game's own code runs headless in Node, so a level can be tested without opening a browser.
+
+```sh
+node tools/solve.mjs w1.3            # find a way through a level (or w1 for a whole world)
+node tools/solve.mjs w1.3 --beam 600 # a slower search that also finds waits and detours
+node tools/solve.mjs w1.3 --replay "R20 RJ6 N10 R30"   # play a script, see what happens
+node tools/format.mjs assets/packs/my-pack/world.json  # lay a world file out like the others
+```
+
+A script is a list of moves held for 1/20 s ticks: `R`, `L` or `N` (nothing), plus `J` to hold
+jump. The solver prints the way it found, how long it took and how hard it had to look. Effects
+that act on the player (the Abyss's creatures) can't be searched.
