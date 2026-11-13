@@ -38,7 +38,7 @@
         "",
         "",
         "",
-        "   @  ?                                                     >",
+        "   @  ?                                               ¡     >",
         "###########                                         ############",
         "###########                                         ############"
       ],
@@ -50,7 +50,8 @@
         {"at": [36, 11], "text": {"pt-BR": "CONFIE", "en": "TRUST"}, "group": "c"},
         {"at": [43, 13], "text": {"pt-BR": "SALTE", "en": "LEAP"}}
       ],
-      "events": [{"when": {"stand": "c"}, "do": [{"wobble": "c", "time": 0.35}, {"fall": "c", "land": false}]}]
+      "events": [{"when": {"stand": "c"}, "do": [{"wobble": "c", "time": 0.35}, {"fall": "c", "land": false}]}],
+      "mechs": {"pop": {"reach": 2.2}}
     },
     {
       "name": {"pt-BR": "Placas", "en": "Signs"},
@@ -70,7 +71,7 @@
         "                              ############",
         "                              vvvvvvvvvvvv",
         "",
-        "   @    ?            ?             ?                    ?  >",
+        "   @    ?            ?  ¡¡         ?                    ?¡ >",
         "################################################################",
         "################################################################"
       ],
@@ -109,7 +110,8 @@
           "repeat": true,
           "do": [{"say": {"pt-BR": "não é assim que funciona.", "en": "that's not how this works."}, "time": 2}]
         }
-      ]
+      ],
+      "mechs": {"pop": {"reach": 1.8}}
     },
     {
       "name": {"pt-BR": "Errata", "en": "Errata"},
@@ -129,7 +131,7 @@
         "",
         "",
         "",
-        "   @  ?                                                      >",
+        "   @  ?                                      ¡       ¡       >",
         "",
         "################################    ############################"
       ],
@@ -164,7 +166,8 @@
       "events": [
         {"when": {"zone": "B"}, "do": [{"swap": "b", "to": "^"}, {"sfx": "glitch"}]},
         {"when": {"zone": "D"}, "do": [{"wobble": "d", "time": 0.2}, {"fall": "d", "land": false}]}
-      ]
+      ],
+      "mechs": {"pop": {"reach": 2}}
     },
     {
       "name": {"pt-BR": "Datilografia", "en": "Typewriter"},
@@ -201,10 +204,10 @@
         "",
         "",
         "",
-        "       AA                                   EEEE",
-        "       AA                                   EEEE",
-        "       AA                                   EEEE",
-        "       AA                                   EEEE",
+        "       AA                             RR    EEEE",
+        "       AA                             RR    EEEE",
+        "       AA                             RR    EEEE",
+        "       AA                             RR    EEEE",
         "",
         ""
       ],
@@ -214,9 +217,10 @@
         {"at": [48, 16], "text": {"pt-BR": "...FIM", "en": "...END"}, "group": "b"}
       ],
       "events": [
-        {"when": {"zone": "A"}, "do": [{"typewrite": "a", "rate": 9}]},
+        {"when": {"zone": "A"}, "do": [{"typewrite": "a", "rate": 8.6}]},
         {"when": {"zone": "E"}, "do": [{"say": {"pt-BR": "espera. estou pensando.", "en": "wait. I'm thinking."}, "time": 2}]},
-        {"when": {"zone": "E", "idle": 0.8}, "do": [{"typewrite": "b", "rate": 6}]}
+        {"when": {"zone": "E", "idle": 0.8}, "do": [{"typewrite": "b", "rate": 6}]},
+        {"when": {"zone": "R"}, "do": [{"say": {"pt-BR": "backspace.", "en": "backspace."}, "time": 1.4}, {"collapse": "a", "from": "left", "rate": 7, "wobble": 0.1}]}
       ]
     },
     {
@@ -273,7 +277,10 @@
       ],
       "events": [
         {"when": {"start": true}, "do": [{"move": "w", "by": [7, 0], "speed": 3, "loop": true, "quiet": true}]},
-        {"when": {"jump": true, "zone": [27, 12, 5, 4]}, "do": [{"swap": "x", "to": "*"}]}
+        {"when": {"jump": true, "zone": [27, 12, 5, 4]}, "do": [{"swap": "x", "to": "*"}]},
+        {"when": {"past": 8}, "do": [{"spawn": "drop", "at": [12, 0], "glyph": "*", "warn": 0.3}]},
+        {"when": {"past": 22}, "do": [{"spawn": "drop", "at": [26, 0], "glyph": "*", "warn": 0.3}]},
+        {"when": {"past": 36}, "do": [{"spawn": "drop", "at": [40, 0], "glyph": "*", "warn": 0.3}]}
       ]
     },
     {
@@ -282,17 +289,17 @@
         "",
         "",
         "",
-        "   @",
+        "   @              ¡",
+        "",
+        "            ¡",
         "",
         "",
         "",
+        "                      ¡",
         "",
         "",
         "",
-        "",
-        "",
-        "",
-        "                                                             >",
+        "                              ¡                              >",
         "",
         "",
         "",
@@ -315,7 +322,8 @@
         {"when": {"zone": [25, 3, 2, 1]}, "do": [{"fall": "a", "land": false}]},
         {"when": {"zone": [37, 7, 1, 1]}, "do": [{"swap": "b", "to": "^"}]},
         {"when": {"stand": "c"}, "do": [{"fall": "c", "land": false}]}
-      ]
+      ],
+      "mechs": {"pop": {"reach": 1.6}}
     },
     {
       "name": {"pt-BR": "Ctrl+Z", "en": "Ctrl+Z"},
@@ -335,7 +343,7 @@
         "",
         "",
         "",
-        "   @                                                      >",
+        "   @                   ¡       ¡                          >",
         "################################################################",
         "################################################################"
       ],
@@ -381,7 +389,8 @@
         },
         {"when": {"zone": "Y", "flag": "back"}, "do": [{"move": "d", "by": [3, 0], "speed": 6}]},
         {"when": {"zone": "U"}, "do": [{"flag": "back"}]}
-      ]
+      ],
+      "mechs": {"pop": {"reach": 1.6}}
     },
     {
       "name": {"pt-BR": "Fim", "en": "The End"},
@@ -396,7 +405,7 @@
         "",
         "",
         "",
-        "   @                                                ?        >",
+        "   @                                              ¡ ?   ¡    >",
         "#######                                       ##################",
         "#######                                       ##################",
         "#######                                       ##################",
@@ -433,7 +442,8 @@
         {"when": {"stand": "i"}, "do": [{"wobble": "i", "time": 0.3}, {"fall": "i", "land": false}]},
         {"when": {"stand": "m"}, "do": [{"wobble": "m", "time": 0.3}, {"fall": "m", "land": false}]},
         {"when": {"stand": "q"}, "do": [{"wobble": "q", "time": 0.3}, {"fall": "q", "land": false}]}
-      ]
+      ],
+      "mechs": {"pop": {"reach": 2}}
     }
   ]
 }

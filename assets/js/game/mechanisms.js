@@ -44,7 +44,9 @@ registerMechanism('crumble', {
     for (const u of standingOn(play, 'crumble')) {
       const hit = s.cells.find((c) => c.i === u.i);
       if (!hit || hit.state !== 'idle') continue;
-      start(hit, o.delay);
+      // Mercy ("ease") gives a crumbling floor longer too.
+      const delay = o.delay * (play.ease || 1);
+      start(hit, delay);
       play.sfx('creak', hit.x * CW);
       // The rest of the slab goes too, a cell at a time, spreading from your feet.
       if (o.chain) {
@@ -52,7 +54,7 @@ registerMechanism('crumble', {
           for (let k = 1; ; k++) {
             const c = s.cells.find((n) => n.y === hit.y && n.x === hit.x + dir * k);
             if (!c) break;
-            start(c, o.delay + k * o.chain);
+            start(c, delay + k * o.chain);
           }
         }
       }
@@ -144,7 +146,7 @@ registerMechanism('pop', {
 registerMechanism('pulse', {
   tiles: { '†': { dir: 1 }, '‡': { dir: -1 } },
   options: { period: 2, on: 0.8, warn: 0.45, wave: 0, phase: 0 },
-  setup: (cells, o, level) => ({ cells: cells.map((c) => ({ ...c, dir: tileOf(c.ch).dir })), level }),
+  setup: (cells) => ({ cells: cells.map((c) => ({ ...c, dir: tileOf(c.ch).dir })) }),
   phase(c, o, time) {
     const u = (((time + o.phase - c.x * o.wave) % o.period) + o.period) % o.period;
     return u < o.on ? 'up' : u > o.period - o.warn ? 'warn' : 'down';
