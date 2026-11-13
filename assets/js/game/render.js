@@ -232,6 +232,52 @@ export function drawTide(screen, tide, pal, time) {
   ctx.globalAlpha = 1;
 }
 
+// The player: a small @ for a head over a pair of legs that move, drawn from the feet up
+// (the head, upside down), so squash and stretch stay planted. Glyphs mirror with facing.
+const FACE = FONT_BOLD.slice(FONT_BOLD.indexOf('px ') + 3);
+const HEAD = `bold 12px ${FACE}`, LIMB = `bold 9px ${FACE}`;
+const STRIDE = ['/|', '||', '|\\', '/\\'];
+
+// What the body is doing: { legs: two glyphs, arms: two glyphs or null }.
+export function pose(p) {
+  if (!p.ground) {
+    const v = p.vy * p.gdir;
+    if (v < -60) return { legs: '\\/', arms: null };       // rising: knees tucked
+    if (v > 280) return { legs: '||', arms: '\\/' };       // falling hard: arms up
+    return { legs: '/\\', arms: null };
+  }
+  if (Math.abs(p.vx) > 15) return { legs: STRIDE[Math.floor(p.stride / 6) % 4], arms: null };
+  return { legs: '/\\', arms: null };
+}
+
+// x, feet: where the feet are, in screen pixels. sx, sy: squash and stretch.
+export function drawFigure(screen, x, feet, { facing = 1, gdir = 1, sx = 1, sy = 1, pose: body, color, crown = null }) {
+  const ctx = screen.ctx;
+  ctx.save();
+  ctx.translate(x, feet);
+  ctx.scale(sx * facing, sy * gdir);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = screen.color(color);
+  ctx.font = HEAD;
+  ctx.fillText('@', 0, -12);
+  ctx.font = LIMB;
+  ctx.fillText(body.legs[0], -2.4, -3.6);
+  ctx.fillText(body.legs[1], 2.4, -3.6);
+  if (body.arms) {
+    ctx.fillText(body.arms[0], -6.2, -12.5);
+    ctx.fillText(body.arms[1], 6.2, -12.5);
+  }
+  if (crown) {
+    ctx.font = FONT_BOLD;
+    ctx.fillStyle = screen.color(crown);
+    ctx.fillText('w', 0, -23);
+  }
+  ctx.restore();
+}
+
+const feetOf = (p) => (p.gdir > 0 ? p.y + PHYS.h : p.y) + MAP_Y;
+
 export function drawPlayer(screen, p, pal, size = 1) {
   const ctx = screen.ctx;
   // A faint halo: the one warm thing in every room.
@@ -240,37 +286,22 @@ export function drawPlayer(screen, p, pal, size = 1) {
     drawGlow(screen, '@', p.x + PHYS.w / 2 - CW / 2, (p.gdir > 0 ? p.y + PHYS.h - CH : p.y) + MAP_Y, screen.color(pal.player), 5);
     ctx.globalAlpha = 1;
   }
-  const sy = (1 - p.squash) * size, sx = (1 + p.squash * 0.6) * size;
-  // Anchored at the feet (the head, upside down) so squash looks grounded.
-  ctx.save();
-  ctx.translate(p.x + PHYS.w / 2, (p.gdir > 0 ? p.y + PHYS.h : p.y) + MAP_Y);
-  ctx.scale(sx * p.facing, sy * p.gdir);
-  ctx.font = FONT_BOLD;
-  ctx.fillStyle = screen.color(pal.player);
-  ctx.fillText('@', 0, -CH / 2 + 1);
-  if (p.crown) {
-    ctx.fillStyle = screen.color(pal.exit);
-    ctx.fillText('w', 0, -CH - 4);
-  }
-  ctx.restore();
+  drawFigure(screen, p.x + PHYS.w / 2, feetOf(p), {
+    facing: p.facing, gdir: p.gdir, sx: (1 + p.squash * 0.6) * size, sy: (1 - p.squash) * size,
+    pose: pose(p), color: pal.player, crown: p.crown ? pal.exit : null,
+  });
 }
 
-// Afterimages left behind when moving fast: [{ x, y, facing, gdir, age }].
+// Afterimages left behind when moving fast: [{ x, y, facing, gdir, pose, age }].
 export function drawTrail(screen, trail, pal) {
   const ctx = screen.ctx, ghost = tones(pal).ghost;
-  ctx.save();
-  ctx.font = FONT_BOLD;
   for (const g of trail) {
-    ctx.globalAlpha = Math.max(0, 0.35 - g.age * 1.6);
-    if (ctx.globalAlpha <= 0) continue;
-    ctx.fillStyle = screen.color(ghost);
-    ctx.save();
-    ctx.translate(g.x + PHYS.w / 2, (g.gdir > 0 ? g.y + PHYS.h : g.y) + MAP_Y);
-    ctx.scale(g.facing, g.gdir);
-    ctx.fillText('@', 0, -CH / 2 + 1);
-    ctx.restore();
+    const a = 0.35 - g.age * 1.6;
+    if (a <= 0) continue;
+    ctx.globalAlpha = a;
+    drawFigure(screen, g.x + PHYS.w / 2, feetOf(g), { facing: g.facing, gdir: g.gdir, pose: g.pose, color: ghost });
   }
-  ctx.restore();
+  ctx.globalAlpha = 1;
 }
 
 // Particles are just glyphs with velocity.

@@ -2,7 +2,7 @@ import { CW, CH, COLS, MAP_COLS, MAP_Y, MAP_W, MAP_H, PHYS, VIEW_W, VIEW_H } fro
 import { Level, overlaps } from '../game/level.js';
 import { Player } from '../game/player.js';
 import { Events } from '../game/events.js';
-import { drawStatic, drawLive, drawBodies, drawFields, drawTide, drawPlayer, drawTrail, Particles } from '../game/render.js';
+import { drawStatic, drawLive, drawBodies, drawFields, drawTide, drawPlayer, drawTrail, pose, Particles } from '../game/render.js';
 import { veil } from './menu.js';
 import { t, loc } from '../core/i18n.js';
 import { Menu } from './menu.js';
@@ -282,7 +282,7 @@ export class Play {
     }
     // Afterimages when moving fast, a puff of dust from running feet.
     for (const g of this.trail) g.age += dt;
-    if (this.ticks % 3 === 0 && (Math.abs(p.vx) > 90 || Math.abs(p.vy) > 260)) this.trail.push({ x: p.x, y: p.y, facing: p.facing, gdir: p.gdir, age: 0 });
+    if (this.ticks % 3 === 0 && (Math.abs(p.vx) > 90 || Math.abs(p.vy) > 260)) this.trail.push({ x: p.x, y: p.y, facing: p.facing, gdir: p.gdir, pose: pose(p), age: 0 });
     if (this.trail.length && this.trail[0].age > 0.25) this.trail.shift();
     if (p.ground && Math.abs(p.vx) > 80 && this.ticks % 14 === 0) {
       this.particles.burst(p.cx - p.facing * 3, feet, '.', 1, 30, pal.dim, { angle: -Math.PI / 2 * p.gdir - p.facing * 0.6, spread: 0.6, gravity: 40, life: 0.35 });

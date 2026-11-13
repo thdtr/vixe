@@ -1,5 +1,6 @@
 import { CW, CH, COLS } from '../config.js';
 import { t } from '../core/i18n.js';
+import { drawFigure, pose } from '../game/render.js';
 
 const clock = (s) => {
   const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, sec = Math.floor(s) % 60;
@@ -65,8 +66,8 @@ export class Ending {
     // A small epilogue: the '@' finally walks somewhere without being lied to.
     const x = ((this.time * 22) % (COLS * CW + 40)) - 20;
     for (let c = 0; c < COLS; c++) screen.glyph(c % 2 ? '=' : '-', c * CW, 18 * CH, pal.dots);
-    screen.glyph('@', x, 17 * CH, pal.player);
-    if (app.save.flags.crown) screen.glyph('w', x, 17 * CH - 14, pal.exit);
+    const walking = { ground: true, vx: 22, gdir: 1, stride: this.time * 22 };
+    drawFigure(screen, x + CW / 2, 18 * CH, { pose: pose(walking), color: pal.player, crown: app.save.flags.crown ? pal.exit : null });
     if (this.chars >= this.total && Math.sin(this.time * 5) > 0) screen.text('>', COLS - 3, 19, pal.exit);
   }
 }

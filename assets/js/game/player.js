@@ -28,6 +28,7 @@ export class Player {
     this.revealed = [];
     this.under = [];          // what the feet rest on: [{ t, i, body }] (i: grid index, -1 for a body)
     this.conveyor = 0;        // a belt's pull while standing on it, px/s (set by mechanisms.js)
+    this.stride = 0;          // ground covered since the last stop, px: drives the walk cycle
   }
 
   get rect() { return { x: this.x, y: this.y, w: P.w, h: P.h }; }
@@ -80,6 +81,7 @@ export class Player {
     this.ground = this.moveY((this.vy + d.y) * dt, level);
 
     this.landed = !wasGrounded && !!this.ground;
+    this.stride = this.ground && Math.abs(this.vx) > 15 ? this.stride + Math.abs(this.vx) * dt : 0;
     if (this.landed) this.squash = 0.3;
     this.squash = approach(this.squash, 0, dt * 2.5);
     this.idle = ctl.dir || ctl.jump ? 0 : this.idle + dt;
