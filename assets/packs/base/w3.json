@@ -236,7 +236,7 @@
         {"when": {"start": true}, "do": [{"speed": 1.6}, {"say": {"pt-BR": "pressa.", "en": "hurry."}, "time": 1.5}]},
         {
           "when": {"zone": "A"},
-          "do": [{"wait": 0.55}, {"fall": "a"}, {"wait": 0.9}, {"fall": "b"}, {"wait": 0.9}, {"fall": "c"}, {"wait": 0.9}, {"fall": "d"}, {"wait": 0.3}, {"fall": "e"}]
+          "do": [{"wait": 0.55}, {"fall": "a"}, {"wait": 0.82}, {"fall": "b"}, {"wait": 0.82}, {"fall": "c"}, {"wait": 0.82}, {"fall": "d"}, {"wait": 0.3}, {"fall": "e"}]
         }
       ],
       "mechs": {"pop": {"reach": 2.6}}

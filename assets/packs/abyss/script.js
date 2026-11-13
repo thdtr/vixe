@@ -13,6 +13,8 @@
 //   eye      a 3D eyeball that follows you, blinks and, if asked, fights
 //
 // Walls are carved by the core "texture" effect and lit by the core "light" effect.
+// Effects that change the game (push, kill, open doors) also have save() and load(state),
+// so tools/solve.mjs can rewind them while it searches.
 
 import { CW, CH, MAP_W, MAP_H } from '../../js/config.js';
 import { TAU, clamp, mix, smooth, frac, approach, wrapAngle, hash, noise, fbm } from '../../js/art/math.js';
@@ -89,6 +91,8 @@ export function register({ registerFx, registerTile }) {
     const level = surf + 1;
     const bubble = (x, y, big) => bubbles.length < 90 && bubbles.push({ x, y, v: 25 + Math.random() * 35, p: Math.random() * 9, big, life: 6 });
     return {
+      save: () => ({ was }),
+      load(st) { was = st.was; },
       anim(dt) {
         t += dt;
         for (const b of bubbles) { b.y -= b.v * dt; b.x += Math.sin(t * 4 + b.p) * 10 * dt; b.life -= dt; }
@@ -179,6 +183,8 @@ export function register({ registerFx, registerTile }) {
     const dims = (j) => [22 * j.size * (1 - 0.2 * j.squeeze), 26 * j.size * (1 + 0.22 * j.squeeze)];
     list.forEach(place);
     return {
+      save: () => ({ t }),
+      load(st) { t = st.t; list.forEach(place); },
       anim(dt) { t += dt; list.forEach(place); },
       update(dt, play) {
         const p = play.player;
@@ -248,6 +254,9 @@ export function register({ registerFx, registerTile }) {
     const bits = Array.from({ length: def.debris ?? 22 }, (_, i) => ({ r: R * (0.3 + 0.7 * Math.random()), a: Math.random() * TAU, ch: ",.'`*o"[i % 6] }));
     let t = 0;
     return {
+      // Its pull depends only on where you are; the debris is just for show.
+      save: () => ({}),
+      load() {},
       anim(dt) {
         t += dt;
         for (const b of bits) {
@@ -311,6 +320,12 @@ export function register({ registerFx, registerTile }) {
     const seg = (i) => path[Math.min(path.length - 1, Math.round(i * GAP / 2))];
     const Z = new Float32Array(HW * HH), NX = new Float32Array(HW * HH), NY = new Float32Array(HW * HH), S = new Int16Array(HW * HH).fill(-1);
     return {
+      save: () => ({ x, y, ang, speed, t, wait, awake, mouth, path: path.map((q) => [...q]) }),
+      load(st) {
+        ({ x, y, ang, speed, t, wait, awake, mouth } = st);
+        path.length = 0;
+        for (const q of st.path) path.push([...q]);
+      },
       anim(dt) { t += dt; },
       update(dt, play) {
         if (!awake) {
@@ -442,6 +457,12 @@ export function register({ registerFx, registerTile }) {
       return hx < 0 || hx >= HW || hy < 0 || hy >= HH ? 0 : heat[hy * HW + hx];
     };
     return {
+      save: () => ({ heat: heat.slice(), t, acc, vents: vents.map((v) => [v.heat, v.was]) }),
+      load(st) {
+        heat.set(st.heat);
+        ({ t, acc } = st);
+        vents.forEach((v, i) => { [v.heat, v.was] = st.vents[i]; });
+      },
       anim(dt) {
         t += dt;
         acc = Math.min(acc + dt, 0.2);
@@ -530,6 +551,16 @@ export function register({ registerFx, registerTile }) {
     };
 
     return {
+      save: () => ({
+        t, gx, gy, gz, blink, nextBlink, blinking, state, timer, hits, tremble, pupil, cx, cy,
+        aim: aim && { ...aim }, end: end && { ...end }, alive: nodes.map((n) => n.alive),
+      }),
+      load(st) {
+        ({ t, gx, gy, gz, blink, nextBlink, blinking, state, timer, hits, tremble, pupil, cx, cy } = st);
+        aim = st.aim && { ...st.aim };
+        end = st.end && { ...st.end };
+        nodes.forEach((n, i) => { n.alive = st.alive[i]; });
+      },
       anim(dt, play) {
         t += dt;
         tremble = Math.max(0, tremble - dt);

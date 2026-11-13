@@ -34,6 +34,35 @@ for (const w of worlds) {
         }
       }
     }
+    // Logic that loads fine but can never happen: a trap that never fires, a door that never shows.
+    const zones = new Set([...(lv.marks ?? []).join('').match(/[A-Z]/g) ?? [], ...Object.keys(lv.fields ?? {})]);
+    const setFlags = new Set(), usedFlags = new Set(), shown = new Set();
+    const zoneOf = (v) => typeof v === 'string' && !zones.has(v) && say(`zone "${v}" isn't on the map`);
+    // An event only ever set off by { "fire": id } may hold itself back with a flag nobody sets.
+    const fired = new Set((lv.events ?? []).flatMap((e) => (e.do ?? []).map((st) => st.fire).filter(Boolean)));
+    for (const e of lv.events ?? []) {
+      zoneOf(e.when?.zone);
+      if (e.when?.flag && !fired.has(e.id)) usedFlags.add(e.when.flag);
+      for (const st of e.do ?? []) {
+        if (st.flag) setFlags.add(st.flag);
+        if (st.fill) zoneOf(st.fill);
+        if (st.field && !(lv.fields ?? {})[st.field]) say(`field "${st.field}" doesn't exist`);
+        for (const k of ['show', 'typewrite']) if (st[k]) shown.add(st[k]);
+      }
+    }
+    for (const f of [...(w.fx ?? []), ...(lv.fx ?? [])]) {
+      if (f.flag) usedFlags.add(f.flag);
+      if (f.exit) shown.add(f.exit);
+    }
+    for (const f of usedFlags) if (!setFlags.has(f)) say(`flag "${f}" is checked but never set`);
+    const signs = (lv.map.join('').match(/\?/g) ?? []).length;
+    if (signs > (lv.signs ?? []).length) say(`${signs} signs on the map, ${(lv.signs ?? []).length} texts`);
+    for (const g of lv.hidden ?? '') {
+      if (shown.has(g)) continue;
+      const exitInside = (lv.marks ?? []).some((row, y) => [...row].some((ch, x) => ch === g && tileOf(lv.map[y]?.[x])?.exit))
+        || (lv.words ?? []).some((x) => x.group === g && Object.values(x.text).join('').includes('>'));
+      say(exitInside ? `the exit is in hidden group "${g}", which nothing shows` : `hidden group "${g}" is never shown`);
+    }
     for (const name of Object.keys(lv.mechs ?? {})) {
       if (!mechanisms[name]) { say(`unknown mechanism "${name}"`); continue; }
       for (const o of Object.keys(lv.mechs[name])) if (!(o in mechanisms[name].options)) say(`mechanism "${name}" has no option "${o}"`);

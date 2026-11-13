@@ -16,6 +16,8 @@
 //   front(screen, play)  drawn after the player, particles and tide
 //   lights(play)       returns light sources for a "light" layer: [{ x, y, r, color, i }]
 //   cmd(step, play)    the { "fx": id, ... } trap action
+//   save() / load(s)   its state as plain data and back, for effects that change the game
+//                      (tools/solve.mjs rewinds a level with them while it searches)
 //
 // Unknown types are skipped with a warning, like unknown traps.
 

@@ -13,6 +13,17 @@ const ctx2d = new Proxy({}, {
 globalThis.document ??= { createElement: () => ({ getContext: () => ctx2d, width: 0, height: 0 }), documentElement: {} };
 globalThis.navigator ??= {};
 
+// Randomness the search can rewind: Math.random runs off this seed, saved with every snapshot.
+export const rand = { s: 0x9e3779b9 };
+Math.random = () => {
+  let x = rand.s;
+  x ^= x << 13; x >>>= 0;
+  x ^= x >>> 17;
+  x ^= x << 5; x >>>= 0;
+  rand.s = x || 1;
+  return x / 4294967296;
+};
+
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const json = (p) => JSON.parse(readFileSync(ROOT + p, 'utf8'));
 const load = (p) => import(pathToFileURL(ROOT + p).href);
@@ -64,6 +75,7 @@ const sink = new Proxy({}, { get: () => noop });
 
 // A play scene on a level, as the game would start it, minus the screen.
 export function makePlay(world, index, deaths = 0) {
+  rand.s = 0x9e3779b9;
   const save = { levels: {}, secrets: [], flags: {}, deaths: 0, seen: {}, flawless: [], vibrate: 'off', shake: false, time: 0 };
   const app = {
     input: new ScriptedInput(), audio: sink, save, persist: noop, go: noop, run: null, touchHinted: true,
@@ -79,8 +91,10 @@ export function makePlay(world, index, deaths = 0) {
 }
 
 // One fixed step of the level with the given controls. Returns 'win', 'dead' or null.
+// Effects breathe every step too, as they do every frame in the game (jellyfish drift, vents fire).
 export function step(play, dir, jump) {
   play.app.input.set(dir, jump);
+  for (const f of play.fx) f.anim?.(STEP, play);
   if (play.state === 'play') play.step(STEP, play.app.input);
   return play.state === 'win' ? 'win' : play.state === 'dead' ? 'dead' : null;
 }

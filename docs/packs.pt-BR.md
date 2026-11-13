@@ -206,9 +206,19 @@ O próprio código do jogo roda sem tela no Node, então dá para testar uma fas
 node tools/solve.mjs w1.3            # acha um caminho pela fase (ou w1 para um mundo inteiro)
 node tools/solve.mjs w1.3 --beam 600 # uma busca mais lenta que também acha esperas e desvios
 node tools/solve.mjs w1.3 --replay "R20 RJ6 N10 R30"   # joga um roteiro e diz o que aconteceu
+node tools/solve.mjs w2.6 --via "24,13 34,11 24,9"     # mira nessas células, uma de cada vez, e depois na saída
+node tools/solve.mjs w1 --naive        # jogar sem pensar (segurar direita, pular no ritmo) vence? Não deveria
+node tools/check.mjs                   # toda fase carrega, e nenhuma armadilha, zona ou flag está morta
 node tools/format.mjs assets/packs/meu-pack/mundo.json # deixa o arquivo do mundo no formato dos outros
 ```
 
 Um roteiro é uma lista de movimentos segurados por tiques de 1/20 s: `R`, `L` ou `N` (nada),
 mais `J` para segurar o pulo. O solucionador mostra o caminho que achou, quanto tempo levou e o
-quanto precisou procurar. Efeitos que agem sobre o jogador (as criaturas do Abismo) não entram na busca.
+quanto precisou procurar; `--slack` diz com que frequência esse caminho ainda vence com o tempo
+levemente alterado. Efeitos que agem sobre o jogador precisam de `save()` e `load()` (veja
+`assets/js/game/fx.js`) para entrar na busca.
+
+Algumas fases fazem a busca se perder (uma porta que foge, um caminho que primeiro se afasta da
+saída). `tools/routes.json` guarda um roteiro vencedor para cada uma delas, e testar essas fases
+o repete: se uma mudança quebrar uma delas, o solucionador avisa **ROUTE BROKEN**. Ao criar uma
+fase assim, ache um caminho com `--beam` ou `--via`, confira com `--replay` e adicione ao arquivo.

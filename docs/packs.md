@@ -218,9 +218,18 @@ The game's own code runs headless in Node, so a level can be tested without open
 node tools/solve.mjs w1.3            # find a way through a level (or w1 for a whole world)
 node tools/solve.mjs w1.3 --beam 600 # a slower search that also finds waits and detours
 node tools/solve.mjs w1.3 --replay "R20 RJ6 N10 R30"   # play a script, see what happens
+node tools/solve.mjs w2.6 --via "24,13 34,11 24,9"     # aim for these cells in turn, then the exit
+node tools/solve.mjs w1 --naive        # can mindless play (hold right, hop on a beat) win? It shouldn't
+node tools/check.mjs                   # every level loads, and no trap, zone or flag is dead
 node tools/format.mjs assets/packs/my-pack/world.json  # lay a world file out like the others
 ```
 
 A script is a list of moves held for 1/20 s ticks: `R`, `L` or `N` (nothing), plus `J` to hold
-jump. The solver prints the way it found, how long it took and how hard it had to look. Effects
-that act on the player (the Abyss's creatures) can't be searched.
+jump. The solver prints the way it found, how long it took and how hard it had to look; `--slack`
+adds how often that way still wins when its timing is nudged. Effects that act on the player
+need `save()` and `load()` (see `assets/js/game/fx.js`) to be searched.
+
+Some levels make the search wander off (a door that runs, a route that leads away from the exit
+first). `tools/routes.json` keeps a winning script for each of them, and checking those levels
+replays it: if a change breaks one, the solver says **ROUTE BROKEN**. When you add such a level,
+find a way with `--beam` or `--via`, check it with `--replay`, and add it to the file.

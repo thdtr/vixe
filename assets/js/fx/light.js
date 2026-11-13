@@ -71,6 +71,8 @@ export function light(def, play) {
   };
 
   return {
+    save: () => ({ clock: sonar?.clock, rings: sonar ? sonar.rings.map((r) => ({ ...r })) : [] }),
+    load(st) { if (sonar) { sonar.clock = st.clock; sonar.rings = st.rings.map((r) => ({ ...r })); } },
     ping,
     anim(dt) {
       t += dt;

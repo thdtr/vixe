@@ -1,10 +1,15 @@
 // Saves and restores everything about a running level that can change, so a search can
 // try one move, back up, and try another. Restoring writes back into the same objects, so
 // references between them (the player's ground and the body under it) stay valid.
-// Level effects (fx) keep their state in closures and aren't covered: levels whose effects
-// push, pull or kill can't be searched this way.
+// Level effects keep their state in closures; those that change the game expose save() and
+// load(), and a level with one that doesn't can't be searched this way (see searchable()).
 
-const PLAY = ['time', 'ticks', 'state', 'stateT', 'reversed', 'gravity', 'weight', 'flipT', 'dark', 'ease', 'collected'];
+import { rand } from './env.mjs';
+
+export const searchable = (play) => play.fx.every((f) => !f.update || f.save);
+
+// attempt too: a branch that dies counts a death, and mercy rules ("deaths": n) read it.
+const PLAY = ['time', 'ticks', 'state', 'stateT', 'reversed', 'gravity', 'weight', 'flipT', 'dark', 'ease', 'collected', 'attempt'];
 const PLAYER = ['x', 'y', 'vx', 'vy', 'gdir', 'weight', 'push', 'speed', 'swim', 'facing', 'alive', 'ground', 'coyote', 'buffer', 'jumped', 'landed', 'idle', 'squash', 'conveyor'];
 
 const copy = (v) => (v && typeof v === 'object' ? structuredClone(v) : v);
@@ -26,6 +31,8 @@ export function snapshot(play) {
     scripts: events.scripts.map((s) => ({ ...s })),
     mechs: mechs.list.map((m) => copy(m.state)),
     actors: actors.list.map((a) => ({ def: a.def, state: copy(a.state) })),
+    fx: play.fx.map((f) => f.save?.()),
+    rand: rand.s,
   };
 }
 
@@ -52,4 +59,6 @@ export function restore(play, s) {
   events.scripts = s.scripts.map((x) => ({ ...x }));
   mechs.list.forEach((m, i) => { m.state = copy(s.mechs[i]); });
   actors.list = s.actors.map((a) => ({ def: a.def, state: copy(a.state) }));
+  play.fx.forEach((f, i) => { if (s.fx[i] !== undefined) f.load(copy(s.fx[i])); });
+  rand.s = s.rand;
 }

@@ -419,7 +419,7 @@
         "¦¦       ╱  ╲    ╱  ╲    ╱  ╲                      *********  ¦¦",
         "¦¦      ╱    ╲  ╱    ╲  ╱    ╲    =================           ¦¦",
         "¦¦        ┆┆      ┆┆      ┆┆                                  ¦¦",
-        "¦¦ @  ?        ^^^                                           >¦¦",
+        "¦¦ @  ?        ^^^                                        ¡  >¦¦",
         "====•=======•=======•=======•=======•=======•=======•=======•===",
         "º º  º º º  º  º º  º º º  º º  º  º º º  º º  º º  º  º º º  º"
       ],
@@ -483,7 +483,8 @@
         {"when": {"jump": true, "zone": "Z", "flag": "cue"}, "do": [{"show": "k"}]},
         {"when": {"zone": "Y"}, "do": [{"say": {"pt-BR": "[o ponto errou a fala]", "en": "[the prompter fluffed the line]"}, "time": 2}]},
         {"when": {"typed": ["merda", "breakaleg"]}, "do": [{"say": {"pt-BR": "[merda pra você também!]", "en": "[break a leg yourself!]"}, "time": 2}, {"show": "m"}]}
-      ]
+      ],
+      "mechs": {"pop": {"reach": 2}}
     },
     {
       "name": {"pt-BR": "Voo", "en": "Flying"},

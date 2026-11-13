@@ -130,8 +130,8 @@
         "",
         "",
         "",
-        "",
-        "   @  ?                                      ¡       ¡       >",
+        "                                                             >",
+        "   @  ?                                      ¡               #",
         "",
         "################################    ############################"
       ],
@@ -161,11 +161,13 @@
         {"at": [16, 16], "text": {"pt-BR": "DURO", "en": "HARD"}, "group": "b"},
         {"at": [20, 16], "text": {"pt-BR": "_E_SEMPRE___", "en": "_AND_ALWAYS_"}},
         {"at": [32, 16], "text": {"pt-BR": "RETO", "en": "FLAT"}, "group": "d"},
-        {"at": [36, 16], "text": {"pt-BR": "_DO_INÍCIO_AO_FIM_DA_LINHA__", "en": "_FROM_START_TO_END_OF_LINE__"}}
+        {"at": [36, 16], "text": {"pt-BR": "_DO_INÍCIO_AO_FIM__", "en": "_FROM_START_TO_END_"}},
+        {"at": [55, 16], "text": {"pt-BR": "DA_LINHA_", "en": "OF_LINE__"}, "group": "e"}
       ],
       "events": [
         {"when": {"zone": "B"}, "do": [{"swap": "b", "to": "^"}, {"sfx": "glitch"}]},
-        {"when": {"zone": "D"}, "do": [{"wobble": "d", "time": 0.2}, {"fall": "d", "land": false}]}
+        {"when": {"zone": "D"}, "do": [{"wobble": "d", "time": 0.2}, {"fall": "d", "land": false}]},
+        {"when": {"past": 50}, "do": [{"collapse": "e", "from": "right", "rate": 10, "wobble": 0.2}]}
       ],
       "mechs": {"pop": {"reach": 2}}
     },
@@ -188,8 +190,8 @@
         "",
         "",
         "   @                                                        >",
-        "##########                                            ##########",
-        "##########                                            ##########"
+        "##########                                              ########",
+        "##########                                              ########"
       ],
       "marks": [
         "",
@@ -211,13 +213,17 @@
         "",
         ""
       ],
-      "hidden": "ab",
+      "hidden": "abc",
       "words": [
-        {"at": [10, 16], "text": {"pt-BR": "ESTA_PONTE_ESTÁ_SENDO_ESCRITA_AGORA___", "en": "THIS_BRIDGE_IS_BEING_WRITTEN_RIGHT_NOW"}, "group": "a"},
-        {"at": [48, 16], "text": {"pt-BR": "...FIM", "en": "...END"}, "group": "b"}
+        {"at": [10, 16], "text": {"pt-BR": "ESTA_PONTE_ESTÁ_", "en": "THIS_BRIDGE_IS__"}, "group": "a"},
+        {"at": [26, 16], "text": {"pt-BR": "SENDO_ESCRITA_AGORA____", "en": "BEING_WRITTEN_RIGHT_NOW"}, "group": "c"},
+        {"at": [49, 16], "text": {"pt-BR": "....FIM", "en": "....END"}, "group": "b"}
       ],
       "events": [
-        {"when": {"zone": "A"}, "do": [{"typewrite": "a", "rate": 8.6}]},
+        {
+          "when": {"zone": "A"},
+          "do": [{"typewrite": "a", "rate": 8.6}, {"wait": 2.96046511627907}, {"say": {"pt-BR": "hm.", "en": "hm."}, "time": 1}, {"typewrite": "c", "rate": 8.6}]
+        },
         {"when": {"zone": "E"}, "do": [{"say": {"pt-BR": "espera. estou pensando.", "en": "wait. I'm thinking."}, "time": 2}]},
         {"when": {"zone": "E", "idle": 0.8}, "do": [{"typewrite": "b", "rate": 6}]},
         {"when": {"zone": "R"}, "do": [{"say": {"pt-BR": "backspace.", "en": "backspace."}, "time": 1.4}, {"collapse": "a", "from": "left", "rate": 7, "wobble": 0.1}]}
@@ -278,9 +284,9 @@
       "events": [
         {"when": {"start": true}, "do": [{"move": "w", "by": [7, 0], "speed": 3, "loop": true, "quiet": true}]},
         {"when": {"jump": true, "zone": [27, 12, 5, 4]}, "do": [{"swap": "x", "to": "*"}]},
-        {"when": {"past": 8}, "do": [{"spawn": "drop", "at": [12, 0], "glyph": "*", "warn": 0.3}]},
-        {"when": {"past": 22}, "do": [{"spawn": "drop", "at": [26, 0], "glyph": "*", "warn": 0.3}]},
-        {"when": {"past": 36}, "do": [{"spawn": "drop", "at": [40, 0], "glyph": "*", "warn": 0.3}]}
+        {"when": {"past": 10}, "do": [{"spawn": "drop", "at": [19, 1], "glyph": "*", "warn": 0.3}]},
+        {"when": {"past": 24}, "do": [{"spawn": "drop", "at": [33, 1], "glyph": "*", "warn": 0.3}]},
+        {"when": {"past": 37}, "do": [{"spawn": "drop", "at": [45, 1], "glyph": "*", "warn": 0.25}]}
       ]
     },
     {
@@ -321,7 +327,23 @@
       "events": [
         {"when": {"zone": [25, 3, 2, 1]}, "do": [{"fall": "a", "land": false}]},
         {"when": {"zone": [37, 7, 1, 1]}, "do": [{"swap": "b", "to": "^"}]},
-        {"when": {"stand": "c"}, "do": [{"fall": "c", "land": false}]}
+        {"when": {"stand": "c"}, "do": [{"fall": "c", "land": false}]},
+        {
+          "when": {"past": 30},
+          "do": [{"spawn": "drop", "at": [38, 1], "warn": 0.3}, {"spawn": "drop", "at": [36, 1], "warn": 0.48}, {"spawn": "drop", "at": [40, 1], "warn": 0.62}]
+        },
+        {
+          "when": {"past": 38},
+          "do": [{"spawn": "drop", "at": [46, 1], "warn": 0.3}, {"spawn": "drop", "at": [44, 1], "warn": 0.48}, {"spawn": "drop", "at": [48, 1], "warn": 0.62}]
+        },
+        {
+          "when": {"past": 44},
+          "do": [{"spawn": "drop", "at": [53, 1], "warn": 0.3}, {"spawn": "drop", "at": [51, 1], "warn": 0.48}, {"spawn": "drop", "at": [55, 1], "warn": 0.62}]
+        },
+        {
+          "when": {"past": 50},
+          "do": [{"spawn": "drop", "at": [58, 1], "warn": 0.25}, {"spawn": "drop", "at": [56, 1], "warn": 0.43}, {"spawn": "drop", "at": [60, 1], "warn": 0.5700000000000001}]
+        }
       ],
       "mechs": {"pop": {"reach": 1.6}}
     },

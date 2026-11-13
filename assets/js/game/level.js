@@ -162,9 +162,10 @@ export class Level {
     }
   }
 
+  // Is anything solid in the rect? A body passed as `except` doesn't count (the map always does).
   solidAt(r, except = null) {
     let hit = false;
-    this.query(r, (px, py, t, i, b) => { if (t.solid && b !== except) hit = true; });
+    this.query(r, (px, py, t, i, b) => { if (t.solid && (!b || b !== except)) hit = true; });
     return hit;
   }
 
