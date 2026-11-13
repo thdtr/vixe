@@ -11,13 +11,13 @@
 import { registerTile } from '../game/tiles.js';
 import { actions, triggers } from '../game/events.js';
 import { mergeStrings } from './i18n.js';
-import { fxTypes } from '../game/fx.js';
+import { registerFx } from '../game/fx.js';
 
 const api = {
   registerTile,
   registerAction: (name, fn) => { actions[name] = fn; },
   registerTrigger: (name, fn) => { triggers[name] = fn; },
-  registerFx: (name, make) => { fxTypes[name] = make; },
+  registerFx,
 };
 
 async function json(url) {

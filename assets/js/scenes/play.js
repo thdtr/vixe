@@ -5,7 +5,7 @@ import { Events } from '../game/events.js';
 import { drawStatic, drawLive, drawBodies, drawFields, drawTide, drawPlayer, Particles } from '../game/render.js';
 import { t, loc } from '../core/i18n.js';
 import { Menu } from './menu.js';
-import { makeFx } from '../game/fx.js';
+import { makeFx, fxDefs } from '../game/fx.js';
 
 // Deaths on one level (all tries, saved) before the pause menu offers to skip it.
 const SKIP_AFTER = 25;
@@ -80,7 +80,7 @@ export class Play {
     this.flags = {};
     this.collected = false;
     this.particles.list.length = 0;
-    this.fx = makeFx(this.def.fx, this);
+    this.fx = makeFx(fxDefs(this.world, this.def), this);
   }
 
   get inputMode() { return this.paused ? 'menu' : 'play'; }

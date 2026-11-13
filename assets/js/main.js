@@ -15,6 +15,7 @@ import { Options } from './scenes/options.js';
 import { Intro } from './scenes/intro.js';
 import { Ending } from './scenes/ending.js';
 import { Credits } from './scenes/credits.js';
+import './fx/index.js';
 
 const PHOSPHOR = '#8cffa0';
 // A 60 Hz frame is exactly two steps, so the accumulator sits right on a step boundary

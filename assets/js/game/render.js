@@ -1,12 +1,9 @@
 import { CW, CH, MAP_COLS, MAP_ROWS, MAP_Y, PHYS, FONT_BOLD } from '../config.js';
 import { tileOf } from './tiles.js';
+import { hash } from '../art/math.js';
 
-// Cheap deterministic noise for textures that must not flicker.
-export const hash = (x, y) => {
-  let h = (x * 374761393 + y * 668265263) | 0;
-  h = Math.imul(h ^ (h >>> 13), 1274126177);
-  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
-};
+// Re-exported: the menus use it for their own textures.
+export { hash };
 
 const isWall = (ch) => !!tileOf(ch)?.wall;
 
