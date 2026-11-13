@@ -17,6 +17,12 @@ const SFX = {
   type:    [{ noise: 3500, d: 0.015, v: 0.05 }],
   hum:     [{ wave: 'sine', f: [90, 180], d: 0.3, v: 0.12 }, { wave: 'triangle', f: [360, 720], d: 0.25, v: 0.04 }],
   warp:    [{ wave: 'sine', f: [1800, 120], d: 0.3, v: 0.1 }, { wave: 'triangle', f: [200, 1600], d: 0.2, v: 0.05, at: 0.12 }],
+  ping:    [{ wave: 'sine', f: [1480, 1400], d: 0.5, v: 0.07 }, { wave: 'sine', f: [1480, 1400], d: 0.4, v: 0.025, at: 0.28 }],
+  splash:  [{ noise: 1800, d: 0.28, v: 0.14 }, { wave: 'sine', f: [500, 140], d: 0.18, v: 0.05 }],
+  roar:    [{ wave: 'sawtooth', f: [62, 38], d: 1.3, v: 0.16 }, { noise: 500, d: 1.1, v: 0.22 }, { wave: 'square', f: [93, 50], d: 1.0, v: 0.05, at: 0.1 }],
+  beam:    [{ wave: 'sawtooth', f: [140, 1100], d: 0.45, v: 0.07 }, { noise: 4000, d: 0.4, v: 0.1 }],
+  charge:  [{ wave: 'sine', f: [220, 880], d: 0.8, v: 0.07 }],
+  rumble:  [{ noise: 160, d: 0.7, v: 0.3 }],
 };
 
 // Sounds heard over and over drift a little in pitch (noise: in brightness) on each play,

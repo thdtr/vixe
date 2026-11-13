@@ -15,6 +15,7 @@ export class Player {
     this.drift = { x: 0, y: 0 };   // carried along by a field, in px/s
     this.push = null;              // the field's push it eases toward, in cells/s
     this.speed = 1;
+    this.swim = false;        // in water: every press of jump is a stroke
     this.facing = 1;
     this.alive = true;
     this.ground = null;       // null in the air, 'static' or the Body under our feet
@@ -48,12 +49,12 @@ export class Player {
     this.vx = approach(this.vx, target, accel * this.speed * dt);
     if (ctl.dir) this.facing = ctl.dir;
 
-    this.coyote = this.ground ? P.coyote : Math.max(0, this.coyote - dt);
+    this.coyote = this.ground || this.swim ? P.coyote : Math.max(0, this.coyote - dt);
     this.buffer = ctl.jumpPressed ? P.buffer : Math.max(0, this.buffer - dt);
     this.jumped = false;
     if (this.buffer > 0 && this.coyote > 0) {
       if (this.ground?.vx) this.vx += this.ground.vx;   // leap off moving things with their momentum
-      this.vy = -P.jump * g;
+      this.vy = -P.jump * g * (this.swim && !this.ground ? P.stroke : 1);
       this.buffer = this.coyote = 0;
       this.ground = null;
       this.jumped = true;

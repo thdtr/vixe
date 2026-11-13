@@ -109,3 +109,20 @@ brilhantes como `sawtooth` e `square`.
 e estes tiles: as estrelas `·` `°`, o rastro de meteoro `´` e a boca de buraco de minhoca `¤`;
 a cortina `¦`, a corda `│` e a plateia `º` (nenhum deles é sólido); a ribalta `•` e o saco de
 areia `§` (os dois sólidos); e `╱ ╲ ─ ┆ ╭ ╮ ╰ ╯` para cenário pintado, onde não dá para pisar.
+
+## Efeitos
+
+Uma fase pode listar camadas procedurais em `fx`, desenhadas atrás do mapa, na frente dele ou nos dois:
+
+```json
+"fx": [ { "type": "sea", "surface": 7, "rays": 0.8 }, { "type": "light", "ambient": 0.1 } ]
+```
+
+Um script registra novos tipos com `registerFx(nome, (def, play) => fx)`; `assets/js/game/fx.js`
+lista os ganchos que um efeito pode ter (`update`, `anim`, `back`, `front`, `lights`, `cmd`), e a
+ação `{ "fx": "<id>", ... }` conversa com um deles. `assets/packs/abyss/script.js` é o exemplo
+real: céu, mar, textura de rocha, luzes com sombras de verdade e sonar, águas-vivas, redemoinho,
+serpente, fendas de magma e um olho, tudo desenhado com glifos numa grade duas vezes mais fina que o mapa.
+
+Um campo também aceita `"swim": true` (cada toque no pulo é uma braçada, como na água) e
+`"motes": false` (o campo fica invisível).

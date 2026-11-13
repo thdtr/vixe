@@ -63,7 +63,10 @@ export class Select {
     if (input.confirmed()) this.start();
   }
 
-  rowOf(i) { return 3 + i * 2; }   // six worlds fit above the level info at row 15
+  // Six worlds sit two rows apart; more squeeze in above the level info at row 15.
+  get gap() { return this.worlds.length > 6 ? 11 / (this.worlds.length - 1) : 2; }
+
+  rowOf(i) { return 3 + i * this.gap; }
 
   // What a point lands on: 'back', 'play', or 'world:level' (level -1 is the
   // world's name). Each world owns the whole band between its neighbors.
@@ -71,7 +74,7 @@ export class Select {
     if (y < 3 * CH && x < (backLabel().length + 3) * CW) return 'back';
     const b = this.playBox();
     if (this.app.progress.levelOpen(this.worlds[this.row], this.col) && x >= b.x && x < b.x + b.w && y >= b.y) return 'play';
-    const w = Math.floor((y / CH - 2.5) / 2);
+    const w = Math.floor((y / CH - 3) / this.gap + 0.5);
     if (w < 0 || w >= this.worlds.length) return null;
     const c = Math.max(-1, Math.floor((x / CW - GRID_COL + 0.5) / CELL));
     return c < this.worlds[w].levels.length ? `${w}:${c}` : null;

@@ -1,0 +1,10 @@
+{
+  "id": "abyss",
+  "name": { "pt-BR": "O Abismo", "en": "The Abyss" },
+  "worlds": ["w7.json"],
+  "script": "script.js",
+  "strings": {
+    "pt-BR": { "ending.abyss": "aqui embaixo, a luz nunca foi minha.\npeguei emprestada das águas-vivas,\ndo fogo, do próprio olho.\n\nagora eu devolvo." },
+    "en": { "ending.abyss": "down here, the light was never mine.\nI borrowed it from the jellyfish,\nfrom the fire, from the eye itself.\n\nnow I'm giving it back." }
+  }
+}

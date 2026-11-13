@@ -152,7 +152,7 @@ export function drawFields(screen, level, pal, time) {
   const ctx = screen.ctx;
   ctx.globalAlpha = 0.45;
   for (const [id, f] of level.fields) {
-    if (!f.on) continue;
+    if (!f.on || f.motes === false) continue;
     const [px, py] = f.push || [0, 0];
     // Which way the motes stream (in cells/s), and what they look like.
     const vx = px, vy = py || (f.gravity ? f.gravity * 3 : 0);

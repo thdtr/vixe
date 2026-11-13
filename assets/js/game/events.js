@@ -130,6 +130,8 @@ export const actions = {
   flash: (p, v) => { p.flash = v; },
   flag: (p, v) => { p.flags[v] = true; },
   fire: (p, id) => { p.events.fire(id); },
+  // Talks to a level effect: { "fx": "eye", ...whatever it understands }
+  fx: (p, id, s) => { p.fx.find((f) => f.id === id)?.cmd?.(s, p); },
   kill: (p) => { p.kill(); },
   win: (p) => { p.win(); },
 };

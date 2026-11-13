@@ -122,3 +122,20 @@ A pack can optionally ship an ES module that exports `register(api)`. The API of
 trigger, and these tiles: the `·` `°` stars, the `´` meteor tail and the `¤` wormhole mouth;
 the `¦` curtain, `│` rope and `º` audience (none of them solid); the `•` footlight and `§`
 sandbag (both solid); and `╱ ╲ ─ ┆ ╭ ╮ ╰ ╯` for painted scenery you can't stand on.
+
+## Effects
+
+A level can list procedural layers in `fx`, drawn behind the map, in front of it, or both:
+
+```json
+"fx": [ { "type": "sea", "surface": 7, "rays": 0.8 }, { "type": "light", "ambient": 0.1 } ]
+```
+
+A script registers new types with `registerFx(name, (def, play) => fx)`; `assets/js/game/fx.js`
+lists the hooks an effect can have (`update`, `anim`, `back`, `front`, `lights`, `cmd`), and the
+`{ "fx": "<id>", ... }` trap action talks to one. `assets/packs/abyss/script.js` is the working
+example: a sky, a sea, rock texture, lights with real shadows and sonar, jellyfish, a whirlpool,
+a serpent, magma vents and an eye, all drawn with glyphs on a grid twice as fine as the map.
+
+A field also takes `"swim": true` (every press of jump is a stroke, as in water) and
+`"motes": false` (the field stays invisible).

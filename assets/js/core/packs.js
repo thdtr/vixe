@@ -4,18 +4,20 @@
 //   pack.json   { id, name, worlds: ["w1.json", ...], strings?, script? }
 //   wN.json     a world: { id, name, palette, music, requires?, hidden?, levels: [...] }
 //   script      optional ES module exporting register(api) to add new tiles,
-//               trap actions or triggers.
+//               trap actions, triggers or level effects (see game/fx.js).
 //
 // A broken pack is skipped with a warning; it never takes the base game down.
 
 import { registerTile } from '../game/tiles.js';
 import { actions, triggers } from '../game/events.js';
 import { mergeStrings } from './i18n.js';
+import { fxTypes } from '../game/fx.js';
 
 const api = {
   registerTile,
   registerAction: (name, fn) => { actions[name] = fn; },
   registerTrigger: (name, fn) => { triggers[name] = fn; },
+  registerFx: (name, make) => { fxTypes[name] = make; },
 };
 
 async function json(url) {

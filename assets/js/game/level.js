@@ -11,7 +11,8 @@ import { loc } from '../core/i18n.js';
 //   signs:  texts for each "?" in reading order
 //   words:  localized solid text placed on the map: { at: [x, y], text: {...}, group? }
 //   fields: zones that change how you fall while you're inside them:
-//           { "A": { gravity: -1, weight: 0.3, push: [dx, dy] (cells/s), off: true } }
+//           { "A": { gravity: -1, weight: 0.3, push: [dx, dy] (cells/s), off: true,
+//                   swim: true (water: jump strokes in mid-air), motes: false (draw nothing) } }
 //           A field may cover a rect instead, { "pull": { at: [x, y, w, h], ... } }:
 //           its name then works as a zone too.
 //   events: see events.js

@@ -25,7 +25,8 @@ export const PHYS = {
   apexGravity: 0.6,                   // gravity scale near the top of a held jump
   maxFall: 520,
   jump: 420,
-  jumpCut: 150,                       // upward speed cap after releasing jump
+  jumpCut: 150,
+  stroke: 0.62,                       // a swimming stroke, as a share of a jump                       // upward speed cap after releasing jump
   coyote: 0.09,
   buffer: 0.12,
   bodyGravity: 1100,                  // falling scenery is a bit lazier than you
@@ -38,4 +39,4 @@ export const FONT = `16px ${FACE}`;
 export const FONT_BOLD = `bold 16px ${FACE}`;
 
 export const SAVE_KEY = 'vixe/save/v1';
-export const VERSION = '1.2.0';
+export const VERSION = '1.3.0';

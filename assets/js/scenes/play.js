@@ -5,6 +5,7 @@ import { Events } from '../game/events.js';
 import { drawStatic, drawLive, drawBodies, drawFields, drawTide, drawPlayer, Particles } from '../game/render.js';
 import { t, loc } from '../core/i18n.js';
 import { Menu } from './menu.js';
+import { makeFx } from '../game/fx.js';
 
 // Deaths on one level (all tries, saved) before the pause menu offers to skip it.
 const SKIP_AFTER = 25;
@@ -79,6 +80,7 @@ export class Play {
     this.flags = {};
     this.collected = false;
     this.particles.list.length = 0;
+    this.fx = makeFx(this.def.fx, this);
   }
 
   get inputMode() { return this.paused ? 'menu' : 'play'; }
@@ -116,6 +118,7 @@ export class Play {
     const p = this.player, f = this.level.fieldAt(p.rect);
     p.weight = f?.weight ?? this.weight;
     p.push = f?.push;
+    p.swim = !!f?.swim;
     const dir = f?.gravity ?? this.gravity;
     if (dir === p.gdir) return;
     p.gdir = dir;
@@ -220,6 +223,7 @@ export class Play {
     this.glitch = Math.max(0, this.glitch - dt);
     this.flash = Math.max(0, this.flash - dt);
     this.particles.update(dt);
+    for (const f of this.fx) f.anim?.(dt, this);
     if (this.freeze > 0) { this.freeze -= dt; return; }
 
     if (this.state === 'dead') {
@@ -247,6 +251,8 @@ export class Play {
     if (this.reversed) dir = -dir;
     const jump = input.held('jump') || input.held('up');
     this.applyFields();
+    for (const f of this.fx) f.update?.(dt, this);
+    if (this.state !== 'play') return;
     p.update(dt, { dir, jump, jumpPressed: input.pressed('jump') || input.pressed('up') }, this.level);
 
     for (const i of p.revealed) {
@@ -322,6 +328,7 @@ export class Play {
     const k = this.shakeT > 0 ? Math.min(1, this.shakeT * 8) * 3 : 0;
     const ox = (Math.random() - 0.5) * k * 2, oy = (Math.random() - 0.5) * k * 2;
     screen.begin(pal.bg, ox, oy);
+    for (const f of this.fx) f.back?.(screen, this);
     screen.cached(`${this.def.id}:${this.level.key}`, (l) => drawStatic(screen, l, this.level, pal), ox, oy);
     const found = this.app.save.secrets.includes(this.def.id);
     drawLive(screen, this.level, pal, this.time, found);
@@ -333,6 +340,7 @@ export class Play {
     else if (this.state === 'win') drawPlayer(screen, p, pal, Math.max(0, this.stateT / 0.55));
     this.particles.draw(screen);
     if (this.level.tide) drawTide(screen, this.level.tide, pal, this.time);
+    for (const f of this.fx) f.front?.(screen, this);
 
     if (this.dark) this.drawDark(screen, pal);
     if (this.glitch > 0) this.drawGlitch(screen, pal);
