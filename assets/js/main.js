@@ -53,6 +53,7 @@ class App {
       intro: new Intro(this), ending: new Ending(this), credits: new Credits(this),
     };
     this.applySettings();
+    this.phoneGate();
 
     const unlock = () => {
       this.audio.unlock();
@@ -205,6 +206,41 @@ class App {
     touch.dataset.show = s.touchShow;
     Object.assign(this.input, { size: TOUCH_SIZES[s.touchSize], swap: s.touchSwap, show: s.touchShow });
     this.input.rest();
+  }
+
+  // VIXE is made for a keyboard. A touch-only device (no mouse or trackpad, no
+  // controller) is told so first, and can send itself the link or play anyway.
+  // Its taps stop here, so nothing behind wakes up (sound, full screen).
+  phoneGate() {
+    const el = document.getElementById('phone');
+    const touchOnly = matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches;
+    const pad = () => [...(navigator.getGamepads?.() || [])].some(Boolean);
+    if (!touchOnly || this.save.phoneOk || pad()) return;
+    const q = (s) => el.querySelector(s);
+    q('.say').textContent = t('phone.say');
+    q('.why').textContent = t('phone.why');
+    q('.wait').textContent = t('phone.wait');
+    q('.share').textContent = t('phone.share');
+    q('.anyway').textContent = t('phone.anyway');
+    q('.pad').textContent = t('phone.pad');
+    for (const type of ['pointerdown', 'pointerup', 'keydown']) el.addEventListener(type, (e) => e.stopPropagation());
+    const pass = () => {
+      el.hidden = true;
+      this.save.phoneOk = true;
+      this.persist();
+      removeEventListener('gamepadconnected', pass);
+    };
+    q('.anyway').addEventListener('click', pass);
+    addEventListener('gamepadconnected', pass);
+    q('.share').addEventListener('click', async () => {
+      const url = location.origin + location.pathname;
+      try {
+        if (navigator.share) return await navigator.share({ title: 'VIXE', url });
+        await navigator.clipboard.writeText(url);
+        q('.share').textContent = t('phone.copied');
+      } catch { /* share sheet closed, or no clipboard: nothing to say */ }
+    });
+    el.hidden = false;
   }
 
   // The back button (Android's, a swipe from the edge, the browser's) works like

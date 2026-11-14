@@ -1,13 +1,19 @@
 {
   "lang.name": "português",
   "rotate": "gire o aparelho. o jogo é deitado.",
+  "phone.say": "VIXE foi feito para teclado.",
+  "phone.why": "no celular ele fica pequeno e os controles atrapalham.",
+  "phone.wait": "abre no computador. eu espero.",
+  "phone.share": "mandar o link",
+  "phone.copied": "link copiado.",
+  "phone.anyway": "jogar mesmo assim",
+  "phone.pad": "tem um controle? conecta que eu deixo.",
 
   "title.tagline": "um jogo que não joga limpo",
   "title.halloween": "hoje as armadilhas vieram fantasiadas",
   "title.friday13": "sexta-feira 13. boa sorte com isso.",
   "title.hintKeys": "setas: mover   espaço: pular   esc: pausa",
   "title.hintTouch": "toque para escolher",
-  "title.install": "tela cheia: compartilhar > adicionar à tela de início",
 
   "menu.play": "jogar",
   "menu.continue": "continuar",

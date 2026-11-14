@@ -148,6 +148,38 @@ body.ready #boot { display: none; }
 }
 #rotate pre { font: 16px/1.15 var(--mono); color: var(--fg); text-align: left; }
 
+/* Touch-only devices get this before anything else (main.js): the game is made
+   for a keyboard. Upright or not, it reads, so it sits above the rotate card. */
+#phone {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  padding: 24px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-area-inset-left));
+  background: var(--bg);
+  color: var(--dim);
+  text-align: center;
+}
+#phone[hidden] { display: none; }
+#phone pre { font: 14px/1.15 var(--mono); color: var(--fg); margin-bottom: 8px; }
+#phone p { text-wrap: balance; }
+#phone .say { color: var(--fg); font-size: 16px; }
+#phone .go { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 14px; }
+#phone button {
+  font: 15px var(--mono);
+  padding: 12px 18px;
+  border: 1px solid var(--dim);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--fg);
+}
+#phone button.share { border-color: var(--fg); }
+#phone button:active { background: rgba(233, 220, 195, 0.12); }
+#phone .pad { font-size: 12px; margin-top: 6px; }
+
 /* Phones only: upright tablets are wide enough to play. Same query in main.js. */
 @media (orientation: portrait) and (pointer: coarse) and (max-width: 599px) {
   #rotate { display: grid; }

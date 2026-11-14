@@ -1,13 +1,19 @@
 {
   "lang.name": "english",
   "rotate": "rotate your device. this game lies down.",
+  "phone.say": "VIXE was made for a keyboard.",
+  "phone.why": "on a phone it gets tiny and the controls get in the way.",
+  "phone.wait": "open it on a computer. I'll wait.",
+  "phone.share": "send the link",
+  "phone.copied": "link copied.",
+  "phone.anyway": "play anyway",
+  "phone.pad": "got a controller? plug it in and I'll let you in.",
 
   "title.tagline": "a game that doesn't play fair",
   "title.halloween": "the traps came in costume today",
   "title.friday13": "friday the 13th. good luck with that.",
   "title.hintKeys": "arrows: move   space: jump   esc: pause",
   "title.hintTouch": "tap to choose",
-  "title.install": "full screen: share > add to home screen",
 
   "menu.play": "play",
   "menu.continue": "continue",

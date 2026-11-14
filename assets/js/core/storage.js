@@ -10,6 +10,7 @@ const DEFAULTS = {
   touchShow: 'touch',    // when the touch controls are drawn: 'touch' (while a thumb is down), 'always' or 'off'
   touchSwap: false,      // jump on the left, move on the right
   vibrate: 'deaths',     // 'deaths', 'all' (jumps and landings too) or 'off'
+  phoneOk: false,        // played on a touch-only device anyway, past the keyboard warning
   levels: {},            // id -> { done, deaths, best }
   seen: {},              // world intro cards already shown
   deaths: 0,
@@ -34,7 +35,7 @@ export function writeSave(save) {
 }
 
 // Settings survive "erase progress".
-const SETTINGS = ['lang', 'music', 'sfx', 'shake', 'scanlines', 'touchSize', 'touchShow', 'touchSwap', 'vibrate'];
+const SETTINGS = ['lang', 'music', 'sfx', 'shake', 'scanlines', 'touchSize', 'touchShow', 'touchSwap', 'vibrate', 'phoneOk'];
 
 export function resetProgress(save) {
   const keep = Object.fromEntries(SETTINGS.map((k) => [k, save[k]]));

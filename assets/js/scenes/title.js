@@ -39,18 +39,6 @@ export class Title {
     this.level = new Level({ map: LOGO });
     this.time = 0;
     this.app.audio.music(THEME);
-    // iPhones can't go full screen from the browser; installing the game is the way.
-    // Said on the first visit only (for that whole session).
-    const app = this.app;
-    if (app.installHint === undefined) {
-      const installed = navigator.standalone || matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches;
-      const fullscreen = document.fullscreenEnabled || document.webkitFullscreenEnabled;
-      app.installHint = app.input.touchDevice && !installed && !fullscreen && !app.save.flags.installHint;
-      if (app.installHint) {
-        app.save.flags.installHint = true;
-        app.persist();
-      }
-    }
   }
 
   update(dt) {
@@ -77,8 +65,7 @@ export class Title {
     screen.center(tagline, 9 - up, pal.dim);
     this.menu.draw(screen, 11 - up, pal, this.time);
 
-    if (this.app.installHint) screen.text(t('title.install'), 1, 19, pal.text);
-    else screen.text(t(this.app.input.touchDevice ? 'title.hintTouch' : 'title.hintKeys'), 1, 19, pal.dim);
+    screen.text(t(this.app.input.touchDevice ? 'title.hintTouch' : 'title.hintKeys'), 1, 19, pal.dim);
     screen.text(`v${VERSION}`, COLS - VERSION.length - 2, 19, pal.dots);
   }
 }
