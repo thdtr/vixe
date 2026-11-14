@@ -22,7 +22,7 @@ const PHOSPHOR = '#8cffa0';
 // A 60 Hz frame is exactly two steps, so the accumulator sits right on a step boundary
 // and timing jitter would turn 2-2-2 into 1-3-1-3. Letting a step run this early keeps it even.
 const SLACK = 0.002;
-const TOUCH_SIZES = [0.85, 1, 1.25];   // small, medium, large buttons (and lanes)
+const TOUCH_SIZES = [0.85, 1, 1.25];   // small, medium, large touch controls
 
 // '#rrggbb' or 'rgb(r,g,b)' (a tinted color) -> 'r, g, b', for rgba() in CSS.
 const triplet = (c) => (c[0] === '#' ? [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16)).join(', ') : c.slice(4, -1));
@@ -83,7 +83,6 @@ class App {
       this.clock += dt;
       acc += dt;
       this.input.poll();
-      this.fitScreen();
       while (acc >= STEP - SLACK) {
         this.update(STEP);
         this.input.endStep();
@@ -201,19 +200,11 @@ class App {
     document.body.classList.toggle('scanlines', s.scanlines);
     this.screen.setTint(s.flags.phosphor ? PHOSPHOR : null);
     document.querySelector('#rotate p').textContent = t('rotate');
-    document.querySelector('#touch .jump').textContent = t('touch.jump');
-    const touch = document.getElementById('touch').style;
-    touch.setProperty('--size', TOUCH_SIZES[s.touchSize]);
-    touch.setProperty('--alpha', s.touchAlpha / 5);
-    document.body.classList.toggle('swap', s.touchSwap);
-    this.input.swap = s.touchSwap;
-    this.fitScreen();
-  }
-
-  // Thumb lanes on touch screens, unless the player asked for the full picture.
-  // Checked every frame too: a touch can reveal a touch screen late.
-  fitScreen() {
-    this.screen.setThumbs(this.input.touchDevice && this.save.touchLayout !== 'full', TOUCH_SIZES[this.save.touchSize]);
+    const touch = document.getElementById('touch');
+    touch.style.setProperty('--size', TOUCH_SIZES[s.touchSize]);
+    touch.dataset.show = s.touchShow;
+    Object.assign(this.input, { size: TOUCH_SIZES[s.touchSize], swap: s.touchSwap, show: s.touchShow });
+    this.input.rest();
   }
 
   // The back button (Android's, a swipe from the edge, the browser's) works like

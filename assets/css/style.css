@@ -51,17 +51,16 @@ body.scanlines #stage::after {
 }
 body.ready #boot { display: none; }
 
-/* Touch controls. The zones are generous and invisible: the left half of the
-   screen steers, the right half jumps. With body.lanes the picture leaves a
-   lane on each side (--lane, set by screen.js) and the pads are drawn there,
-   off the level. Without lanes nothing is drawn over the level but the pause.
-   --ui and --glow are "r, g, b" from the current world's palette; --size and
-   --alpha come from the options (main.js). body.swap trades the two lanes. */
+/* Touch controls, over the picture. One half of the screen is a floating
+   stick, the other jumps (input.js). Shown only on touch (data-show="touch"),
+   the stick appears under the thumb and the jump ring pulses where it landed,
+   then both fade away; "always" leaves faint ghosts where they wait; "off"
+   draws nothing but the pause. --ui and --glow are "r, g, b" from the current
+   world's palette; --size comes from the options (main.js). */
 #touch {
   --ui: 233, 220, 195;
   --glow: 242, 193, 78;
   --size: 1;
-  --alpha: 1;
   position: fixed;
   inset: 0;
   z-index: 2;
@@ -70,64 +69,51 @@ body.ready #boot { display: none; }
 /* In the touch options the controls are only on show: taps go to the menu. */
 #touch.preview, #touch.preview .pause { pointer-events: none; }
 
-.lane {
+.stick, .tap {
+  --d: calc(96px * var(--size));
   position: absolute;
-  top: 0;
-  bottom: 0;
-  width: var(--lane, 180px);
+  width: var(--d);
+  height: var(--d);
+  margin: calc(var(--d) / -2) 0 0 calc(var(--d) / -2);
+  border-radius: 50%;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s;
 }
-.lane.left, body.swap .lane.right { left: env(safe-area-inset-left); right: auto; }
-.lane.right, body.swap .lane.left { right: env(safe-area-inset-right); left: auto; }
-body.lanes .lane:has(.pad.on) {
-  background: linear-gradient(to top, rgba(var(--glow), 0.1), transparent calc(100px + env(safe-area-inset-bottom)));
+.stick {
+  border: 2px solid rgba(var(--ui), 0.5);
+  background: rgba(var(--ui), 0.06);
 }
-
-/* Shapes, not glyphs: '<', '>' and '^' already mean things in the level. */
-.pad {
+.stick i {
   position: absolute;
-  bottom: calc(14px + env(safe-area-inset-bottom));
-  height: calc(68px * var(--size));
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 6px;
-  border: 1px solid rgba(var(--ui), calc(0.22 * var(--alpha)));
-  border-radius: 16px;
-  background: rgba(var(--ui), calc(0.06 * var(--alpha)));
-  color: rgba(var(--ui), calc(0.55 * var(--alpha)));
-  font: 12px var(--mono);
-  letter-spacing: 1px;
-  transition: background-color 60ms, box-shadow 60ms;
+  inset: 26%;
+  border-radius: 50%;
+  background: rgba(var(--glow), 0.45);
 }
-/* The outer pad keeps clear of the screen edge, where a swipe means "go back". */
-.pad.left { left: max(4px, calc(12px - env(safe-area-inset-left))); right: calc(50% + 2px); }
-.pad.right { left: calc(50% + 2px); right: 4px; }
-body.swap .pad.left { left: 4px; }
-body.swap .pad.right { right: max(4px, calc(12px - env(safe-area-inset-right))); }
-.pad.jump { left: 50%; width: min(calc(100% - 12px), calc(96px * var(--size))); transform: translateX(-50%); }
-.pad::before { content: ''; width: 14px; height: 16px; background: currentColor; }
-.pad.left::before { clip-path: polygon(100% 0, 0 50%, 100% 100%); }
-.pad.right::before { clip-path: polygon(0 0, 100% 50%, 0 100%); }
-.pad.jump::before { width: 18px; height: 12px; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
-/* The glow reaches past the thumb, so the press shows even under it, at any --alpha. */
-.pad.on {
-  color: rgb(var(--glow));
-  background: rgba(var(--glow), 0.22);
-  border-color: rgba(var(--glow), 0.75);
-  box-shadow: 0 0 18px 6px rgba(var(--glow), 0.35);
+.tap {
+  --d: calc(76px * var(--size));
+  border: 2px solid rgba(var(--glow), 0.8);
+  background: rgba(var(--glow), 0.12);
 }
-body:not(.lanes) .pad { visibility: hidden; }
+.tap.on { animation: tap 0.18s ease-out; }
+@keyframes tap { from { transform: scale(0.55); } }
+.stick.on, .tap.on { opacity: 0.4; transition: none; }
 
-/* Always top right: centered over the right lane, or in the corner without lanes. */
+/* Faint ghosts at rest: always shown, or while the touch options are open. */
+#touch[data-show="always"] :is(.stick, .tap),
+#touch.preview:not([data-show="off"]) :is(.stick, .tap) { opacity: 0.22; }
+#touch[data-show="always"] :is(.stick, .tap).on { opacity: 0.45; }
+#touch[data-show="off"] :is(.stick, .tap) { visibility: hidden; }
+
+/* Top right corner, faint until pressed. */
 .pause {
   position: absolute;
   top: calc(6px + env(safe-area-inset-top));
-  right: calc(env(safe-area-inset-right) + (var(--lane) - 48px) / 2);
+  right: calc(env(safe-area-inset-right) + 2px);
   width: 48px;
   height: 44px;
   border: 0;
-  color: rgba(var(--ui), 0.6);
+  color: rgba(var(--ui), 0.4);
   pointer-events: auto;
   /* Held, a bar fills underneath; when it is full the level restarts (input.js HOLD). */
   background: linear-gradient(rgb(var(--glow)), rgb(var(--glow))) no-repeat 50% 100% / 0 3px;
@@ -148,7 +134,6 @@ body:not(.lanes) .pad { visibility: hidden; }
 }
 .pause::before { left: 16px; }
 .pause::after { right: 16px; }
-body:not(.lanes) .pause { right: calc(env(safe-area-inset-right) + 2px); }
 
 #rotate {
   display: none;

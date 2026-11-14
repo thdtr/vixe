@@ -11,9 +11,6 @@ import { makeFx, fxDefs } from '../game/fx.js';
 import { Mechanisms } from '../game/mechanisms.js';
 import { Actors } from '../game/actors.js';
 
-// Deaths on one level (all tries, saved) before the pause menu offers to skip it.
-const SKIP_AFTER = 25;
-
 export class Play {
   constructor(app) {
     this.app = app;
@@ -21,7 +18,6 @@ export class Play {
     this.pauseMenu = new Menu([
       { label: () => t('menu.resume'), run: () => this.setPaused(false) },
       { label: () => t('menu.restart'), run: () => { this.setPaused(false); this.restart(); } },
-      { label: () => t('menu.skip'), run: () => this.skip(), hidden: () => !this.canSkip },
       { label: () => t('menu.levels'), run: () => { app.run = null; app.go('select', { world: this.world, index: this.index }); } },
       { label: () => t('menu.options'), run: () => app.go('options', { back: this }) },
       { label: () => t('menu.title'), run: () => { app.run = null; app.go('title'); } },
@@ -41,8 +37,8 @@ export class Play {
     else if (app.run?.world !== world.id || app.run.at !== index) app.run = null;
     app.audio.music(world.music);
     this.reset();
-    // Without thumb lanes the touch zones are invisible: say once where they are.
-    if (app.input.touchDevice && !app.screen.lanes && !app.touchHinted) {
+    // The touch controls are invisible until used: say once where they are.
+    if (app.input.touchDevice && !app.touchHinted) {
       app.touchHinted = true;
       this.say(t(app.save.touchSwap ? 'touch.hintSwap' : 'touch.hint'), 4);
     }
@@ -91,11 +87,6 @@ export class Play {
   }
 
   get inputMode() { return this.paused ? 'menu' : 'play'; }
-
-  get canSkip() {
-    const rec = this.app.save.levels[this.def.id];
-    return !!rec && !rec.done && (rec.deaths || 0) >= SKIP_AFTER;
-  }
 
   setPaused(on) {
     this.paused = on;
@@ -156,7 +147,6 @@ export class Play {
     this.buzz(35, true);
     const milestone = { 100: 'egg.d100', 404: 'egg.d404', 666: 'egg.d666', 1000: 'egg.d1000' }[save.deaths];
     if (milestone) this.say(t(milestone), 4);
-    else if (rec.deaths === SKIP_AFTER && !rec.done) this.say(t('skip.hint'), 4);
   }
 
   get flawless() {
@@ -191,13 +181,6 @@ export class Play {
     this.advance();
   }
 
-  // Gives up on this level: the way on opens, the crown waits until it is beaten.
-  skip() {
-    this.app.save.levels[this.def.id].skipped = true;
-    this.app.run = null;
-    this.setPaused(false);
-    this.advance();
-  }
 
   advance() {
     const app = this.app;
@@ -446,7 +429,7 @@ export class Play {
     screen.text(code, 1, 0, pal.accent);
     screen.text(loc(this.def.name).toUpperCase(), code.length + 2, 0, pal.hud);
     const deaths = `${t('hud.deaths')} ${this.attempt}`;
-    const right = this.app.input.touchDevice && !this.app.screen.lanes ? 6 : 1;   // room for the pause button
+    const right = this.app.input.touchDevice ? 6 : 1;   // room for the pause button
     screen.text(deaths, COLS - deaths.length - right, 0, this.attempt ? pal.hazard : pal.dim);
     // Once the game is over, a star rides along while the whole world is still deathless.
     if (this.flawless && this.app.progress.finished()) screen.glyph('*', (COLS - deaths.length - right - 2) * CW, 0, pal.exit);

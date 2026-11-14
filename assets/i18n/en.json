@@ -17,7 +17,6 @@
   "menu.back": "back",
   "menu.resume": "resume",
   "menu.restart": "restart",
-  "menu.skip": "skip level (no crown)",
   "menu.title": "main menu",
 
   "opt.language": "language",
@@ -27,15 +26,15 @@
   "opt.scanlines": "scanlines",
   "opt.on": "on",
   "opt.off": "off",
-  "opt.touch": "game size",
-  "opt.touchLanes": "fit around thumbs",
-  "opt.touchFull": "full screen",
   "opt.touchControls": "touch controls",
-  "opt.touchSize": "buttons",
+  "opt.touchSize": "size",
+  "opt.touchShow": "show",
+  "opt.show.touch": "on touch",
+  "opt.show.always": "always",
+  "opt.show.off": "never",
   "opt.small": "small",
   "opt.medium": "medium",
   "opt.large": "large",
-  "opt.touchAlpha": "visibility",
   "opt.touchSwap": "jump with",
   "opt.rightHand": "right hand",
   "opt.leftHand": "left hand",
@@ -50,9 +49,8 @@
   "hud.paused": "- paused -",
   "hud.holdRestart": "hold pause to restart",
 
-  "touch.jump": "jump",
-  "touch.hint": "left: move   right: jump",
-  "touch.hintSwap": "left: jump   right: move",
+  "touch.hint": "left: drag to move   right: tap to jump",
+  "touch.hintSwap": "left: tap to jump   right: drag to move",
 
   "select.title": "WHERE WOULD YOU LIKE TO SUFFER?",
   "select.lockedWorld": "? ? ?",
@@ -64,8 +62,6 @@
   "select.hintKeys": "enter: play   esc: back",
 
   "intro.world": "WORLD {n}",
-
-  "skip.hint": "stuck? there's a way out in the pause menu. I won't tell.",
 
   "secret.found": "$ {n}/{total}   you weren't supposed to find that",
   "flawless.done": "a whole world without dying. that wasn't in the plan.",

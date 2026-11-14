@@ -40,16 +40,12 @@ export class Options {
       // Shown with the touch controls on screen, so every change can be seen.
       touch: new Menu([
         {
-          label: () => `${t('opt.touch')}  < ${t(s.touchLayout === 'full' ? 'opt.touchFull' : 'opt.touchLanes')} >`,
-          adjust: () => { s.touchLayout = s.touchLayout === 'full' ? 'lanes' : 'full'; this.changed(); },
+          label: () => `${t('opt.touchShow')}  < ${t(`opt.show.${s.touchShow}`)} >`,
+          adjust: (d) => { s.touchShow = cycle(['touch', 'always', 'off'], s.touchShow, d); this.changed(); },
         },
         {
           label: () => `${t('opt.touchSize')}  < ${t(['opt.small', 'opt.medium', 'opt.large'][s.touchSize])} >`,
           adjust: (d) => { s.touchSize = cycle([0, 1, 2], s.touchSize, d); this.changed(); },
-        },
-        {
-          label: () => `${t('opt.touchAlpha')}  < ${bar(s.touchAlpha)} >`,
-          adjust: (d) => { s.touchAlpha = clamp(s.touchAlpha + d); this.changed(); },
         },
         {
           label: () => `${t('opt.touchSwap')}  < ${t(s.touchSwap ? 'opt.leftHand' : 'opt.rightHand')} >`,

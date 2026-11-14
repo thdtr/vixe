@@ -1,12 +1,5 @@
 import { CW, CH, COLS, VIEW_W, VIEW_H, FONT } from '../config.js';
 
-// Thumb lanes: on touch screens the picture shrinks a little so each thumb
-// gets a lane beside it, and the controls never sit on top of the level.
-const LANE = 104;          // ideal lane width, CSS px
-const LANE_MIN = 88;       // narrower than this and the lanes are not worth it
-const MIN_SCALE = 0.8;     // never shrink text below ~13px to make room
-const ROOM_BELOW = 96;     // a band this tall under the picture already fits the pads
-
 // A 640x360 virtual grid of glyphs, scaled to fit the window at native
 // resolution so text stays sharp at any size.
 export class Screen {
@@ -19,19 +12,8 @@ export class Screen {
     this.scale = 1;
     this.tint = null;
     this.tintCache = new Map();
-    this.thumbs = false;     // wants thumb lanes
-    this.laneSize = 1;
-    this.lanes = false;      // got them (the screen may be too narrow)
     this.resize = this.resize.bind(this);
     addEventListener('resize', this.resize);
-    this.resize();
-  }
-
-  // size: scales the ideal lane, for bigger or smaller buttons.
-  setThumbs(on, size = 1) {
-    if (on === this.thumbs && size === this.laneSize) return;
-    this.thumbs = on;
-    this.laneSize = size;
     this.resize();
   }
 
@@ -40,23 +22,9 @@ export class Screen {
     const vv = visualViewport, pad = getComputedStyle(document.body);
     const w = (vv ? vv.width : innerWidth) - parseFloat(pad.paddingLeft) - parseFloat(pad.paddingRight);
     const h = (vv ? vv.height : innerHeight) - parseFloat(pad.paddingTop) - parseFloat(pad.paddingBottom);
-    let k = Math.min(w / VIEW_W, h / VIEW_H), lane = 0;
-    if (this.thumbs) {
-      const ideal = LANE * this.laneSize;
-      const laned = Math.min(k, Math.max(MIN_SCALE, (w - 2 * ideal) / VIEW_W));
-      if ((h - VIEW_H * k) / 2 >= ROOM_BELOW * this.laneSize) {
-        lane = Math.floor(ideal);   // a tall screen: the pads sit under the picture, nothing shrinks
-      } else if ((w - VIEW_W * laned) / 2 >= LANE_MIN) {
-        k = laned;
-        lane = Math.floor((w - Math.floor(VIEW_W * k)) / 2);
-      }
-    }
-    this.lanes = lane > 0;
+    // Touch controls float over the picture, so it takes all the room there is.
+    const k = Math.min(w / VIEW_W, h / VIEW_H);
     const cssW = Math.floor(VIEW_W * k), cssH = Math.floor(VIEW_H * k);
-    // The touch controls (style.css) read the lane width from here.
-    document.body.classList.toggle('lanes', this.lanes);
-    if (this.lanes) document.documentElement.style.setProperty('--lane', `${lane}px`);
-    else document.documentElement.style.removeProperty('--lane');
     // Past 2x the glyphs look the same, and every frame costs more battery.
     const dpr = Math.min(devicePixelRatio || 1, 2);
     for (const c of [this.canvas, this.layer]) {
