@@ -2,7 +2,7 @@
 
 [English](README.md) · **Português**
 
-Um jogo de plataforma de ~420 KB feito só de texto. Inspirado em *Level Devil*.
+Um jogo de plataforma de ~500 KB feito só de texto. Inspirado em *Level Devil*.
 
 **Jogue em <https://vixe.online>**
 
@@ -13,7 +13,8 @@ Um jogo de plataforma de ~420 KB feito só de texto. Inspirado em *Level Devil*.
 São 48 fases em 6 mundos, e talvez mais alguma coisa escondida. Dá para jogar no teclado,
 no controle ou no toque, e no celular ele pode ser instalado como app. O jogo não usa
 nenhuma imagem, fonte ou biblioteca. Tudo é desenhado com caracteres e todo som é
-sintetizado na hora.
+sintetizado na hora, inclusive uma trilha sonora que vai se completando conforme você
+avança em cada mundo.
 
 ## Como rodar
 

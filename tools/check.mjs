@@ -1,6 +1,7 @@
 // Checks every level of every pack in the manifest: it must load, have a start and a way out,
 // name only traps, triggers and mechanisms that exist, and survive a few seconds of play
-// without an error. Fast enough for CI; tools/solve.mjs is the deeper check.
+// without an error. Every track is read too: its notes must be notes, its bars whole, its
+// drums in the kit. Fast enough for CI; tools/solve.mjs is the deeper check.
 //
 //   node tools/check.mjs
 
@@ -9,12 +10,45 @@ import { actions, triggers } from '../assets/js/game/events.js';
 import { mechanisms } from '../assets/js/game/mechanisms.js';
 import { fxTypes } from '../assets/js/game/fx.js';
 import { tileOf } from '../assets/js/game/tiles.js';
+import { compile, midi } from '../assets/js/core/music.js';
+import { kits, kitLetters, sounds } from '../assets/js/core/audio.js';
+import { TITLE, ENDING } from '../assets/js/core/themes.js';
 
 const problems = [];
 const worlds = await loadWorlds();
 let count = 0;
 
+// A track's mistakes, in words: what the reader in music.js trips on, plus the things only
+// the synth would notice (a drum the kit doesn't have, a setting it has never heard of).
+const TRACK = new Set(['bpm', 'div', 'bar', 'swing', 'seq', 'loop', 'kit', 'win', 'space', 'echo', 'voices']);
+const VOICE = new Set(['wave', 'width', 'v', 'notes', 'drums', 'kit', 'cut', 'res', 'env', 'sweep', 'detune', 'vib', 'glide', 'tr', 'gate', 'pan', 'echo', 'space', 'layer']);
+const WAVES = new Set(['sine', 'triangle', 'square', 'sawtooth', 'pulse']);
+function checkTrack(track, say) {
+  if (!(track?.bpm > 0) || !Array.isArray(track.voices)) return say('needs a bpm and voices');
+  for (const k of Object.keys(track)) if (!TRACK.has(k)) say(`unknown setting "${k}"`);
+  const song = compile(track);
+  for (const p of song.problems) say(p);
+  for (const tok of String(track.win ?? '').split(/\s+/).filter(Boolean)) if (midi(tok) === null) say(`win: "${tok}" is not a note`);
+  if (typeof track.kit === 'string' && !kits.has(track.kit)) say(`unknown kit "${track.kit}"`);
+  song.voices.forEach((v, i) => {
+    const who = `voice ${i + 1}`, def = v.def;
+    for (const k of Object.keys(def)) if (!VOICE.has(k)) say(`${who}: unknown setting "${k}"`);
+    if (!(def.v > 0)) say(`${who} has no volume ("v")`);
+    if (v.drums) {
+      const kit = kitLetters(def.kit ?? track.kit);
+      const hits = new Set([v.free, ...Object.values(v.parts)].flatMap((part) => (part ?? []).flatMap((ev) => [...(ev?.hits ?? '')])));
+      for (const ch of hits) if (!kit.has(ch)) say(`${who}: the kit has no "${ch}"`);
+    } else if (def.wave !== undefined && !WAVES.has(def.wave) && !(Array.isArray(def.wave) && def.wave.every((n) => typeof n === 'number'))) {
+      say(`${who}: unknown wave ${JSON.stringify(def.wave)}`);
+    }
+    if (def.env && def.env.length !== 4) say(`${who}: env takes [attack, decay, sustain, release]`);
+  });
+}
+checkTrack(TITLE, (msg) => problems.push(`title theme: ${msg}`));
+checkTrack(ENDING, (msg) => problems.push(`ending theme: ${msg}`));
+
 for (const w of worlds) {
+  if (w.music) checkTrack(w.music, (msg) => problems.push(`${w.id} music: ${msg}`));
   for (const [ix, lv] of w.levels.entries()) {
     const id = `${w.id}.${ix + 1}`, say = (msg) => problems.push(`${id} ${lv.name?.en ?? ''}: ${msg}`);
     count++;
@@ -29,6 +63,7 @@ for (const w of worlds) {
       for (const s of e.do ?? []) {
         const name = Object.keys(s)[0];
         if (!actions[name]) say(`unknown action "${name}"`);
+        if (name === 'sfx' && !sounds.has(s.sfx)) say(`unknown sound "${s.sfx}"`);
         if (['show', 'hide', 'wobble', 'fall', 'move', 'orbit', 'stop', 'swap', 'chase', 'collapse', 'typewrite'].includes(name) && !groups.has(s[name])) {
           say(`"${name}" names group "${s[name]}", which isn't on the map`);
         }
@@ -81,4 +116,4 @@ if (problems.length) {
   console.error(problems.join('\n'));
   process.exit(1);
 }
-console.log(`ok: ${count} levels in ${worlds.length} worlds`);
+console.log(`ok: ${count} levels and ${worlds.filter((w) => w.music).length + 2} tracks in ${worlds.length} worlds`);

@@ -209,6 +209,21 @@ export class Input {
     }
   }
 
+  // Something here can shake in the hand: a phone, or a controller with motors.
+  get buzzes() {
+    if (this.touchDevice && 'vibrate' in navigator) return true;
+    return [...(navigator.getGamepads?.() ?? [])].some((p) => p?.vibrationActuator);
+  }
+
+  // A controller's motors, where it has them: a tap for a jump, a jolt for a death.
+  rumble(ms, strong = false) {
+    for (const p of navigator.getGamepads?.() ?? []) {
+      p?.vibrationActuator?.playEffect?.('dual-rumble', {
+        duration: Math.max(60, ms * 4), strongMagnitude: strong ? 0.9 : 0.15, weakMagnitude: strong ? 0.7 : 0.3,
+      })?.catch?.(() => {});
+    }
+  }
+
   held(a) {
     if (this.keys.has(a) || this.pad.has(a)) return true;
     for (const t of this.touches.values()) {

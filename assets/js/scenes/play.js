@@ -4,12 +4,13 @@ import { Player } from '../game/player.js';
 import { Events } from '../game/events.js';
 import { drawStatic, drawLive, drawBodies, drawFields, drawTide, drawPlayer, drawTrail, pose, Particles } from '../game/render.js';
 import { SLEEP } from '../game/figures.js';
-import { veil } from './menu.js';
 import { t, loc } from '../core/i18n.js';
-import { Menu } from './menu.js';
+import { Menu, veil, stopwatch } from './menu.js';
 import { makeFx, fxDefs } from '../game/fx.js';
 import { Mechanisms } from '../game/mechanisms.js';
 import { Actors } from '../game/actors.js';
+
+const GRAVES = 40;       // deaths on this level that stay marked on the map
 
 export class Play {
   constructor(app) {
@@ -30,12 +31,13 @@ export class Play {
     this.def = world.levels[index];
     this.attempt = 0;
     this.paused = false;
+    this.graves = [];        // where this visit's deaths happened: { x, y } in map pixels
     const app = this.app;
     // A world played start to finish without a single death or restart: { world, at }
     // is the level the run expects next. Coming in anywhere else drops it.
     if (index === 0) app.run = { world: world.id, at: 0 };
     else if (app.run?.world !== world.id || app.run.at !== index) app.run = null;
-    app.audio.music(world.music);
+    this.tune();
     this.reset();
     // The touch controls are invisible until used: say once where they are.
     if (app.input.touchDevice && !app.touchHinted) {
@@ -44,9 +46,17 @@ export class Play {
     }
   }
 
+  // The world's music, as full as this level asks for: it starts out bare and gains a
+  // layer every few levels, so the last door of a world is reached with everything playing.
+  tune() {
+    const audio = this.app.audio, last = this.world.levels.length - 1;
+    audio.intensity(last > 0 ? Math.min(3, Math.floor(this.index / last * 3 + 0.34)) : 0);
+    audio.music(this.world.music);
+  }
+
   // Back from the options opened in the pause menu: still paused.
   resume() {
-    this.app.audio.music(this.world.music);
+    this.tune();
     this.app.audio.muffle(this.paused);
   }
 
@@ -79,6 +89,8 @@ export class Play {
     this.freeze = 0;
     this.msg = null;
     this.sign = null;
+    this.record = false;         // this win beat the level's best time
+    this.wonAt = 0;
     this.flags = {};
     this.collected = false;
     this.particles.list.length = 0;
@@ -97,11 +109,15 @@ export class Play {
   // ---- API used by traps (see events.js) ----
 
   // x (map pixels) puts the sound a little to the left or right, where it happened.
-  sfx(name, x) { this.app.audio.play(name, Number.isFinite(x) ? (x / MAP_W * 2 - 1) * 0.3 : 0); }
+  // vol makes it louder or quieter than it is written.
+  sfx(name, x, vol = 1) { this.app.audio.play(name, Number.isFinite(x) ? (x / MAP_W * 2 - 1) * 0.3 : 0, vol); }
   // Deaths buzz by default; jumps and landings too if the player asked for it.
+  // A phone buzzes, a controller rumbles.
   buzz(ms, death = false) {
     const v = this.app.save.vibrate;
-    if (v === 'all' || (v === 'deaths' && death)) navigator.vibrate?.(ms);
+    if (v !== 'all' && !(v === 'deaths' && death)) return;
+    navigator.vibrate?.(ms);
+    this.app.input.rumble?.(ms, death);
   }
   shake(v) { if (this.app.save.shake) this.shakeT = Math.max(this.shakeT, v); }
   say(text, time = 2.5) { this.msg = { text: loc(text), t: time, age: 0 }; }
@@ -135,6 +151,9 @@ export class Play {
     this.stateT = 0.8;
     this.freeze = 0.07;
     this.attempt++;
+    // A fall off the map is marked on its edge, where the floor wasn't.
+    this.graves.push({ x: p.cx, y: Math.max(CH / 2, Math.min(MAP_H - CH / 2, p.cy)) });
+    if (this.graves.length > GRAVES) this.graves.shift();
     save.deaths++;
     const rec = save.levels[this.def.id] ??= {};
     rec.deaths = (rec.deaths || 0) + 1;
@@ -163,11 +182,14 @@ export class Play {
     if (this.state !== 'play') return;
     this.state = 'win';
     this.stateT = 0.55;
+    this.wonAt = this.time;
+    // A level beaten before, and faster this time.
+    this.record = this.time < (this.app.save.levels[this.def.id]?.time ?? 0);
     if (this.perfectWorld) {   // hold the moment
       this.stateT = 2.4;
       this.say(t('flawless.done'), 2.4);
     }
-    this.sfx('win', this.player.cx);
+    this.sfx(this.record ? 'record' : 'win', this.player.cx);
     this.particles.burst(this.player.cx, this.player.cy, '+\'.', 14, 120, this.world.palette.exit, { gravity: -80, life: 0.6 });
   }
 
@@ -176,6 +198,7 @@ export class Play {
     const rec = save.levels[this.def.id] ??= {};
     rec.done = true;
     rec.best = Math.min(rec.best ?? Infinity, this.attempt);
+    rec.time = Math.min(rec.time ?? Infinity, Math.floor(this.wonAt * 100) / 100);
     if (this.perfectWorld) save.flawless.push(this.world.id);
     if (this.flawless) this.app.run.at++;
     this.advance();
@@ -241,6 +264,7 @@ export class Play {
     if (this.reversed) dir = -dir;
     const jump = input.held('jump') || input.held('up');
     this.applyFields();
+    this.app.audio.mod('water', p.swim);
     for (const f of this.fx) f.update?.(dt, this);
     this.mechs.update(dt, this);
     this.actors.update(dt, this);
@@ -260,9 +284,13 @@ export class Play {
       this.particles.burst(p.cx, feet, '.', 3, 40, pal.dots, { gravity: 0, life: 0.3 });
     }
     if (p.landed) {
-      this.sfx('land', p.cx);
+      // A long fall lands harder than a hop: louder, its dust thrown further, and at
+      // full speed the room feels it.
+      const hard = Math.min(1, p.impact / PHYS.maxFall);
+      this.sfx('land', p.cx, 0.5 + hard * 0.9);
       this.buzz(8);
-      this.particles.burst(p.cx, feet, '.,', 4, 50, pal.wall, { angle: -Math.PI / 2 * p.gdir, spread: 2.4, life: 0.3 });
+      this.particles.burst(p.cx, feet, '.,', 4, 40 + hard * 50, pal.wall, { angle: -Math.PI / 2 * p.gdir, spread: 2.4, life: 0.3 });
+      if (hard > 0.9) this.shake(0.05);
     }
     // Afterimages when moving fast, a puff of dust from running feet.
     for (const g of this.trail) g.age += dt;
@@ -331,6 +359,7 @@ export class Play {
     screen.cached(`${this.def.id}:${this.level.key}`, (l) => drawStatic(screen, l, this.level, pal), ox, oy);
     const found = this.app.save.secrets.includes(this.def.id);
     drawLive(screen, this.level, pal, this.time, found);
+    this.drawGraves(screen, pal);
     this.mechs.draw(screen, pal, this);
     drawBodies(screen, this.level, pal, this.time, found);
     if (this.level.fields.size) drawFields(screen, this.level, pal, this.time);
@@ -345,17 +374,30 @@ export class Play {
     for (const f of this.fx) f.front?.(screen, this);
 
     if (this.dark) this.drawDark(screen, pal);
-    if (this.glitch > 0) this.drawGlitch(screen, pal);
+    // Tearing and white flashes are for show; they can be switched off (options).
+    const flashes = this.app.save.flashes !== false;
+    if (this.glitch > 0 && flashes) this.drawGlitch(screen, pal);
     ctx.setTransform(screen.scale, 0, 0, screen.scale, 0, 0);
     this.drawBanner(screen, pal);
     this.drawHud(screen, pal);
-    if (this.flash > 0) screen.fill(0, 0, VIEW_W, VIEW_H, pal.player, Math.min(0.8, this.flash * 4));
+    if (this.flash > 0 && flashes) screen.fill(0, 0, VIEW_W, VIEW_H, pal.player, Math.min(0.8, this.flash * 4));
     if (this.paused) {
       screen.fill(0, 0, VIEW_W, VIEW_H, pal.bg, 0.86);
       screen.center(t('hud.paused'), 4, pal.dim);
       this.pauseMenu.draw(screen, 7, pal, this.app.clock);
       if (this.app.input.touchDevice) screen.center(t('hud.holdRestart'), 18, pal.dim);
     }
+  }
+
+  // Every death on this visit leaves a mark where it happened: the level's traps, mapped
+  // out the hard way. They fade a little as they pile up.
+  drawGraves(screen, pal) {
+    const ctx = screen.ctx, n = this.graves.length;
+    this.graves.forEach((g, i) => {
+      ctx.globalAlpha = 0.28 + 0.4 * (i + 1) / n;
+      screen.glyph('x', g.x - CW / 2, g.y - CH / 2 + MAP_Y, pal.dim);
+    });
+    ctx.globalAlpha = 1;
   }
 
   // A radial gradient over the whole map is costly to paint every frame, so the
@@ -433,6 +475,15 @@ export class Play {
     screen.text(deaths, COLS - deaths.length - right, 0, this.attempt ? pal.hazard : pal.dim);
     // Once the game is over, a star rides along while the whole world is still deathless.
     if (this.flawless && this.app.progress.finished()) screen.glyph('*', (COLS - deaths.length - right - 2) * CW, 0, pal.exit);
+    // The stopwatch (options): this try's time, stopped at the door and lit up on a record,
+    // with the time to beat beside it once the level has one.
+    if (this.app.save.clock) {
+      const won = this.state === 'win', best = this.app.save.levels[this.def.id]?.time;
+      const now = stopwatch(won ? this.wonAt : this.time), tail = best ? ` / ${stopwatch(best)}` : '';
+      const end = COLS - deaths.length - right - 4;
+      screen.text(now, end - tail.length - now.length, 0, won && this.record ? pal.exit : pal.hud);
+      if (tail) screen.text(tail, end - tail.length, 0, pal.dim);
+    }
 
     const line = this.msg ? this.msg.text.slice(0, Math.floor(this.msg.age * 45) + 1) : loc(this.sign);
     if (line) screen.center(line, 19, this.msg ? pal.accent : pal.text);

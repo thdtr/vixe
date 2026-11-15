@@ -12,7 +12,10 @@ export class Intro {
     this.typed = 0;
     this.app.save.seen[at.world.id] = true;
     this.app.persist();
-    this.app.audio.music(null);
+    // The world's music, from behind the card: the level opens the door on it.
+    this.app.audio.intensity(0);
+    this.app.audio.music(at.world.music);
+    this.app.audio.mod('far', true);
   }
 
   update(dt) {

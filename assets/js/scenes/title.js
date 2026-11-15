@@ -3,6 +3,7 @@ import { Level } from '../game/level.js';
 import { drawStatic } from '../game/render.js';
 import { t } from '../core/i18n.js';
 import { Menu, veil } from './menu.js';
+import { TITLE } from '../core/themes.js';
 
 // The logo is drawn like a level map, so it shares the walls' look.
 const LOGO = [
@@ -13,14 +14,6 @@ const LOGO = [
   '               # #        #        # #     #',
   '                #      #######   ##   ##   #######',
 ];
-
-const THEME = {
-  bpm: 66,
-  voices: [
-    { wave: 'triangle', v: 0.3, notes: 'a1 - - - - - . . e1 - - - - - . . f1 - - - - - . . e1 - - - g#1 - . .' },
-    { wave: 'square', v: 0.035, notes: '. . . . a3 . . . . . c4 . . . . . . . . . a3 . . . . . b3 . . . . .' },
-  ],
-};
 
 export class Title {
   constructor(app) {
@@ -38,7 +31,9 @@ export class Title {
   enter() {
     this.level = new Level({ map: LOGO });
     this.time = 0;
-    this.app.audio.music(THEME);
+    // The theme fills out as the game is played through.
+    this.app.audio.intensity(this.app.depth());
+    this.app.audio.music(TITLE);
   }
 
   update(dt) {

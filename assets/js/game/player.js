@@ -23,6 +23,7 @@ export class Player {
     this.buffer = 0;
     this.jumped = false;
     this.landed = false;
+    this.impact = 0;          // how fast the last landing came down, px/s
     this.idle = 0;
     this.squash = 0;
     this.revealed = [];
@@ -77,10 +78,12 @@ export class Player {
     d.y = approach(d.y, (push?.[1] || 0) * CH, P.driftAccel * dt);
 
     this.revealed.length = 0;
+    const fall = Math.abs(this.vy + d.y);
     this.moveX((this.vx + d.x + (this.ground ? this.conveyor : 0)) * dt, level);
     this.ground = this.moveY((this.vy + d.y) * dt, level);
 
     this.landed = !wasGrounded && !!this.ground;
+    if (this.landed) this.impact = fall;
     this.stride = this.ground && Math.abs(this.vx) > 15 ? this.stride + Math.abs(this.vx) * dt : 0;
     if (this.landed) this.squash = 0.3;
     this.squash = approach(this.squash, 0, dt * 2.5);

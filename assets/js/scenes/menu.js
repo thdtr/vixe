@@ -10,6 +10,13 @@ export function veil(screen, top, bottom, width, color, alpha = 0.78) {
   }
 }
 
+// A level's time: "7.42", or "1:07.42" past the minute.
+export function stopwatch(s) {
+  const whole = Math.floor(s * 100) / 100, m = Math.floor(whole / 60);
+  const rest = (whole - m * 60).toFixed(2);
+  return m ? `${m}:${rest.padStart(5, '0')}` : rest;
+}
+
 // A vertical list of options, driven by keys, pad or taps.
 // item: { label: () => string, run?: () => void, adjust?: (dir) => void, hidden?: () => bool }
 export class Menu {

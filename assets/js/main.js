@@ -68,9 +68,11 @@ class App {
       this.audio.suspend(document.hidden);
       if (document.hidden) {
         this.persist();
-        if (this.scene === this.scenes.play && this.scene.state === 'play') this.scene.setPaused(true);
+        this.away();
       }
     });
+    // Another window taking the keyboard is the player looking away, too.
+    addEventListener('blur', () => this.away());
 
     document.body.classList.add('ready');
     // Dev shortcut: ?dev&play=w1.3 jumps straight into a level.
@@ -95,6 +97,12 @@ class App {
     requestAnimationFrame(frame);
   }
 
+  // The player looked away: a level waits for them.
+  away() {
+    const play = this.scenes.play;
+    if (this.scene === play && play.state === 'play' && !play.paused) play.setPaused(true);
+  }
+
   // target: a scene name (entered fresh) or a scene object (resumed as it was).
   go(target, args = {}, { quick = false } = {}) {
     if (this.transition) return;
@@ -109,7 +117,9 @@ class App {
   }
 
   enter(target, args) {
-    this.audio.muffle(false);   // a paused level muffles it again in Play.resume
+    // Nothing between the music and the listener: a scene puts back what it wants
+    // (a menu keeps the music behind a door, a paused level muffles it in Play.resume).
+    this.audio.clear();
     if (typeof target === 'string') {
       this.scene = this.scenes[target];
       this.scene.enter?.(args);
@@ -182,6 +192,12 @@ class App {
 
   palette() {
     return this.home().palette;
+  }
+
+  // How far into the game the player is, 0 to 3: the menus' music fills out with it.
+  depth() {
+    const done = this.worlds.filter((w) => this.progress.complete(w)).length;
+    return Math.min(3, Math.ceil(done / 2));
   }
 
   // A world's scenery for a menu to draw behind itself, kept while it's in use.

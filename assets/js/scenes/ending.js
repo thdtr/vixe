@@ -1,6 +1,7 @@
 import { CW, CH, COLS } from '../config.js';
 import { t } from '../core/i18n.js';
 import { drawFigure, pose } from '../game/render.js';
+import { ENDING } from '../core/themes.js';
 
 const clock = (s) => {
   const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, sec = Math.floor(s) % 60;
@@ -33,7 +34,8 @@ export class Ending {
     this.lines.push('', t('ending.stats', { deaths: save.deaths, time: clock(save.time) }));
     this.total = this.lines.join('').length;
     app.persist();
-    app.audio.music(null);
+    app.audio.intensity(3);
+    app.audio.music(ENDING);
   }
 
   update(dt) {

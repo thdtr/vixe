@@ -154,13 +154,77 @@ adds more with `registerMechanism(name, { tiles, options, setup, update, hurts, 
 
 ## Music
 
+A world's `music` is a track. The game's own themes (`assets/js/core/themes.js`) are written
+the same way, and so are the seven worlds, which make good examples.
+
 ```json
 { "bpm": 100, "voices": [ { "wave": "triangle", "v": 0.3, "notes": "a1 . c2 - g1 ." } ] }
 ```
 
-Each entry in `notes` is a sixteenth note. `.` is a rest and `-` holds the previous note.
-A voice can also take `cut`, a low-pass in Hz (e.g. `"cut": 1200`) that softens bright
-waves like `sawtooth` and `square`.
+Each entry in `notes` is a sixteenth note: a note (`a1`, `c#4`, `bb2`), `.` for a rest, or `-`
+to hold the note before it. Notes joined by `+` sound together (`a2+c3+e3`), `!` after a note
+accents it and `~` plays it softly. `notes` may be an array of strings, one bar each.
+
+**Sections.** A song is more than a loop once it has `seq`, the order its sections play in.
+A voice's `notes` then holds a pattern for each section it plays in, and it rests through the
+others:
+
+```json
+{ "bpm": 100, "seq": "I A A B A", "loop": 1, "voices": [
+    { "wave": "triangle", "v": 0.3,
+      "notes": { "I": "a1 - - - . . . .", "A": "a1 . a1 . c2 . a1 .", "B": "f1 . . . g1 . . ." } },
+    { "drums": true, "v": 0.2, "layer": 1, "notes": { "A B": "k . h . s . h ." } } ] }
+```
+
+A section lasts as long as its longest pattern, and shorter ones loop inside it. A key may name
+several sections (`"A B"`), and `"=A"` as a pattern means "the same as A". `loop` is the entry
+of `seq` the song returns to when it ends, so an intro plays once. A voice whose `notes` is a
+plain string (or array) keeps looping under every section at its own length: a loop of 37 steps
+drifts against the bars and never lands the same way twice.
+
+**Drums.** A voice with `"drums": true` takes hits instead of notes, one letter each, several at
+once (`kh` is a kick and a hat). The standard kit has `k` kick, `s` snare, `h` hat, `o` open hat,
+`c` clap, `t` tom, `r` rim, `x` crash, `b` a long low boom and `m` shaker. `"kit"`, on the track
+or on a voice, swaps sounds in: `metal` (an anvil for a snare, steam for hats, `p` a struck
+pipe), `type` (a typewriter: keys, space bar, carriage, `d` its bell, `z` a line break) or
+`soft` (everything rounded off). It can also be a table of your own, `{ "k": [ ...parts ] }`,
+in the format of the sound effects at the top of `assets/js/core/audio.js`.
+
+**A voice** can set:
+
+| setting | what it does |
+|---------|--------------|
+| `wave` | `sine`, `triangle`, `square`, `sawtooth`, `pulse` (`width` wide, 0.25 by default), or a list of harmonics such as `[1, 0.5, 0.3]` |
+| `v` | how loud |
+| `env` | `[attack, decay, sustain, release]`: seconds, with sustain from 0 to 1. Without it a note is plucked, dying away over its length |
+| `gate` | how much of its steps a note sounds for (0.95 by default; 0.5 is staccato) |
+| `cut`, `res` | a low-pass in Hz that softens bright waves, and its resonance in dB |
+| `sweep` | `[from, to, seconds]`: a filter of the note's own that closes (or opens) as it sounds |
+| `detune` | cents between two copies of the wave, for a wider sound |
+| `vib` | `[cents, hz]` of vibrato |
+| `glide` | seconds a note takes to slide from the one before |
+| `tr` | transposes the voice, in semitones |
+| `pan` | from -1 (left) to 1 (right) |
+| `echo`, `space` | how much of the voice goes to the track's echo and to its room, from 0 to 1 |
+| `layer` | the intensity it comes in at (below), or `[from, to]` |
+
+**A track** can set `bpm`, `div` (steps to a beat, 4 by default), `bar` (steps to a bar, 16 by
+default; a waltz is 12), `swing` (how late every other step lands, 0 to 0.5), `seq`, `loop`,
+`kit`, and:
+
+- `echo`: `{ "steps": 3, "feedback": 0.5, "cut": 2800 }`, repeats that bounce from ear to ear.
+- `space`: `{ "time": 1.8, "cut": 3500, "mix": 1 }`, the room the track plays in: how long it
+  rings and how dull it is. The level's sound effects ring in the same room, so a world sounds
+  like one place.
+- `win`: the notes that play when a level is won (`"a4 c5 e5 a5"`), in the track's key.
+
+**Layers.** The game plays a world's track at an intensity from 0 to 3 that rises through its
+levels: the first ones hear only the voices with no `layer`, and the last level hears
+everything. Give the bones of the track no layer, and bring in drums, harmonies and extras at
+1, 2 and 3. The level select and a world's title card play it at 0, from behind a door.
+
+`node tools/check.mjs` reads every track: a token that isn't a note, a bar that is a step
+short, a drum the kit doesn't have and a misspelled setting are all reported.
 
 ## Scripts
 
@@ -220,7 +284,8 @@ node tools/solve.mjs w1.3 --beam 600 # a slower search that also finds waits and
 node tools/solve.mjs w1.3 --replay "R20 RJ6 N10 R30"   # play a script, see what happens
 node tools/solve.mjs w2.6 --via "24,13 34,11 24,9"     # aim for these cells in turn, then the exit
 node tools/solve.mjs w1 --naive        # can mindless play (hold right, hop on a beat) win? It shouldn't
-node tools/check.mjs                   # every level loads, and no trap, zone or flag is dead
+node tools/solve.mjs w1 --human        # only taps a thumb can do: jump held for 0.1 s or more
+node tools/check.mjs                   # every level loads, no trap, zone or flag is dead, every track reads
 node tools/format.mjs assets/packs/my-pack/world.json  # lay a world file out like the others
 ```
 
@@ -229,7 +294,14 @@ jump. The solver prints the way it found, how long it took and how hard it had t
 adds how often that way still wins when its timing is nudged. Effects that act on the player
 need `save()` and `load()` (see `assets/js/game/fx.js`) to be searched.
 
+The search presses jump for a single tick when it suits it, which no thumb can do: a level may
+be winnable only that way. `--human` holds every press for 0.1 s or more, so what it finds a
+person can play. If it finds nothing where the plain search does, give it room before believing
+it (`--patience 3` with a bigger `--budget`, `--beam`, or waypoints on every ledge with `--via`,
+which is what works most often), then look at the level.
+
 Some levels make the search wander off (a door that runs, a route that leads away from the exit
 first). `tools/routes.json` keeps a winning script for each of them, and checking those levels
 replays it: if a change breaks one, the solver says **ROUTE BROKEN**. When you add such a level,
-find a way with `--beam` or `--via`, check it with `--replay`, and add it to the file.
+find a way with `--human` and `--beam` or `--via`, check it with `--replay`, and add it to the
+file. Every route there is one a person's taps can play.

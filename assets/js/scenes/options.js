@@ -12,8 +12,11 @@ export class Options {
     this.app = app;
     const s = app.save;
     const toggle = (key) => () => { s[key] = !s[key]; this.changed(); };
+    const onOff = (key) => ({ label: () => `${t(`opt.${key}`)}  ${t(s[key] ? 'opt.on' : 'opt.off')}`, adjust: toggle(key) });
+    // An item that opens another page; `page` is how the cursor finds its way back to it.
+    const page = (name, key, hidden) => ({ label: () => `${t(key)}  >`, run: () => this.open(name), hidden, page: name });
+    const back = { label: () => t('menu.back'), run: () => this.open('main') };
     this.confirming = false;
-    this.touchItem = { label: () => `${t('opt.touchControls')}  >`, run: () => this.open('touch'), hidden: () => !app.input.touchDevice };
     this.menus = {
       main: new Menu([
         {
@@ -22,9 +25,20 @@ export class Options {
         },
         { label: () => `${t('opt.music')}  < ${bar(s.music)} >`, adjust: (d) => { s.music = clamp(s.music + d); this.changed(); } },
         { label: () => `${t('opt.sfx')}  < ${bar(s.sfx)} >`, adjust: (d) => { s.sfx = clamp(s.sfx + d); this.changed(); app.audio.play('jump'); } },
-        { label: () => `${t('opt.shake')}  ${t(s.shake ? 'opt.on' : 'opt.off')}`, adjust: toggle('shake') },
-        { label: () => `${t('opt.scanlines')}  ${t(s.scanlines ? 'opt.on' : 'opt.off')}`, adjust: toggle('scanlines') },
-        this.touchItem,
+        page('screen', 'opt.screen'),
+        page('touch', 'opt.touchControls', () => !app.input.touchDevice),
+        {
+          // A phone buzzes and a controller rumbles: shown when there is one of them.
+          label: () => `${t('opt.vibrate')}  < ${t(`opt.vibrate.${s.vibrate}`)} >`,
+          adjust: (d) => {
+            s.vibrate = cycle(['deaths', 'all', 'off'], s.vibrate, d);
+            this.changed();
+            if (s.vibrate === 'off') return;
+            navigator.vibrate?.(30);
+            app.input.rumble(30, true);
+          },
+          hidden: () => !app.input.buzzes,
+        },
         {
           label: () => t(this.confirming ? 'opt.resetConfirm' : 'opt.reset'),
           run: () => {
@@ -37,6 +51,8 @@ export class Options {
         },
         { label: () => t('menu.back'), run: () => this.leave() },
       ]),
+      // What the picture does: shaking and flashing can be switched off, the stopwatch on.
+      screen: new Menu([onOff('shake'), onOff('flashes'), onOff('scanlines'), onOff('clock'), back]),
       // Shown with the touch controls on screen, so every change can be seen.
       touch: new Menu([
         {
@@ -51,12 +67,7 @@ export class Options {
           label: () => `${t('opt.touchSwap')}  < ${t(s.touchSwap ? 'opt.leftHand' : 'opt.rightHand')} >`,
           adjust: toggle('touchSwap'),
         },
-        {
-          label: () => `${t('opt.vibrate')}  < ${t(`opt.vibrate.${s.vibrate}`)} >`,
-          adjust: (d) => { s.vibrate = cycle(['deaths', 'all', 'off'], s.vibrate, d); this.changed(); if (s.vibrate !== 'off') navigator.vibrate(30); },
-          hidden: () => !('vibrate' in navigator),
-        },
-        { label: () => t('menu.back'), run: () => this.open('main') },
+        back,
       ]),
     };
   }
@@ -73,8 +84,9 @@ export class Options {
 
   open(page) {
     // Coming back from a page, the cursor waits on the item that opened it.
-    this.menus.main.index = this.page === 'touch' ? this.menus.main.visible.indexOf(this.touchItem) : 0;
-    this.menus.touch.index = 0;
+    const main = this.menus.main;
+    main.index = Math.max(0, main.visible.findIndex((item) => item.page === this.page));
+    if (page !== 'main') this.menus[page].index = 0;
     this.page = page;
     this.confirming = false;
   }
@@ -91,7 +103,7 @@ export class Options {
   update(dt) {
     this.time += dt;
     this.app.backdrop(this.app.home()).update(dt);
-    if (this.app.input.backed()) return this.page === 'touch' ? this.open('main') : this.leave();
+    if (this.app.input.backed()) return this.page === 'main' ? this.leave() : this.open('main');
     const menu = this.menus[this.page], before = menu.index;
     menu.update(this.app);
     if (menu.index !== before) this.confirming = false;
@@ -99,9 +111,10 @@ export class Options {
 
   draw(screen) {
     const pal = this.app.palette(), menu = this.menus[this.page];
+    const title = { main: 'menu.options', screen: 'opt.screen', touch: 'opt.touchControls' }[this.page];
     screen.begin(pal.bg);
     this.app.backdrop(this.app.home()).paint(screen, 0.8);
-    screen.center(t(this.page === 'touch' ? 'opt.touchControls' : 'menu.options'), 2, pal.hud);
+    screen.center(t(title), 2, pal.hud);
     menu.draw(screen, menu.visible.length > 7 ? 4 : 5, pal, this.time);
   }
 }
