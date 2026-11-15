@@ -15,13 +15,19 @@
 //   node tools/solve.mjs w1.3 --patience 3     how much a second costs (default: 10, then 2, then 0.5)
 //   node tools/solve.mjs w1.3 --beam 2000      sweep forward in time instead, keeping the 2000
 //                                              most promising moments (finds waits and detours)
+//   node tools/solve.mjs w1 --human            only press jump the way a thumb can: held for
+//                                              0.1 s or more. A level that needs a shorter tap
+//                                              is won by the search and by nobody else.
 //
 // Levels the search can't crack on its own (it has to wait for a door to come back, or chase
 // one) keep a winning script in tools/routes.json; checking such a level replays it first, and
-// says ROUTE BROKEN if it no longer wins. --search ignores the recorded routes.
+// says ROUTE BROKEN if it no longer wins. --search ignores the recorded routes. The routes
+// kept there press jump the way a person does (see --human): record yours the same way.
 //
 // A script is a list of moves, each held for a number of 1/20 s ticks: R (right), L (left),
-// N (nothing), with J added to hold jump (RJ6: right and jump for 0.3 s).
+// N (nothing), with J added to hold jump (RJ6: right and jump for 0.3 s). A lone RJ1 is a tap
+// of 1/20 s, quicker than a key can be pressed and let go: --human never plays one, and says
+// how many a recorded route has.
 // Effects that act on the player must have save()/load() (see game/fx.js) to be searched.
 
 import { loadWorlds, makePlay, step } from './sim/env.mjs';
@@ -31,13 +37,14 @@ import { tileOf } from '../assets/js/game/tiles.js';
 import { readFileSync } from 'node:fs';
 
 const TICK = 6;                    // simulation steps per move (1/20 s)
+const TAP = 2;                     // ticks a person's shortest press of jump lasts (0.1 s)
 const MOVES = [[1, false], [1, true], [0, false], [0, true], [-1, false], [-1, true]];
 const NAMES = (d, j) => (d > 0 ? 'R' : d < 0 ? 'L' : 'N') + (j ? 'J' : '');
 
 const args = process.argv.slice(2);
 const opt = (name, fallback) => { const i = args.indexOf(`--${name}`); return i >= 0 ? args.splice(i, 2)[1] : fallback; };
 const flag = (name) => args.includes(`--${name}`) && !!args.splice(args.indexOf(`--${name}`), 1);
-const naive = flag('naive'), slack = flag('slack'), searchOnly = flag('search');
+const naive = flag('naive'), slack = flag('slack'), searchOnly = flag('search'), human = flag('human');
 const routes = JSON.parse(readFileSync(new URL('./routes.json', import.meta.url), 'utf8'));
 const via = (opt('via', '') || '').split(/\s+/).filter(Boolean).map((p) => p.split(',').map((v) => (Number(v) + 0.5) * CW * (1)));
 const beam = Number(opt('beam', 0)), patiences = opt('patience', '10,2,0.5').split(',').map(Number), budget = Number(opt('budget', 250000)), deaths = Number(opt('deaths', 0)), replay = opt('replay', null), limit = Number(opt('time', 60));
@@ -88,6 +95,21 @@ const parse = (s) => s.trim().split(/\s+/).map((tok) => {
   return [m[1] === 'R' ? 1 : m[1] === 'L' ? -1 : 0, !!m[2], Number(m[3])];
 });
 
+// With --human, jump once pressed stays down for TAP ticks. `held` is how many ticks it has
+// been down at a moment of the search (0: up); letting go any sooner isn't a move.
+const tooQuick = (held, jump) => human && !jump && held > 0 && held < TAP;
+const holding = (held, jump) => (jump ? Math.min(held + 1, TAP) : 0);
+
+// Presses of jump in a script that last less than TAP ticks.
+const quickTaps = (moves) => {
+  let run = 0, count = 0;
+  for (const [, j, n] of [...moves, [0, false, 1]]) {
+    if (j) run += n;
+    else { if (run > 0 && run < TAP) count++; run = 0; }
+  }
+  return count;
+};
+
 const compact = (moves) => {
   const out = [];
   for (const [d, j] of moves) {
@@ -119,11 +141,12 @@ function solve(world, index, patience) {
     const [x, y] = points[stage], p = play.player;
     return Math.hypot(x - p.cx, y - p.cy) < 12;
   };
-  heap.push({ f: h(), g: 0, snap: snapshot(play), path: [], stage: 0 });
+  heap.push({ f: h(), g: 0, snap: snapshot(play), path: [], stage: 0, held: 0 });
   let nodes = 0, best = Infinity, bestPath = [];
   while (heap.size && nodes < budget) {
     const n = heap.pop();
     for (const [d, j] of MOVES) {
+      if (tooQuick(n.held, j)) continue;
       restore(play, n.snap);
       stage = n.stage;
       // Jump only matters as a fresh press: holding it on from the last move is a separate choice.
@@ -134,12 +157,13 @@ function solve(world, index, patience) {
       if (r === 'win') return { result: 'win', time: play.time, path: [...n.path, [d, j]], nodes };
       if (r === 'dead' || play.time > limit) continue;
       if (stage < points.length && reached()) stage++;
-      const k = `${stage}:${key(play)}`;
+      const held = holding(n.held, j);
+      const k = `${stage}:${human ? held : ''}:${key(play)}`;
       if (seen.has(k)) continue;
       seen.add(k);
       const hh = h();
       if (hh < best) { best = hh; bestPath = [...n.path, [d, j]]; }
-      heap.push({ f: play.time * patience + hh * 1.6, g: play.time, snap: snapshot(play), path: [...n.path, [d, j]], stage });
+      heap.push({ f: play.time * patience + hh * 1.6, g: play.time, snap: snapshot(play), path: [...n.path, [d, j]], stage, held });
     }
   }
   return { result: 'unsolved', nodes, closest: best.toFixed(1), path: bestPath };
@@ -154,11 +178,12 @@ function sweep(world, index) {
     const p = play.player, ex = exits(play);
     return ex.length ? Math.min(...ex.map(([x, y]) => Math.hypot(x - p.cx, (y - p.cy) * 1.2))) / CW : 0;
   };
-  let layer = [{ snap: snapshot(play), path: [] }], nodes = 0, best = Infinity, bestPath = [];
+  let layer = [{ snap: snapshot(play), path: [], held: 0 }], nodes = 0, best = Infinity, bestPath = [];
   while (layer.length && play.time <= limit) {
     const next = new Map();
     for (const n of layer) {
       for (const [d, j] of MOVES) {
+        if (tooQuick(n.held, j)) continue;
         restore(play, n.snap);
         play.app.input.jump = n.path.length ? n.path[n.path.length - 1][1] : false;
         let r = null;
@@ -167,9 +192,10 @@ function sweep(world, index) {
         if (r === 'win') return { result: 'win', time: play.time, path: [...n.path, [d, j]], nodes };
         if (r === 'dead') continue;
         const p = play.player;
-        const k = key(play).replace(/^[^|]*\|/, `${Math.round(p.x / 5)},${Math.round(p.y / 5)},${Math.sign(Math.round(p.vy / 80))},${p.ground ? 1 : 0},${p.gdir}|`);
+        const held = holding(n.held, j);
+        const k = (human ? `${held}:` : '') + key(play).replace(/^[^|]*\|/, `${Math.round(p.x / 5)},${Math.round(p.y / 5)},${Math.sign(Math.round(p.vy / 80))},${p.ground ? 1 : 0},${p.gdir}|`);
         const h = dist();
-        if (!next.has(k) || next.get(k).h > h) next.set(k, { h, snap: snapshot(play), path: [...n.path, [d, j]] });
+        if (!next.has(k) || next.get(k).h > h) next.set(k, { h, snap: snapshot(play), path: [...n.path, [d, j]], held });
       }
     }
     layer = [...next.values()].sort((a, b) => a.h - b.h).slice(0, beam);
@@ -219,7 +245,9 @@ for (const [w, i] of targets) {
   const route = !searchOnly && !beam && !via.length && routes[id];
   if (route) {
     const rr = run(makePlay(w, i, deaths), parse(route));
-    if (rr.result === 'win') { console.log(`${id} ${name}: won by its recorded route in ${rr.time.toFixed(2)}s`); continue; }
+    // A route with taps no thumb can do still proves the level loads and ends; it says so.
+    const taps = human ? quickTaps(parse(route)) : 0;
+    if (rr.result === 'win') { console.log(`${id} ${name}: won by its recorded route in ${rr.time.toFixed(2)}s${taps ? ` (with ${taps} tap(s) under 0.1 s: not a route for a person)` : ''}`); continue; }
     console.log(`${id} ${name}: ROUTE BROKEN (${rr.result} at ${rr.time.toFixed(2)}s), searching instead`);
   }
   // Hurry first; if that fails, try again willing to wait longer and longer.
