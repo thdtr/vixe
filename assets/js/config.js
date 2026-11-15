@@ -39,4 +39,4 @@ export const FONT = `16px ${FACE}`;
 export const FONT_BOLD = `bold 16px ${FACE}`;
 
 export const SAVE_KEY = 'vixe/save/v1';
-export const VERSION = '1.4.0';
+export const VERSION = '1.5.0';

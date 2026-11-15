@@ -1,8 +1,11 @@
 import { CW, CH, COLS } from '../config.js';
 import { t, loc } from '../core/i18n.js';
+import { TITLE } from '../core/themes.js';
+import { stopwatch } from './menu.js';
 
 const GRID_COL = 27;     // where level cells start
 const CELL = 4;          // width of a level cell
+const REST = 0.4;        // seconds the cursor rests on a world before its music starts
 const backLabel = () => `< ${t('menu.back')}`;
 
 export class Select {
@@ -24,15 +27,30 @@ export class Select {
       this.col = at ? at.index : 0;
     }
     this.time = 0;
+    this.heard = -1;         // the row the cursor was on last step,
+    this.rest = 0;           // and how long it has rested there
+    this.app.audio.mod('far', true);
   }
 
   get worlds() { return this.app.progress.listed(); }
+
+  // The world under the cursor is heard as well as seen, from behind its door. Only once
+  // the cursor rests there, so running down the list doesn't start seven songs.
+  listen(dt) {
+    const app = this.app, shown = this.worlds[this.row];
+    if (this.heard !== this.row) { this.heard = this.row; this.rest = 0; }
+    if ((this.rest += dt) < REST) return;
+    const open = app.progress.worldOpen(shown) && shown.music;
+    app.audio.intensity(open ? 0 : app.depth());
+    app.audio.music(open ? shown.music : TITLE);
+  }
 
   update(dt) {
     const app = this.app, input = app.input, worlds = this.worlds;
     this.time += dt;
     const shown = worlds[this.row];
     if (app.progress.worldOpen(shown)) app.backdrop(shown).update(dt);
+    this.listen(dt);
     if (input.backed()) return app.go('title');
     const dy = input.axis('up', 'down');
     const dx = input.axis('left', 'right');
@@ -147,8 +165,9 @@ export class Select {
     if (open) {
       screen.center(`${progress.code(world)}-${this.col + 1}  ${loc(lv.name).toUpperCase()}`, info, pal.text);
       if (rec) {
+        // Levels beaten before the stopwatch existed have no time yet.
         const stats = rec.done
-          ? t('select.stats', { deaths: rec.deaths || 0, best: rec.best ?? 0 })
+          ? t('select.stats', { deaths: rec.deaths || 0, best: rec.best ?? 0 }) + (rec.time ? `   ${t('select.time', { time: stopwatch(rec.time) })}` : '')
           : t(rec.skipped ? 'select.skipped' : 'select.tries', { deaths: rec.deaths || 0 });
         screen.center(stats, info + 1, pal.dim);
       }

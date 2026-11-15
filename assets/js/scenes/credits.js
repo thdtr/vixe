@@ -1,12 +1,15 @@
 import { COLS, ROWS } from '../config.js';
 import { t } from '../core/i18n.js';
+import { ENDING } from '../core/themes.js';
 
 export class Credits {
   constructor(app) { this.app = app; }
 
   enter() {
     this.time = 0;
-    this.app.audio.music(null);
+    // After an ending its music plays on; from the title, the credits bring it in.
+    this.app.audio.intensity(3);
+    this.app.audio.music(ENDING);
   }
 
   update(dt) {

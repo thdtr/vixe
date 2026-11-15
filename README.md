@@ -2,7 +2,7 @@
 
 **English** · [Português](README.pt-BR.md)
 
-A ~420 KB platformer made entirely of text. Inspired by *Level Devil*.
+A ~500 KB platformer made entirely of text. Inspired by *Level Devil*.
 
 **Play it at <https://vixe.online>**
 
@@ -13,7 +13,7 @@ A ~420 KB platformer made entirely of text. Inspired by *Level Devil*.
 48 levels across 6 worlds, and maybe something else tucked away. Play with a keyboard, a
 gamepad or a touchscreen, and install it as an app on your phone. The game uses no images,
 fonts or libraries. Everything is drawn with characters and every sound is synthesized on
-the fly.
+the fly, down to a soundtrack that fills out the deeper you get into each world.
 
 ## Running it
 

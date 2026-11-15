@@ -26,7 +26,7 @@ problema é ignorado com um aviso no console; ele nunca derruba o jogo base.
 `script` e `strings` são opcionais.
 
 **Mundo**: `id`, `name`, `tagline`, `palette` (cores `bg dots wall wallDim girder hazard
-exit player text accent hud dim`), `music` (veja abaixo) e `levels`. Opcionais:
+exit player text accent hud dim`), `music` (veja [Música](#música)) e `levels`. Opcionais:
 `requires` (`{ "world": "w4", "secrets": 4 }`), `hidden`, `code` (rótulo no lugar do
 número), `ending` (cena de final após a última fase) e `fx`, os **efeitos** que todas as fases
 do mundo compartilham. A paleta também pode definir os tons que o desenho calcula a partir
@@ -145,11 +145,6 @@ adiciona outros com `registerMechanism(nome, { tiles, options, setup, update, hu
 (`assets/js/game/actors.js`) e novos tipos de movimento de grupo com `registerMotion`
 (`assets/js/game/motion.js`).
 
-**Música**: `{ "bpm": 100, "voices": [ { "wave": "triangle", "v": 0.3, "notes": "a1 . c2 - g1 ." } ] }`,
-uma nota por semicolcheia: `.` é pausa e `-` sustenta a nota anterior. Uma voz também
-aceita `cut`, um filtro passa-baixa em Hz (por exemplo `"cut": 1200`) que suaviza ondas
-brilhantes como `sawtooth` e `square`.
-
 **Script** (opcional): um módulo ES que exporta `register(api)`. A API tem
 `registerAction(name, fn)`, `registerTrigger(name, fn)` e `registerTile(char, def)`.
 `assets/packs/base/script.js` é um exemplo real: adiciona as ações `typewrite` e `warp`
@@ -157,6 +152,84 @@ brilhantes como `sawtooth` e `square`.
 e estes tiles: as estrelas `·` `°`, o rastro de meteoro `´` e a boca de buraco de minhoca `¤`;
 a cortina `¦`, a corda `│` e a plateia `º` (nenhum deles é sólido); a ribalta `•` e o saco de
 areia `§` (os dois sólidos); e `╱ ╲ ─ ┆ ╭ ╮ ╰ ╯` para cenário pintado, onde não dá para pisar.
+
+## Música
+
+O `music` de um mundo é uma trilha. Os temas do próprio jogo (`assets/js/core/themes.js`) são
+escritos do mesmo jeito, assim como os sete mundos, que servem de exemplo.
+
+```json
+{ "bpm": 100, "voices": [ { "wave": "triangle", "v": 0.3, "notes": "a1 . c2 - g1 ." } ] }
+```
+
+Cada entrada de `notes` é uma semicolcheia: uma nota (`a1`, `c#4`, `bb2`), `.` para pausa ou
+`-` para sustentar a nota anterior. Notas unidas por `+` soam juntas (`a2+c3+e3`), `!` depois
+da nota a acentua e `~` a toca baixinho. `notes` pode ser uma lista de textos, um compasso em
+cada.
+
+**Seções.** Uma música deixa de ser um laço quando tem `seq`, a ordem em que as seções tocam.
+O `notes` de uma voz passa a ter um padrão para cada seção em que ela toca, e ela fica em
+silêncio nas outras:
+
+```json
+{ "bpm": 100, "seq": "I A A B A", "loop": 1, "voices": [
+    { "wave": "triangle", "v": 0.3,
+      "notes": { "I": "a1 - - - . . . .", "A": "a1 . a1 . c2 . a1 .", "B": "f1 . . . g1 . . ." } },
+    { "drums": true, "v": 0.2, "layer": 1, "notes": { "A B": "k . h . s . h ." } } ] }
+```
+
+Uma seção dura o tempo do seu padrão mais longo, e os mais curtos se repetem dentro dela. Uma
+chave pode nomear várias seções (`"A B"`), e `"=A"` como padrão quer dizer "igual à A". `loop`
+é a entrada de `seq` para onde a música volta quando termina, então uma introdução toca uma vez
+só. Uma voz cujo `notes` é um texto simples (ou uma lista) segue em laço por baixo de todas as
+seções, no tamanho que tiver: um laço de 37 passos desliza contra os compassos e nunca cai duas
+vezes do mesmo jeito.
+
+**Bateria.** Uma voz com `"drums": true` recebe batidas em vez de notas, uma letra para cada,
+várias de uma vez (`kh` é bumbo e chimbal). O kit padrão tem `k` bumbo, `s` caixa, `h` chimbal,
+`o` chimbal aberto, `c` palma, `t` tom, `r` aro, `x` prato, `b` um estrondo grave e longo e `m`
+chocalho. `"kit"`, na trilha ou numa voz, troca os sons: `metal` (bigorna no lugar da caixa,
+vapor nos chimbais, `p` um cano batido), `type` (uma máquina de escrever: teclas, barra de
+espaço, carro, `d` a campainha, `z` a quebra de linha) ou `soft` (tudo arredondado). Também
+pode ser uma tabela sua, `{ "k": [ ...partes ] }`, no formato dos efeitos sonoros que estão no
+começo de `assets/js/core/audio.js`.
+
+**Uma voz** pode definir:
+
+| ajuste | o que faz |
+|--------|-----------|
+| `wave` | `sine`, `triangle`, `square`, `sawtooth`, `pulse` (com largura `width`, 0,25 por padrão) ou uma lista de harmônicos como `[1, 0.5, 0.3]` |
+| `v` | o volume |
+| `env` | `[ataque, decaimento, sustentação, repouso]`: segundos, com a sustentação de 0 a 1. Sem ele a nota é pinçada e morre ao longo da sua duração |
+| `gate` | quanto dos seus passos a nota soa (0,95 por padrão; 0,5 é staccato) |
+| `cut`, `res` | um passa-baixa em Hz, que suaviza ondas brilhantes, e a ressonância dele em dB |
+| `sweep` | `[de, até, segundos]`: um filtro só da nota, que fecha (ou abre) enquanto ela soa |
+| `detune` | cents entre duas cópias da onda, para um som mais largo |
+| `vib` | `[cents, hz]` de vibrato |
+| `glide` | segundos que a nota leva para deslizar a partir da anterior |
+| `tr` | transpõe a voz, em semitons |
+| `pan` | de -1 (esquerda) a 1 (direita) |
+| `echo`, `space` | quanto da voz vai para o eco e para a sala da trilha, de 0 a 1 |
+| `layer` | a intensidade em que ela entra (abaixo), ou `[de, até]` |
+
+**Uma trilha** pode definir `bpm`, `div` (passos por tempo, 4 por padrão), `bar` (passos por
+compasso, 16 por padrão; uma valsa tem 12), `swing` (o quanto um passo sim, um não, atrasa, de
+0 a 0,5), `seq`, `loop`, `kit` e:
+
+- `echo`: `{ "steps": 3, "feedback": 0.5, "cut": 2800 }`, repetições que saltam de um ouvido
+  para o outro.
+- `space`: `{ "time": 1.8, "cut": 3500, "mix": 1 }`, a sala onde a trilha toca: quanto tempo
+  ela ressoa e o quanto é abafada. Os efeitos sonoros da fase ressoam na mesma sala, então um
+  mundo soa como um lugar só.
+- `win`: as notas que tocam quando a fase é vencida (`"a4 c5 e5 a5"`), no tom da trilha.
+
+**Camadas.** O jogo toca a trilha de um mundo numa intensidade de 0 a 3, que sobe ao longo das
+fases: as primeiras ouvem só as vozes sem `layer`, e a última ouve tudo. Deixe o esqueleto da
+trilha sem camada e traga bateria, harmonias e enfeites em 1, 2 e 3. A seleção de fases e o
+cartão de um mundo a tocam em 0, atrás de uma porta.
+
+`node tools/check.mjs` lê todas as trilhas: avisa de um item que não é nota, de um compasso
+com um passo a menos, de uma batida que o kit não tem e de um ajuste escrito errado.
 
 ## Efeitos
 
@@ -208,7 +281,8 @@ node tools/solve.mjs w1.3 --beam 600 # uma busca mais lenta que também acha esp
 node tools/solve.mjs w1.3 --replay "R20 RJ6 N10 R30"   # joga um roteiro e diz o que aconteceu
 node tools/solve.mjs w2.6 --via "24,13 34,11 24,9"     # mira nessas células, uma de cada vez, e depois na saída
 node tools/solve.mjs w1 --naive        # jogar sem pensar (segurar direita, pular no ritmo) vence? Não deveria
-node tools/check.mjs                   # toda fase carrega, e nenhuma armadilha, zona ou flag está morta
+node tools/solve.mjs w1 --human        # só toques que um dedo consegue: pulo segurado por 0,1 s ou mais
+node tools/check.mjs                   # toda fase carrega, nenhuma armadilha, zona ou flag está morta, toda trilha é lida
 node tools/format.mjs assets/packs/meu-pack/mundo.json # deixa o arquivo do mundo no formato dos outros
 ```
 
@@ -218,7 +292,14 @@ quanto precisou procurar; `--slack` diz com que frequência esse caminho ainda v
 levemente alterado. Efeitos que agem sobre o jogador precisam de `save()` e `load()` (veja
 `assets/js/game/fx.js`) para entrar na busca.
 
+A busca aperta o pulo por um único tique quando convém, o que nenhum dedo consegue: uma fase
+pode ser vencível só assim. `--human` segura cada toque por 0,1 s ou mais, então o que ele acha
+uma pessoa consegue jogar. Se ele não achar nada onde a busca comum acha, dê espaço a ele antes
+de acreditar (`--patience 3` com um `--budget` maior, `--beam`, ou pontos de passagem em cada
+plataforma com `--via`, que é o que mais funciona), e então olhe a fase.
+
 Algumas fases fazem a busca se perder (uma porta que foge, um caminho que primeiro se afasta da
 saída). `tools/routes.json` guarda um roteiro vencedor para cada uma delas, e testar essas fases
 o repete: se uma mudança quebrar uma delas, o solucionador avisa **ROUTE BROKEN**. Ao criar uma
-fase assim, ache um caminho com `--beam` ou `--via`, confira com `--replay` e adicione ao arquivo.
+fase assim, ache um caminho com `--human` e `--beam` ou `--via`, confira com `--replay` e
+adicione ao arquivo. Toda rota guardada ali é uma que os toques de uma pessoa conseguem jogar.
