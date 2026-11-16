@@ -58,7 +58,19 @@ Map tiles
 #  wall            %  fake wall         &  invisible block (shows up when touched)
 =  solid girder    -  one-way platform  ^ v  spikes (floor / ceiling)
 *  saw             ~  acid              >  exit
-?  sign            @  start             any other character is a solid letter
+?  sign            @  start             $  secret
+any other character is a solid letter
+```
+
+A level holds one secret at most, and a secret should be hidden. A `$` with no open air in
+any of the eight cells around it (walls, fake walls or solid tiles all round) is **buried**:
+it's drawn as part of the wall until the player walks into a fake wall next to it, then it
+glints into view. So bury it behind a `%`, like the pocket left of the start in 1-6:
+
+```
+%%%
+$%%  @
+####
 ```
 
 Mechanism tiles act on their own, with no events needed (see [Mechanisms](#mechanisms)):
@@ -232,7 +244,10 @@ A pack can optionally ship an ES module that exports `register(api)`. The API of
 `registerAction(name, fn)`, `registerTrigger(name, fn)` and `registerTile(char, def)`.
 `assets/packs/base/script.js` is a real example. It adds the `typewrite` and `warp` actions
 (`{ "warp": [x, y], "flip": true }`, where `null` keeps that axis), the `typed`
-trigger, and these tiles: the `·` `°` stars, the `´` meteor tail and the `¤` wormhole mouth;
+trigger (a word typed on a keyboard, in the language being played:
+`{ "typed": { "pt-BR": ["saída"], "en": ["exit"] } }`; `p` pauses, so a word with a `p` in it
+can never be typed in a level), and these tiles: the `·` `°` stars, the `´` meteor tail and
+the `¤` wormhole mouth;
 the `¦` curtain, `│` rope and `º` audience (none of them solid); the `•` footlight and `§`
 sandbag (both solid); and `╱ ╲ ─ ┆ ╭ ╮ ╰ ╯` for painted scenery you can't stand on.
 

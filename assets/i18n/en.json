@@ -59,6 +59,8 @@
   "hud.paused": "- paused -",
   "hud.holdRestart": "hold pause to restart",
 
+  "console.hello": "you are reading the code. I am reading you too.",
+  "touch.pause": "pause",
   "touch.hint": "left: drag to move   right: tap to jump",
   "touch.hintSwap": "left: tap to jump   right: drag to move",
 
@@ -74,15 +76,22 @@
 
   "intro.world": "WORLD {n}",
 
-  "secret.found": "$ {n}/{total}   you weren't supposed to find that",
+  "secret.1": "$ {n}/{total}   you weren't supposed to find that.",
+  "secret.2": "$ {n}/{total}   again? now you're looking.",
+  "secret.3": "$ {n}/{total}   stop poking the walls. they can feel it.",
+  "secret.4": "$ {n}/{total}   I'll have to hide things better.",
+  "secret.5": "$ {n}/{total}   fine. you know where I keep things.",
+  "secret.all": "$ {n}/{total}   nothing left hidden. almost nothing.",
   "flawless.done": "a whole world without dying. that wasn't in the plan.",
 
   "ending.main": "the last door opened.\non the other side, another door.\nthis one didn't run, didn't fall, didn't lie.\nyou didn't trust it anyway.\n\ngood. you're learning.",
   "ending.true": "so you found the backstage.\nthis is where I keep the traps.\ndon't tell anyone.\n\nactually, do.\nI need more people to fool.\n\nthanks for playing.   - the game",
   "ending.door": "somewhere, a door that didn't exist now does.",
-  "ending.missing": "there are still {n} thing(s) glinting in the dark.",
+  "ending.missing": "there are still {n} things glinting in the dark.",
+  "ending.missing.one": "there's still one thing glinting in the dark.",
   "ending.challenge": "now try a whole world without dying.",
-  "ending.skipped": "{n} level(s) skipped. the crown is waiting for you there.",
+  "ending.skipped": "{n} levels skipped. the crown is waiting for you there.",
+  "ending.skipped.one": "one level skipped. the crown is waiting for you there.",
   "ending.stats": "deaths {deaths}   time {time}",
 
   "credits.body": "# vixe\nby thiago dutra\n\n# made with\nclaude code (opus 5.5)\n\n# inspired by\nlevel devil",

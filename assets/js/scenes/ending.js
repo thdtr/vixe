@@ -21,13 +21,13 @@ export class Ending {
     if (kind === 'true') {
       // Skipped levels hold the crown back, and the game says so instead of hiding it.
       const skipped = progress.skippedCount();
-      if (skipped) this.lines.push('', t('ending.skipped', { n: skipped }));
+      if (skipped) this.lines.push('', t(skipped === 1 ? 'ending.skipped.one' : 'ending.skipped', { n: skipped }));
       else save.flags.crown = true;
     } else {
       const secret = app.worlds.find((w) => w.hidden && w.requires?.world === app.worlds.find((x) => x.ending === kind)?.id);
       const found = save.secrets.length, total = progress.secretsTotal();
       if (secret && progress.worldOpen(secret)) this.lines.push('', t('ending.door'));
-      else if (found < total) this.lines.push('', t('ending.missing', { n: total - found }));
+      else if (found < total) this.lines.push('', t(total - found === 1 ? 'ending.missing.one' : 'ending.missing', { n: total - found }));
       else this.lines.push('');
       this.lines.push(t('ending.challenge'));
     }

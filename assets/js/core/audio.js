@@ -2,50 +2,238 @@
 
 import { compile, eventAt, midi, hz } from './music.js';
 
-// A run of notes up to the door: what winning a level sounds like. Beating the level's best
-// time adds a flourish, its last two notes again an octave up.
-const fanfare = (freqs) => freqs.map((f, i) => ({ wave: 'triangle', f: [f, f], d: i < freqs.length - 1 ? 0.12 : 0.3, v: 0.12, at: i * 0.07 }));
-const flourish = (freqs) => fanfare([...freqs, ...freqs.slice(-2).map((f) => f * 2)]);
+// A run of notes up to the door: what winning a level sounds like. Each note is struck like
+// a small bell (a triangle with a bright FM partial that fades first) and left to ring under
+// the next, and the last one blooms into the whole chord. Beating the level's best time adds
+// a flourish: its last two notes again, an octave up, with a sparkle on top.
+const STRIKE = 0.075;
+function fanfare(freqs) {
+  const last = freqs.length - 1, end = last * STRIKE;
+  const notes = freqs.flatMap((f, i) => [
+    { wave: 'triangle', f: [f, f], d: i < last ? 0.42 : 1.1, v: 0.07, at: i * STRIKE, cut: 5200 },
+    { wave: 'sine', f: [f * 2, f * 2], fm: [3.5, 0.8], d: i < last ? 0.22 : 0.6, v: 0.025, at: i * STRIKE, pan: i % 2 ? 0.25 : -0.25 },
+  ]);
+  // The bloom: every note at once, soft and slow, swelling under the last strike.
+  const bloom = freqs.map((f, i) => ({ wave: 'sawtooth', f: [f, f], detune: 9, cut: [900, 2600], a: 0.06, hold: 0.12, d: 0.95, v: 0.016, at: end, pan: (i / Math.max(1, last) - 0.5) * 0.6 }));
+  return [...notes, ...bloom, { noise: 9000, type: 'highpass', a: 0.02, d: 0.5, v: 0.006, at: end }];
+}
+const flourish = (freqs) => {
+  const high = freqs.slice(-2).map((f) => f * 2), at = (freqs.length + 1) * STRIKE;
+  return [...fanfare([...freqs, ...high]), ...[0, 1, 2].map((k) => ({ wave: 'sine', f: [high[1] * 2, high[1] * 2], fm: [2.76, 0.5], d: 0.25, v: 0.014, at: at + k * 0.06, pan: [-0.5, 0.5, 0][k] }))];
+};
 const DOOR = [523, 659, 784, 1046];   // without a track to say otherwise: C major
 
-// A sound is a list of parts played together. A part is a tone gliding from f[0] to f[1]
-// Hz, or filtered noise (noise: the filter's frequency, or [from, to] for a sweep; type:
-// 'lowpass' by default, 'highpass' or 'bandpass'; q: how narrow). d is how long it lasts,
-// v how loud, a its attack (4 ms unless set) and at a delay before it starts, all seconds.
+// A sound is a list of parts played together. A part is a tone gliding from f[0] to f[1] Hz,
+// or filtered noise (noise: the filter's frequency, or [from, to] for a sweep; type: 'lowpass'
+// by default, 'highpass' or 'bandpass'; q: how narrow). d is how long it lasts, v how loud,
+// a its attack (4 ms unless set), hold how long it stays at full before dying away, and at a
+// delay before it starts, all seconds. pan puts the part to one side (-1 to 1).
+// A tone may also have:
+//   wave    'sine', 'triangle', 'square', 'sawtooth' or 'pulse' (width: 0.25 by default)
+//   cut     a lowpass on it, in Hz, or [from, to] to open or close it as it sounds (q: resonance)
+//   detune  cents between two copies of it, a little apart: thicker, and it beats
+//   fm      [ratio, index]: a second wave at f * ratio bends its pitch, index * f Hz deep, and
+//           fades away faster than the tone does: bells, glass, metal
+//   vib     [cents, rate]: a wobble in pitch
+//   lin     glide in a straight line instead of the ear's curve
+// Sounds are layered the way the soundtrack is: a body (the pitch), a transient (the click or
+// the scuff that says when it happened) and air (noise that says what it's made of).
 const SFX = {
-  jump:    [{ wave: 'square', f: [240, 480], d: 0.08, v: 0.07 }],
-  land:    [{ noise: 700, d: 0.05, v: 0.12 }, { wave: 'sine', f: [110, 60], d: 0.06, v: 0.08 }],
-  die:     [{ noise: 2400, d: 0.3, v: 0.3 }, { wave: 'sawtooth', f: [320, 38], d: 0.4, v: 0.1 }, { wave: 'sine', f: [130, 34], d: 0.32, v: 0.22 }],
-  win:     fanfare(DOOR),
-  record:  flourish(DOOR),
-  trap:    [{ wave: 'square', f: [110, 40], d: 0.22, v: 0.12 }, { noise: 400, d: 0.15, v: 0.1 }],
-  pop:     [{ wave: 'square', f: [1300, 300], d: 0.05, v: 0.06 }],
-  bonk:    [{ wave: 'triangle', f: [180, 90], d: 0.1, v: 0.2 }],
-  thud:    [{ noise: 300, d: 0.18, v: 0.25 }, { wave: 'sine', f: [70, 36], d: 0.2, v: 0.2 }],
-  flip:    [{ wave: 'sine', f: [200, 900], d: 0.25, v: 0.12 }],
-  coin:    [{ wave: 'square', f: [988, 988], d: 0.06, v: 0.06 }, { wave: 'square', f: [1319, 1319], d: 0.2, v: 0.06, at: 0.06 }],
-  tick:    [{ wave: 'square', f: [880, 880], d: 0.025, v: 0.04 }],
-  select:  [{ wave: 'square', f: [440, 880], d: 0.07, v: 0.06 }],
-  glitch:  [{ noise: 5000, d: 0.08, v: 0.12 }, { wave: 'square', f: [60, 2000], d: 0.06, v: 0.05, at: 0.05 }],
-  type:    [{ noise: 3500, d: 0.015, v: 0.05 }],
-  hum:     [{ wave: 'sine', f: [90, 180], d: 0.3, v: 0.12 }, { wave: 'triangle', f: [360, 720], d: 0.25, v: 0.04 }],
-  warp:    [{ wave: 'sine', f: [1800, 120], d: 0.3, v: 0.1 }, { wave: 'triangle', f: [200, 1600], d: 0.2, v: 0.05, at: 0.12 }],
-  ping:    [{ wave: 'sine', f: [1480, 1400], d: 0.5, v: 0.07 }, { wave: 'sine', f: [1480, 1400], d: 0.4, v: 0.025, at: 0.28 }],
-  splash:  [{ noise: 1800, d: 0.28, v: 0.14 }, { wave: 'sine', f: [500, 140], d: 0.18, v: 0.05 }],
-  roar:    [{ wave: 'sawtooth', f: [62, 38], d: 1.3, v: 0.16 }, { noise: 500, d: 1.1, v: 0.22 }, { wave: 'square', f: [93, 50], d: 1.0, v: 0.05, at: 0.1 }],
-  beam:    [{ wave: 'sawtooth', f: [140, 1100], d: 0.45, v: 0.07 }, { noise: 4000, d: 0.4, v: 0.1 }],
-  charge:  [{ wave: 'sine', f: [220, 880], d: 0.8, v: 0.07 }],
-  rumble:  [{ noise: 160, d: 0.7, v: 0.3 }],
-  creak:   [{ wave: 'triangle', f: [70, 55], d: 0.25, v: 0.08 }, { noise: 900, d: 0.06, v: 0.06 }],
-  crumble: [{ noise: 500, d: 0.35, v: 0.22 }, { wave: 'triangle', f: [90, 40], d: 0.3, v: 0.1 }],
-  spike:   [{ wave: 'square', f: [1800, 600], d: 0.05, v: 0.06 }, { noise: 6000, d: 0.04, v: 0.08 }],
-  spring:  [{ wave: 'sine', f: [180, 720], d: 0.18, v: 0.14 }, { wave: 'square', f: [360, 1440], d: 0.1, v: 0.03 }],
-  shoot:   [{ noise: 3000, d: 0.06, v: 0.1 }, { wave: 'square', f: [900, 300], d: 0.08, v: 0.04 }],
+  // ---- the player
+  // A puff of the suit's jet: a hiss rising through a bandpass, a soft rising blip, and a low push.
+  jump: [
+    { noise: [700, 2600], type: 'bandpass', q: 1.1, a: 0.006, d: 0.13, v: 0.15 },
+    { wave: 'triangle', f: [260, 520], cut: 2400, d: 0.085, v: 0.067 },
+    { wave: 'sine', f: [95, 150], d: 0.06, v: 0.067 },
+  ],
+  // Boots on the floor: a short low knock and a scuff of dust.
+  land: [
+    { wave: 'sine', f: [140, 52], d: 0.08, v: 0.074 },
+    { noise: [1600, 260], d: 0.07, v: 0.068 },
+    { noise: 3200, type: 'bandpass', q: 2, d: 0.018, v: 0.02 },
+  ],
+  // Broken: a hit, a burst that darkens as it scatters, a falling growl, glass, and a stutter.
+  die: [
+    { wave: 'sine', f: [190, 36], d: 0.4, v: 0.21 },
+    { noise: [7000, 240], d: 0.38, v: 0.2 },
+    { wave: 'sawtooth', f: [440, 42], detune: 24, cut: [3200, 180], d: 0.5, v: 0.084 },
+    { noise: 6500, type: 'highpass', d: 0.11, v: 0.054 },
+    { wave: 'square', f: [1320, 1320], cut: 3000, d: 0.025, v: 0.023, at: 0.03 },
+    { wave: 'square', f: [990, 990], cut: 3000, d: 0.025, v: 0.019, at: 0.065 },
+    { wave: 'square', f: [660, 660], cut: 3000, d: 0.03, v: 0.015, at: 0.1 },
+  ],
+  win: fanfare(DOOR),
+  record: flourish(DOOR),
+
+  // ---- secrets
+  // The secret itself: the old two notes, as glass bells, with a shimmer and a breath under them.
+  coin: [
+    { wave: 'sine', f: [988, 988], fm: [3.5, 1.1], d: 0.16, v: 0.044 },
+    { wave: 'triangle', f: [988, 988], d: 0.09, v: 0.025 },
+    { wave: 'sine', f: [1319, 1319], fm: [3.5, 1.1], d: 0.55, v: 0.047, at: 0.075 },
+    { wave: 'triangle', f: [1319, 1319], d: 0.4, v: 0.025, at: 0.075 },
+    { wave: 'sine', f: [2637, 2637], fm: [2.76, 0.6], d: 0.4, v: 0.011, at: 0.13, pan: -0.4 },
+    { wave: 'sine', f: [3951, 3951], fm: [2.76, 0.6], d: 0.35, v: 0.0076, at: 0.18, pan: 0.4 },
+    { noise: 9500, type: 'highpass', a: 0.03, d: 0.5, v: 0.008, at: 0.08 },
+    { wave: 'sine', f: [330, 660], a: 0.02, d: 0.3, v: 0.019 },
+  ],
+  // A buried one, glimpsed as you walk into its wall: barely there, high and far.
+  glint: [
+    { wave: 'sine', f: [2637, 2637], fm: [2.76, 0.4], a: 0.01, d: 0.45, v: 0.017, pan: -0.2 },
+    { wave: 'sine', f: [3520, 3520], fm: [2.76, 0.4], a: 0.01, d: 0.4, v: 0.012, at: 0.07, pan: 0.2 },
+    { noise: 10000, type: 'highpass', a: 0.04, d: 0.35, v: 0.0077 },
+  ],
+
+  // ---- traps and scenery
+  // Machinery waking: a clunk, a motor winding up through a low filter, a catch letting go.
+  trap: [
+    { wave: 'square', f: [120, 55], cut: 900, d: 0.2, v: 0.1 },
+    { noise: [900, 180], d: 0.14, v: 0.11 },
+    { noise: 2600, type: 'bandpass', q: 4, d: 0.025, v: 0.07 },
+    { wave: 'sawtooth', f: [62, 74], cut: 420, a: 0.02, d: 0.26, v: 0.06 },
+  ],
+  // Something appears or goes: a round blip and a click.
+  pop: [
+    { wave: 'sine', f: [880, 340], d: 0.065, v: 0.08 },
+    { noise: 2400, type: 'bandpass', q: 2, d: 0.015, v: 0.04 },
+  ],
+  // A knock on wood: the head on a hidden block, a dart on a wall, a locked door.
+  bonk: [
+    { wave: 'triangle', f: [270, 150], d: 0.1, v: 0.21 },
+    { wave: 'sine', f: [560, 310], d: 0.045, v: 0.062 },
+    { noise: 1300, type: 'bandpass', q: 2.2, d: 0.03, v: 0.11 },
+  ],
+  // Something heavy comes down: a deep hit, its dust, and rubble settling a moment later.
+  thud: [
+    { wave: 'sine', f: [95, 32], d: 0.32, v: 0.14 },
+    { noise: [1000, 110], d: 0.26, v: 0.14 },
+    { wave: 'triangle', f: [58, 40], d: 0.22, v: 0.052 },
+    { noise: 700, type: 'bandpass', q: 1.2, d: 0.14, v: 0.037, at: 0.05 },
+    { noise: 2200, type: 'bandpass', q: 3, d: 0.02, v: 0.016, at: 0.11 },
+  ],
+  // Gravity turns over: a rising whoosh, a little phasey, with a swell under it.
+  flip: [
+    { wave: 'sine', f: [180, 900], detune: 30, d: 0.28, v: 0.075 },
+    { noise: [400, 3200], type: 'bandpass', q: 2, a: 0.03, d: 0.3, v: 0.08 },
+    { wave: 'triangle', f: [90, 450], cut: 1500, d: 0.25, v: 0.04 },
+  ],
+  // The picture tears: bits of tone at the wrong pitch, all at once, and static.
+  glitch: [
+    { noise: 5500, type: 'highpass', d: 0.07, v: 0.097 },
+    { wave: 'square', f: [1760, 1760], d: 0.02, v: 0.031 },
+    { wave: 'square', f: [311, 311], d: 0.02, v: 0.035, at: 0.025 },
+    { wave: 'square', f: [2489, 2489], d: 0.015, v: 0.026, at: 0.045 },
+    { wave: 'sawtooth', f: [60, 1900], lin: true, cut: 3500, d: 0.07, v: 0.031, at: 0.05 },
+    { wave: 'square', f: [98, 98], cut: 1200, d: 0.03, v: 0.035, at: 0.09 },
+  ],
+  // A key struck on a typewriter: the hammer and the bar coming back.
+  type: [
+    { noise: 3600, type: 'bandpass', q: 1.6, d: 0.02, v: 0.063 },
+    { wave: 'sine', f: [1900, 1100], d: 0.012, v: 0.017 },
+    { noise: 900, type: 'bandpass', q: 2, d: 0.03, v: 0.025, at: 0.012 },
+  ],
+  // A field switches on: mains hum climbing up to its pitch, with a buzz in it.
+  hum: [
+    { wave: 'sawtooth', f: [55, 110], detune: 12, cut: [300, 1300], a: 0.02, d: 0.42, v: 0.075, vib: [10, 6] },
+    { wave: 'sine', f: [110, 220], d: 0.36, v: 0.1 },
+    { wave: 'square', f: [220, 440], cut: 900, d: 0.3, v: 0.02 },
+  ],
+  // Through a wormhole: a falling swirl, the other side opening upward, and wind between.
+  warp: [
+    { wave: 'sine', f: [1800, 120], d: 0.32, v: 0.085, vib: [40, 14] },
+    { noise: [5000, 300], type: 'bandpass', q: 3, d: 0.36, v: 0.06 },
+    { wave: 'triangle', f: [200, 1600], cut: 4000, d: 0.22, v: 0.045, at: 0.12 },
+  ],
+  // Sonar in the Echo: one long pure note, and the wall answering it.
+  ping: [
+    { wave: 'sine', f: [1480, 1440], a: 0.006, d: 0.6, v: 0.062 },
+    { wave: 'sine', f: [2960, 2880], d: 0.18, v: 0.011 },
+    { wave: 'sine', f: [1480, 1440], a: 0.01, d: 0.45, v: 0.022, at: 0.28, pan: -0.3 },
+    { wave: 'sine', f: [1480, 1440], a: 0.01, d: 0.35, v: 0.0089, at: 0.56, pan: 0.3 },
+  ],
+  // Into the sea: the slap, the body of water closing, and bubbles coming up.
+  splash: [
+    { noise: [3500, 500], d: 0.36, v: 0.11 },
+    { noise: 1200, type: 'bandpass', q: 1, d: 0.2, v: 0.067, at: 0.015 },
+    { wave: 'sine', f: [500, 140], d: 0.16, v: 0.037 },
+    { wave: 'sine', f: [420, 950], d: 0.04, v: 0.022, at: 0.08, pan: -0.3 },
+    { wave: 'sine', f: [600, 1300], d: 0.035, v: 0.018, at: 0.15, pan: 0.3 },
+    { wave: 'sine', f: [380, 820], d: 0.04, v: 0.015, at: 0.23 },
+  ],
+  // The leviathan: a throat, a sub that shakes the floor, and the water it pushes.
+  roar: [
+    { wave: 'sawtooth', f: [64, 38], detune: 22, cut: [900, 220], q: 3, a: 0.05, d: 1.3, v: 0.11, vib: [35, 9] },
+    { noise: [900, 200], a: 0.05, d: 1.1, v: 0.15 },
+    { wave: 'square', f: [93, 50], cut: 600, d: 1.0, v: 0.034, at: 0.1 },
+    { wave: 'sine', f: [42, 30], a: 0.08, d: 1.2, v: 0.14 },
+  ],
+  // The eye fires: a saw tearing upward through an opening filter, a hiss, and its weight.
+  beam: [
+    { wave: 'sawtooth', f: [140, 1100], detune: 30, cut: [600, 5000], d: 0.45, v: 0.048 },
+    { noise: [2000, 6000], type: 'highpass', d: 0.4, v: 0.055 },
+    { wave: 'sine', f: [70, 60], d: 0.4, v: 0.082 },
+  ],
+  // ...and gathers itself first: a rising whine that swells instead of striking.
+  charge: [
+    { wave: 'sine', f: [220, 880], a: 0.5, d: 0.8, v: 0.032, vib: [25, 8] },
+    { wave: 'triangle', f: [110, 440], cut: 1500, a: 0.4, d: 0.8, v: 0.024 },
+    { noise: [500, 4000], type: 'bandpass', q: 4, a: 0.6, d: 0.8, v: 0.021 },
+  ],
+  // The ground about to give: a deep grind with stones knocking in it.
+  rumble: [
+    { noise: 170, a: 0.05, d: 0.7, v: 0.21 },
+    { wave: 'sine', f: [46, 34], a: 0.06, d: 0.7, v: 0.021 },
+    { noise: 450, type: 'bandpass', q: 1, d: 0.5, v: 0.021 },
+    { noise: 1800, type: 'bandpass', q: 3, d: 0.02, v: 0.014, at: 0.2 },
+  ],
+  // A plank or a cable taking weight: a rasp that drags.
+  creak: [
+    { wave: 'sawtooth', f: [72, 56], cut: 650, q: 6, a: 0.02, d: 0.26, v: 0.07, vib: [70, 23] },
+    { wave: 'triangle', f: [140, 118], d: 0.2, v: 0.035 },
+    { noise: 900, d: 0.06, v: 0.06 },
+  ],
+  // The floor breaks up: a crack, the crumbling body, and pieces landing one by one.
+  crumble: [
+    { noise: 3000, type: 'bandpass', q: 1.5, d: 0.02, v: 0.08 },
+    { noise: [1500, 280], d: 0.4, v: 0.21 },
+    { wave: 'triangle', f: [92, 40], d: 0.3, v: 0.1 },
+    ...[0.06, 0.12, 0.2, 0.29].map((at, i) => ({ noise: 2400 + i * 500, type: 'bandpass', q: 3, d: 0.02, v: 0.05 - i * 0.008, at, pan: [-0.3, 0.2, -0.1, 0.3][i] })),
+  ],
+  // A blade springs out of the floor: a metal ring and a hiss.
+  spike: [
+    { wave: 'sine', f: [2200, 2150], fm: [1.41, 1.2], d: 0.13, v: 0.031 },
+    { wave: 'square', f: [1800, 600], cut: 4000, d: 0.05, v: 0.028 },
+    { noise: 6500, type: 'highpass', d: 0.05, v: 0.063 },
+  ],
+  // A spring: the boing, wobbling as it settles.
+  spring: [
+    { wave: 'sine', f: [180, 720], d: 0.2, v: 0.13, vib: [90, 18] },
+    { wave: 'square', f: [360, 1440], cut: 2000, d: 0.1, v: 0.025 },
+    { wave: 'triangle', f: [90, 180], d: 0.12, v: 0.05 },
+    { noise: 2000, type: 'bandpass', q: 2, d: 0.015, v: 0.04 },
+  ],
+  // A dart leaves its turret: a puff and a short whistle.
+  shoot: [
+    { noise: [4000, 1500], type: 'bandpass', q: 2, d: 0.08, v: 0.11 },
+    { wave: 'square', f: [900, 300], cut: 2500, d: 0.08, v: 0.035 },
+    { noise: 1500, type: 'bandpass', q: 3, d: 0.015, v: 0.05 },
+  ],
+
+  // ---- the menus: dry, quiet, and out of the way
+  tick: [
+    { wave: 'sine', f: [2400, 2200], d: 0.03, v: 0.035 },
+    { noise: 6000, type: 'bandpass', q: 3, d: 0.01, v: 0.03 },
+  ],
+  select: [
+    { wave: 'triangle', f: [660, 660], d: 0.09, v: 0.017 },
+    { wave: 'triangle', f: [990, 990], d: 0.2, v: 0.017, at: 0.055 },
+    { wave: 'sine', f: [1980, 1980], fm: [3.5, 0.5], d: 0.16, v: 0.0034, at: 0.055 },
+  ],
 };
 
 // Sounds heard over and over drift a little in pitch (noise: in brightness) on each play,
 // so they don't drone. Iconic ones like coin, win and die always sound the same.
-const VARY = { jump: 0.04, tick: 0.03, bonk: 0.05, land: 0.15, thud: 0.12, type: 0.2, creak: 0.1, crumble: 0.12, spike: 0.08, shoot: 0.1 };
+const VARY = { jump: 0.04, tick: 0.03, bonk: 0.05, land: 0.15, thud: 0.12, type: 0.2, creak: 0.1, crumble: 0.12, spike: 0.08, shoot: 0.1, pop: 0.06, trap: 0.06 };
 
 // How much of a sound rings in the room (see `space` in a track). The interface is dry:
 // it isn't in the room. Anything not listed gets ROOM.
@@ -53,6 +241,7 @@ const ROOM = 0.22;
 const WET = {
   tick: 0, select: 0, type: 0, jump: 0.1, land: 0.3, die: 0.45, win: 0.4, coin: 0.4, record: 0.4, thud: 0.6, trap: 0.4,
   crumble: 0.45, roar: 0.7, ping: 0.8, rumble: 0.6, splash: 0.5, warp: 0.45, beam: 0.5, bonk: 0.35, spring: 0.3,
+  glint: 0.7, glitch: 0.15,
 };
 
 // The room when a track doesn't describe one: a small, dull one.
@@ -280,33 +469,95 @@ export class Audio {
     const gain = ctx.createGain();
     // A few ms of attack: starting at full volume clicks, mostly on square and saw waves.
     // Silent from the moment it exists, too: a source may start a sample before `t`.
-    const attack = p.a ?? 0.004;
+    const attack = p.a ?? 0.004, hold = p.hold ?? 0;
+    const end = t + Math.max(p.d, attack + hold + 0.005);
     gain.gain.value = 0;
     gain.gain.setValueAtTime(0, t);
     gain.gain.linearRampToValueAtTime(p.v * vol, t + attack);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + Math.max(p.d, attack + 0.005));
-    gain.connect(bus);
-    let src;
+    if (hold) gain.gain.setValueAtTime(p.v * vol, t + attack + hold);
+    gain.gain.exponentialRampToValueAtTime(0.0001, end);
+    if (p.pan && ctx.createStereoPanner) {
+      const pan = ctx.createStereoPanner();
+      pan.pan.value = p.pan;
+      gain.connect(pan).connect(bus);
+    } else {
+      gain.connect(bus);
+    }
+    const sources = [];
+    const stop = end + 0.02;
+    // Glides follow the ear (a curve) unless asked to go in a straight line.
+    const glide = (param, from, to) => {
+      param.setValueAtTime(from, t);
+      if (to === from) return;
+      if (p.lin) param.linearRampToValueAtTime(to, t + p.d);
+      else param.exponentialRampToValueAtTime(to, t + p.d);
+    };
     if (p.noise) {
-      src = ctx.createBufferSource();
+      const src = ctx.createBufferSource();
       src.buffer = this.noiseBuf;
       src.loop = true;
+      // Each play starts somewhere else in the noise, so repeats don't sound copied.
+      const offset = Math.random() * (this.noiseBuf.duration - 0.05);
       const filter = ctx.createBiquadFilter();
       const [from, to] = Array.isArray(p.noise) ? p.noise : [p.noise, p.noise];
       filter.type = p.type || 'lowpass';
       if (p.q) filter.Q.value = p.q;
-      filter.frequency.setValueAtTime(from * k, t);
-      if (to !== from) filter.frequency.exponentialRampToValueAtTime(to * k, t + p.d);
+      glide(filter.frequency, from * k, to * k);
       src.connect(filter).connect(gain);
-    } else {
-      src = ctx.createOscillator();
-      src.type = p.wave;
-      src.frequency.setValueAtTime(p.f[0] * k, t);
-      if (p.f[1] !== p.f[0]) src.frequency.exponentialRampToValueAtTime(p.f[1] * k, t + p.d);
-      src.connect(gain);
+      src.start(t, offset);
+      src.stop(stop);
+      return;
     }
-    src.start(t);
-    src.stop(t + Math.max(p.d, attack + 0.005) + 0.02);
+    // A tone: through its own filter if it has one, as one wave or two a little apart.
+    let into = gain;
+    if (p.cut) {
+      const f = ctx.createBiquadFilter(), [from, to] = Array.isArray(p.cut) ? p.cut : [p.cut, p.cut];
+      if (p.q) f.Q.value = p.q;
+      f.frequency.setValueAtTime(from, t);
+      if (to !== from) f.frequency.exponentialRampToValueAtTime(to, t + p.d);
+      f.connect(gain);
+      into = f;
+    }
+    const twins = p.detune ? [-p.detune / 2, p.detune / 2] : [0];
+    let level = into;
+    if (twins.length > 1) {
+      level = ctx.createGain();
+      level.gain.value = Math.SQRT1_2;
+      level.connect(into);
+    }
+    const wave = p.wave === 'pulse' ? this.wave(p) : null;
+    const tones = twins.map((cents) => {
+      const o = ctx.createOscillator();
+      if (wave) o.setPeriodicWave(wave); else o.type = p.wave || 'triangle';
+      glide(o.frequency, p.f[0] * k, p.f[1] * k);
+      if (cents) o.detune.setValueAtTime(cents, t);
+      o.connect(level);
+      return o;
+    });
+    sources.push(...tones);
+    if (p.fm) {
+      // A modulator at a fixed ratio above the tone, its depth fading out well before the
+      // tone does: the strike is bright, the ring is pure.
+      const [ratio, index] = p.fm, m = ctx.createOscillator(), depth = ctx.createGain();
+      glide(m.frequency, p.f[0] * k * ratio, p.f[1] * k * ratio);
+      depth.gain.setValueAtTime(index * p.f[0] * k, t);
+      depth.gain.exponentialRampToValueAtTime(Math.max(1, index * p.f[0] * k * 0.02), t + Math.max(0.02, p.d * 0.5));
+      m.connect(depth);
+      for (const o of tones) depth.connect(o.frequency);
+      sources.push(m);
+    }
+    if (p.vib) {
+      const [cents, rate = 5] = p.vib, lfo = ctx.createOscillator(), depth = ctx.createGain();
+      lfo.frequency.value = rate;
+      depth.gain.value = cents;
+      lfo.connect(depth);
+      for (const o of tones) depth.connect(o.detune);
+      sources.push(lfo);
+    }
+    for (const o of sources) {
+      o.start(t);
+      o.stop(stop);
+    }
   }
 
   // A room's echo, made up: noise that dies away over `time` seconds and loses its

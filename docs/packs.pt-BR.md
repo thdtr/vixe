@@ -55,7 +55,19 @@ Tiles do mapa:
 #  parede          %  parede falsa      &  bloco invisível (aparece ao ser tocado)
 =  viga sólida     -  plataforma vazada ^ v  espinhos (chão / teto)
 *  serra           ~  ácido             >  saída
-?  placa           @  início            qualquer outro caractere: letra sólida
+?  placa           @  início            $  segredo
+qualquer outro caractere: letra sólida
+```
+
+Cada fase guarda no máximo um segredo, e segredo é para ficar escondido. Um `$` sem ar
+nenhum nas oito casas em volta (só paredes, paredes falsas ou tiles sólidos) fica
+**enterrado**: aparece como parte da parede até o jogador entrar numa parede falsa ao lado
+dele, e aí ele brilha. Então enterre-o atrás de um `%`, como o bolsão à esquerda do início da 1-6:
+
+```
+%%%
+$%%  @
+####
 ```
 
 Tiles de mecanismo agem sozinhos, sem precisar de eventos (veja **Mecanismos**):
@@ -148,8 +160,11 @@ adiciona outros com `registerMechanism(nome, { tiles, options, setup, update, hu
 **Script** (opcional): um módulo ES que exporta `register(api)`. A API tem
 `registerAction(name, fn)`, `registerTrigger(name, fn)` e `registerTile(char, def)`.
 `assets/packs/base/script.js` é um exemplo real: adiciona as ações `typewrite` e `warp`
-(`{ "warp": [x, y], "flip": true }`, onde `null` mantém aquele eixo), o gatilho `typed`,
-e estes tiles: as estrelas `·` `°`, o rastro de meteoro `´` e a boca de buraco de minhoca `¤`;
+(`{ "warp": [x, y], "flip": true }`, onde `null` mantém aquele eixo), o gatilho `typed`
+(uma palavra digitada no teclado, no idioma em que se está jogando:
+`{ "typed": { "pt-BR": ["saída"], "en": ["exit"] } }`; como `p` pausa, uma palavra com `p`
+nunca chega a ser digitada numa fase), e estes tiles: as estrelas `·` `°`, o rastro de
+meteoro `´` e a boca de buraco de minhoca `¤`;
 a cortina `¦`, a corda `│` e a plateia `º` (nenhum deles é sólido); a ribalta `•` e o saco de
 areia `§` (os dois sólidos); e `╱ ╲ ─ ┆ ╭ ╮ ╰ ╯` para cenário pintado, onde não dá para pisar.
 

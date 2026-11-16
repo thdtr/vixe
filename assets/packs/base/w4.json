@@ -206,7 +206,7 @@
         {"when": {"zone": "A"}, "do": [{"fall": "a"}]},
         {"when": {"jump": true, "zone": [30, 13, 12, 3]}, "do": [{"show": "s"}]},
         {
-          "when": {"typed": ["porta", "door", "exit", "saida"]},
+          "when": {"typed": {"pt-BR": ["saida", "saída", "abre", "abra"], "en": ["door", "exit"]}},
           "repeat": true,
           "do": [{"say": {"pt-BR": "não é assim que funciona.", "en": "that's not how this works."}, "time": 2}]
         }
@@ -326,7 +326,7 @@
         },
         {"when": {"zone": "E"}, "do": [{"say": {"pt-BR": "espera. estou pensando.", "en": "wait. I'm thinking."}, "time": 2}]},
         {"when": {"zone": "E", "idle": 0.8}, "do": [{"typewrite": "b", "rate": 6}]},
-        {"when": {"zone": "R"}, "do": [{"say": {"pt-BR": "backspace.", "en": "backspace."}, "time": 1.4}, {"collapse": "a", "from": "left", "rate": 7, "wobble": 0.1}]}
+        {"when": {"zone": "R"}, "do": [{"say": {"pt-BR": "apaga.", "en": "backspace."}, "time": 1.4}, {"collapse": "a", "from": "left", "rate": 7, "wobble": 0.1}]}
       ]
     },
     {
@@ -378,8 +378,7 @@
         {"at": [33, 16], "text": {"pt-BR": "AH", "en": "OH"}, "group": "x"},
         {"at": [35, 16], "text": {"pt-BR": "_ELA_EXPLICA", "en": "_IT_EXPLAINS"}},
         {"at": [47, 16], "text": {"pt-BR": "_UMA_SERRA._FIM__", "en": "_A_SAW._THE_END__"}},
-        {"at": [0, 17], "text": {"pt-BR": "*_NOTA:_ISTO_É_UMA_SERRA._SEMPRE_FOI.", "en": "*_NOTE:_THIS_IS_A_SAW._IT_ALWAYS_WAS."}},
-        {"at": [56, 10], "text": {"pt-BR": "PREÇO:$", "en": "PRICE:$"}}
+        {"at": [0, 17], "text": {"pt-BR": "*_NOTA:_ISTO_É_UMA_SERRA._SEMPRE_FOI.", "en": "*_NOTE:_THIS_IS_A_SAW._IT_ALWAYS_WAS."}}
       ],
       "events": [
         {"when": {"start": true}, "do": [{"move": "w", "by": [7, 0], "speed": 3, "loop": true, "quiet": true}]},
@@ -528,8 +527,8 @@
         "",
         "",
         "   @                                              ¡ ?   ¡    >",
-        "#######                                       ##################",
-        "#######                                       ##################",
+        "%######                                       ##################",
+        "%$#####                                       ##################",
         "#######                                       ##################",
         "#######                                       ##################",
         "#######                                       ##################",

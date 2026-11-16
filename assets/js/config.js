@@ -25,8 +25,10 @@ export const PHYS = {
   apexGravity: 0.6,                   // gravity scale near the top of a held jump
   maxFall: 520,
   jump: 420,
-  jumpCut: 150,
-  stroke: 0.62,                       // a swimming stroke, as a share of a jump                       // upward speed cap after releasing jump
+  jumpCut: 150,                       // upward speed cap after releasing jump
+  stroke: 0.62,                       // a swimming stroke, as a share of a jump
+  jet: 0.22,                          // seconds the suit's jet burns on any jump, however short
+  jetHold: 0.08,                      // and what it keeps while jump is held on the way up
   coyote: 0.09,
   buffer: 0.12,
   bodyGravity: 1100,                  // falling scenery is a bit lazier than you

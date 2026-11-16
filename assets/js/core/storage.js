@@ -22,6 +22,12 @@ const DEFAULTS = {
   flags: {},
 };
 
+// Before anyone picks one in the options: the device's language, if the game speaks it.
+function deviceLang() {
+  const asked = globalThis.navigator?.languages ?? [globalThis.navigator?.language ?? ''];
+  return asked.some((l) => /^pt\b/i.test(l)) ? 'pt-BR' : 'en';
+}
+
 export function loadSave() {
   let data = {};
   try {
@@ -29,7 +35,7 @@ export function loadSave() {
   } catch { /* private mode or corrupted: start fresh */ }
   // Someone who asked their device for less motion starts with the screen held still.
   const calm = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? { shake: false, flashes: false } : {};
-  return { ...structuredClone(DEFAULTS), ...calm, ...data };
+  return { ...structuredClone(DEFAULTS), lang: deviceLang(), ...calm, ...data };
 }
 
 export function writeSave(save) {

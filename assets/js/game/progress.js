@@ -39,8 +39,11 @@ export class Progress {
     return this.dev || i === 0 || this.passed(world.levels[i - 1]) || this.passed(world.levels[i]);
   }
 
+  // The numbered worlds in order, then the hidden ones that have been found. A secret
+  // world goes to the end of the list, never between world 5 and world 6.
   listed() {
-    return this.worlds.filter((w) => !w.hidden || this.worldOpen(w));
+    const found = this.worlds.filter((w) => w.hidden && this.worldOpen(w));
+    return [...this.worlds.filter((w) => !w.hidden), ...found];
   }
 
   // Display number: hidden worlds use their own code.

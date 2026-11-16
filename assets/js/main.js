@@ -75,6 +75,9 @@ class App {
     addEventListener('blur', () => this.away());
 
     document.body.classList.add('ready');
+    // For whoever opens the console: a level, and a line in their own language.
+    console.log(`%c\n   ^^^^^^^^^^\n   @  > ?\n   ##########\n\n%c${t('console.hello')}\n`,
+      'color:#e0533d;font:14px monospace', 'color:#8a7f70;font:12px monospace');
     // Dev shortcut: ?dev&play=w1.3 jumps straight into a level.
     const world = this.worlds.find((w) => w.levels.some((l) => l.id === params.get('play')));
     if (params.has('dev') && world) this.enter('play', { world, index: world.levels.findIndex((l) => l.id === params.get('play')) });
@@ -217,6 +220,7 @@ class App {
     document.body.classList.toggle('scanlines', s.scanlines);
     this.screen.setTint(s.flags.phosphor ? PHOSPHOR : null);
     document.querySelector('#rotate p').textContent = t('rotate');
+    document.querySelector('#touch .pause').setAttribute('aria-label', t('touch.pause'));
     const touch = document.getElementById('touch');
     touch.style.setProperty('--size', TOUCH_SIZES[s.touchSize]);
     touch.dataset.show = s.touchShow;
@@ -294,7 +298,3 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
-console.log(
-  '%c\n   ^^^^^^^^^^\n   @  > ?\n   ##########\n\n%cvocê está lendo o código. eu também estou lendo você.\nyou are reading the code. I am reading you too.\n',
-  'color:#e0533d;font:14px monospace', 'color:#8a7f70;font:12px monospace',
-);

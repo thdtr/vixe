@@ -13,7 +13,8 @@ const isWall = (ch) => !!tileOf(ch)?.wall;
 // so a floor that is about to fall looks exactly like the floor around it.
 function wallLook(level, x, y) {
   if (x < 0 || x >= MAP_COLS || y < 0 || y >= MAP_ROWS) return true;
-  if (isWall(level.grid[y * MAP_COLS + x])) return true;
+  const i = y * MAP_COLS + x;
+  if (isWall(level.grid[i]) || level.buried?.has(i)) return true;
   for (const b of level.bodies.values()) if (b.home && isWall(b.at(x, y)?.ch)) return true;
   return false;
 }
@@ -78,8 +79,9 @@ export function drawStatic(screen, ctx, level, pal) {
         if (hash(x + 7, y * 3) < 0.035) screen.glyph('.', x * CW, y * CH + MAP_Y, pal.dots, ctx);
         continue;
       }
-      if (t.anim || t.exit || t.pickup || t.hidden || t.live) continue;
-      const g = t.wall ? wallGlyph(look, x, y) : [t.glyph || ch, t.color || 'wall'];
+      const buried = level.buried?.has(y * MAP_COLS + x);
+      if (!buried && (t.anim || t.exit || t.pickup || t.hidden || t.live)) continue;
+      const g = t.wall || buried ? wallGlyph(look, x, y) : [t.glyph || ch, t.color || 'wall'];
       if (g) screen.glyph(g[0], x * CW, y * CH + MAP_Y, color(pal, g[1]), ctx);
     }
   }
@@ -105,6 +107,7 @@ export function drawLive(screen, level, pal, time, found = false) {
       continue;
     }
     if (!t.anim && !t.exit && !t.pickup) continue;
+    if (t.pickup && level.buried?.has(i)) continue;
     drawTile(screen, t, ch, x * CW, y * CH + MAP_Y, pal, time, x, y, found);
   }
 }
@@ -240,11 +243,11 @@ export { pose };
 // x, feet: where the feet are, in screen pixels. sx, sy: squash and stretch. color, when
 // set, paints the whole figure in it (an afterimage); otherwise it wears the palette.
 export function drawFigure(screen, x, feet, { facing = 1, gdir = 1, sx = 1, sy = 1, pose: s, pal, color = null, crown = false }) {
-  const ctx = screen.ctx, gold = crown && CROWN === 'brilho';
+  const ctx = screen.ctx, gold = crown && CROWN === 'sparkle';
   const c = {
     body: color ?? (gold ? pal.exit : pal.player), bg: pal.bg,
     hazard: color ?? pal.hazard, exit: color ?? pal.exit, accent: color ?? pal.accent ?? pal.exit,
-    light: '#ffffff', crown: crown && CROWN !== 'brilho', style: CROWN, px: screen.scale,
+    light: '#ffffff', crown: crown && CROWN !== 'sparkle', style: CROWN, px: screen.scale,
   };
   setInk((k) => screen.color(k));
   ctx.save();
