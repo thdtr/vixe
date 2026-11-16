@@ -24,6 +24,8 @@ export function setLang(l) {
   document.documentElement.lang = lang;
 }
 
+export const getLang = () => lang;
+
 export function t(key, vars) {
   let s = tables[lang]?.[key] ?? tables[FALLBACK]?.[key] ?? key;
   if (vars) s = s.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? '');

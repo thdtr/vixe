@@ -9,11 +9,17 @@ import { TAU, hash, noise } from '../art/math.js';
 import { blend } from '../art/color.js';
 import { HX, HY, HW, HH, put, putAt, done, cacheLayer, solids, free } from '../art/glyphs.js';
 import { seeded, clipMap } from './common.js';
+import { loc, getLang } from '../core/i18n.js';
 
-const GHOST = ('era uma vez um porão onde o chão mentia e as portas fugiam ' +
-  'once upon a time the floor lied and every door ran away from you ' +
-  'não acredite em tudo que lê nem nas linhas nem no que fica entre elas ' +
-  'the end is never where the page says it is turn back read again ').split(' ');
+// The text erased from the page, in the language the game is being played in.
+const GHOST = {
+  'pt-BR': 'era uma vez um porão onde o chão mentia e as portas fugiam de você ' +
+    'não acredite em tudo que lê nem nas linhas nem no que fica entre elas ' +
+    'o fim nunca está onde a página diz que está volte e leia de novo',
+  en: 'once upon a time there was a basement where the floor lied and every door ran away from you ' +
+    'do not believe everything you read not the lines and not what lies between them ' +
+    'the end is never where the page says it is turn back and read it again',
+};
 
 export function paper(def, play) {
   const pal = play.world.palette, r = seeded(play, 4);
@@ -37,12 +43,13 @@ export function paper(def, play) {
       }
     }
     // Erased words, still pressed into the page.
-    let w = Math.floor(r() * GHOST.length);
+    const words = loc(GHOST).split(' ');
+    let w = Math.floor(r() * words.length);
     for (let row = 1; row < 18; row += 1) {
       if (hash(row, 99) < 0.35) continue;
       let hx = mx + 3 + Math.floor(hash(row, 5) * 8);
       while (hx < HW - 6) {
-        const word = GHOST[w++ % GHOST.length];
+        const word = words[w++ % words.length];
         if (hx + word.length >= HW) break;
         [...word].forEach((ch, k) => { if (free(m, hx + k, row * 2)) put(screen, ch, (hx + k) * HX, row * 2 * HY + 2, ghost, 2, 0.45, false, l); });
         hx += word.length + 1;
@@ -98,7 +105,7 @@ export function paper(def, play) {
 
   return {
     back(screen) {
-      cacheLayer(store, `paper:${play.level.version}`, screen, (l) => paint(screen, l));
+      cacheLayer(store, `paper:${play.level.version}:${getLang()}`, screen, (l) => paint(screen, l));
       // The binding: the page curves into shadow near one edge.
       clipMap(screen, (ctx) => {
         const left = (def.binding ?? 'left') === 'left', g = ctx.createLinearGradient(left ? 0 : MAP_W, 0, left ? 60 : MAP_W - 60, 0);

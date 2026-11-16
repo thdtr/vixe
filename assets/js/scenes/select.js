@@ -83,8 +83,9 @@ export class Select {
     if (input.confirmed()) this.start();
   }
 
-  // Six worlds sit two rows apart; more squeeze in above the level info at row 15.
-  get gap() { return this.worlds.length > 6 ? 11 / (this.worlds.length - 1) : 2; }
+  // Six worlds sit two rows apart; more squeeze in, the last one at row 13 at most, so a
+  // clear row is left above the level info at row 15.
+  get gap() { return Math.min(2, 10 / (this.worlds.length - 1)); }
 
   rowOf(i) { return 3 + i * this.gap; }
 

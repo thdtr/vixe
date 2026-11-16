@@ -108,6 +108,7 @@ export function solids(level) {
   for (let i = 0; i < m.length; i++) {
     const t = tileOf(level.grid[i]);
     if (t && !t.hidden && !t.oneway && !t.sign && !t.hazard && !t.exit && !t.pickup && !t.scenery && (t.solid || t.wall)) m[i] = t.solid ? 1 : 2;
+    else if (level.buried?.has(i)) m[i] = 2;     // a secret still in its wall looks like the wall
   }
   level.sight = { v: level.version, m };
   return m;

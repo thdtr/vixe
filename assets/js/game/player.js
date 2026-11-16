@@ -30,6 +30,7 @@ export class Player {
     this.under = [];          // what the feet rest on: [{ t, i, body }] (i: grid index, -1 for a body)
     this.conveyor = 0;        // a belt's pull while standing on it, px/s (set by mechanisms.js)
     this.stride = 0;          // ground covered since the last stop, px: drives the walk cycle
+    this.jet = 0;             // seconds of burn left in the suit's jet (lit by every jump)
   }
 
   get rect() { return { x: this.x, y: this.y, w: P.w, h: P.h }; }
@@ -68,6 +69,10 @@ export class Player {
 
     const rising = this.vy * g < 0;
     if (rising && !ctl.jump && -this.vy * g > P.jumpCut) this.vy = -P.jumpCut * g;
+    // The jet lights on every jump and burns for a moment even on the shortest tap,
+    // then for as long as jump is held on the way up.
+    if (this.jumped) this.jet = P.jet;
+    else if (this.jet > 0) this.jet = rising && ctl.jump ? Math.max(this.jet - dt, P.jetHold) : Math.max(0, this.jet - dt);
     const floaty = ctl.jump && Math.abs(this.vy) < 60;
     this.vy += P.gravity * this.weight * g * (floaty ? P.apexGravity : 1) * dt;
     if (this.vy * g > P.maxFall * this.weight) this.vy = P.maxFall * this.weight * g;

@@ -32,6 +32,7 @@ export class Play {
     this.attempt = 0;
     this.paused = false;
     this.graves = [];        // where this visit's deaths happened: { x, y } in map pixels
+    this.msg = null;         // a line kept through deaths still ends with the visit
     const app = this.app;
     // A world played start to finish without a single death or restart: { world, at }
     // is the level the run expects next. Coming in anywhere else drops it.
@@ -87,7 +88,8 @@ export class Play {
     this.flash = 0;
     this.shakeT = 0;
     this.freeze = 0;
-    this.msg = null;
+    // The level's own lines go with it; the game's (a milestone, a secret) outlive a death.
+    if (!this.msg?.keep) this.msg = null;
     this.sign = null;
     this.record = false;         // this win beat the level's best time
     this.wonAt = 0;
@@ -120,7 +122,7 @@ export class Play {
     this.app.input.rumble?.(ms, death);
   }
   shake(v) { if (this.app.save.shake) this.shakeT = Math.max(this.shakeT, v); }
-  say(text, time = 2.5) { this.msg = { text: loc(text), t: time, age: 0 }; }
+  say(text, time = 2.5, keep = false) { this.msg = { text: loc(text), t: time, age: 0, keep }; }
 
   setGravity(dir) {
     this.gravity = dir;
@@ -165,7 +167,7 @@ export class Play {
     this.shake(0.3);
     this.buzz(35, true);
     const milestone = { 100: 'egg.d100', 404: 'egg.d404', 666: 'egg.d666', 1000: 'egg.d1000' }[save.deaths];
-    if (milestone) this.say(t(milestone), 4);
+    if (milestone) this.say(t(milestone), 4.5, true);
   }
 
   get flawless() {
@@ -277,6 +279,12 @@ export class Play {
       this.sfx('bonk', (i % MAP_COLS) * CW + CW / 2);
       this.particles.burst((i % MAP_COLS) * CW + CW / 2, ((i / MAP_COLS) | 0) * CH + CH / 2, '.\'', 6, 80, pal.wall, { life: 0.4 });
     }
+    // Into the fake wall beside a buried secret: it glints out of the dark.
+    for (const i of this.level.dig(p.rect)) {
+      const x = (i % MAP_COLS) * CW + CW / 2, y = ((i / MAP_COLS) | 0) * CH + CH / 2;
+      this.sfx(this.app.save.secrets.includes(this.def.id) ? 'pop' : 'glint', x);
+      this.particles.burst(x, y, "'.+", 8, 50, pal.exit, { gravity: 0, life: 0.5 });
+    }
     const feet = p.gdir > 0 ? p.y + PHYS.h : p.y;
     if (p.jumped) {
       this.sfx('jump', p.cx);
@@ -324,7 +332,8 @@ export class Play {
       } else if (tile.sign && i >= 0) {
         this.sign = level.signs.get(i);
       } else if (tile.pickup) {
-        if (cell) cell.ch = ' '; else level.set(i, ' ');
+        // A secret dug out of a wall leaves the wall as it was.
+        if (cell) cell.ch = ' '; else level.set(i, level.dug.has(i) ? '%' : ' ');
         this.collect(px, py);
       }
     });
@@ -341,10 +350,15 @@ export class Play {
       this.particles.burst(x + CW / 2, y + CH / 2, '.\'', 6, 80, this.world.palette.dim, { life: 0.4 });
       return;
     }
+    // A secret can be the one that opens a hidden world's door.
+    const progress = this.app.progress, shut = (this.app.worlds ?? []).filter((w) => w.hidden && !progress.worldOpen(w));
     save.secrets.push(this.def.id);
     this.app.persist();
     this.sfx('coin', x + CW / 2);
-    this.say(t('secret.found', { n: save.secrets.length, total: this.app.progress.secretsTotal() }), 3);
+    // Each find gets its own line: the game notices it's being searched.
+    const n = save.secrets.length, total = progress.secretsTotal();
+    if (shut.some((w) => progress.worldOpen(w))) this.say(`$ ${n}/${total}   ${t('ending.door')}`, 4.5, true);
+    else this.say(t(n >= total ? 'secret.all' : `secret.${Math.min(n, 5)}`, { n, total }), 3.5, true);
     this.particles.burst(x + CW / 2, y + CH / 2, '$*.', 12, 120, this.world.palette.exit, { gravity: 100 });
   }
 

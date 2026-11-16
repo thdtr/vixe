@@ -4,8 +4,8 @@ import { blend } from '../art/color.js';
 // The player's looks. Each figure draws itself with its feet at (0, 0), facing +x, from
 // glyphs fitted into small boxes, so it keeps the same size whatever monospace font the
 // device falls back to. Only FIGURE and CROWN are worn; the rest are kept for later.
-export const FIGURE = 'astronauta';
-export const CROWN = 'pontas';
+export const FIGURE = 'astronaut';
+export const CROWN = 'spikes';
 
 const FACE = FONT_BOLD.slice(FONT_BOLD.indexOf('px ') + 3);
 const BIG = `bold 100px ${FACE}`;
@@ -50,7 +50,7 @@ export function pose(p, t = 0) {
   const landing = !!p.ground && (p.squash ?? 0) > 0.12;
   const sleep = name === 'idle' && (p.idle ?? 0) > SLEEP;
   return {
-    pose: name, frame: Math.floor((p.stride ?? 0) / 6) % 4, t, vx, vy, landing, sleep,
+    pose: name, frame: Math.floor((p.stride ?? 0) / 6) % 4, t, vx, vy, landing, sleep, jet: p.jet ?? 0,
     blink: name === 'idle' && !landing && !sleep && t % 2.3 > 2.15,
   };
 }
@@ -106,22 +106,22 @@ export function crown(ctx, s, c, y, w, h) {
   const g = c.exit;
   if (s.pose === 'fallHard') y -= 1.6;
   if (c.style === 'w') fit(ctx, 'w', 0, y, w, h, g);
-  else if (c.style === 'pontas') {
+  else if (c.style === 'spikes') {
     y -= h * 0.125; w *= 1.15; h *= 1.25;
     fit(ctx, '▲', -w * 0.37, y - h * 0.05, w * 0.3, h * 0.6, g);
     fit(ctx, '▲', w * 0.37, y - h * 0.05, w * 0.3, h * 0.6, g);
     fit(ctx, '▲', 0, y - h * 0.15, w * 0.34, h * 0.8, g);
     fit(ctx, '▬', 0, y + h * 0.33, w, h * 0.34, g);
     fit(ctx, '•', 0, y + h * 0.33, null, h * 0.3, c.hazard);
-  } else if (c.style === 'rei') {
+  } else if (c.style === 'king') {
     const H = h * 1.6;
     fit(ctx, '♚', 0, y + h / 2 - H / 2, null, H, g);
-  } else if (c.style === 'aureola') {
+  } else if (c.style === 'halo') {
     ctx.save();
     ctx.shadowColor = ink(g); ctx.shadowBlur = 4 * c.px;
     fit(ctx, 'O', 0, y - h * 0.35 - 1.2 + Math.sin(s.t * 2.5) * 0.5, w * 1.3, h * 0.9, g);
     ctx.restore();
-  } else if (c.style === 'estrelas') {
+  } else if (c.style === 'stars') {
     for (let i = 0; i < 3; i++) {
       const a = s.t * 3.2 + i * 2.094, z = Math.sin(a);
       ctx.save();
@@ -132,7 +132,7 @@ export function crown(ctx, s, c, y, w, h) {
   }
 }
 
-// The 'brilho' crown: nothing on the head, glints coming and going around the figure.
+// The 'sparkle' crown: nothing on the head, glints coming and going around the figure.
 const GLINTS = [[-6, -14], [6, -9], [-5, -4], [5, -17], [0, -21]];
 export function glints(ctx, t, color) {
   for (const off of [0, 0.5]) {
@@ -143,7 +143,7 @@ export function glints(ctx, t, color) {
 
 // c: { body, bg, hazard, exit, accent, light, crown, style, px }. glow: the glyph behind the halo.
 export const FIGURES = {
-  arroba: {
+  at: {
     glow: '@',
     draw(ctx, s, c) {
       ctx.fillStyle = ink(c.body); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -156,7 +156,7 @@ export const FIGURES = {
     },
   },
 
-  palito: {
+  stick: {
     draw(ctx, s, c) {
       const k = c.body;
       fit(ctx, 'O', 0, -12.6, null, 5, k);
@@ -168,7 +168,7 @@ export const FIGURES = {
     },
   },
 
-  bolota: {
+  blob: {
     draw(ctx, s, c) {
       const k = c.body;
       if (s.pose !== 'rise') {
@@ -183,7 +183,7 @@ export const FIGURES = {
     },
   },
 
-  telinha: {
+  monitor: {
     draw(ctx, s, c) {
       const k = c.body;
       fit(ctx, '[', -4.4, -9.3, null, 10.5, k);
@@ -202,7 +202,7 @@ export const FIGURES = {
     },
   },
 
-  fantasma: {
+  ghost: {
     draw(ctx, s, c) {
       const k = c.body;
       const fast = s.pose === 'run' || s.pose === 'fallHard' || s.pose === 'rise';
@@ -227,7 +227,7 @@ export const FIGURES = {
     },
   },
 
-  fosforo: {
+  matchstick: {
     draw(ctx, s, c) {
       const k = c.body;
       const l = legsOf(s);
@@ -249,7 +249,7 @@ export const FIGURES = {
     },
   },
 
-  gatinho: {
+  kitten: {
     draw(ctx, s, c) {
       const k = c.body;
       let a = -0.9 + Math.sin(s.t * 2.4) * 0.25;
@@ -272,7 +272,7 @@ export const FIGURES = {
     },
   },
 
-  pinguim: {
+  penguin: {
     draw(ctx, s, c) {
       const k = c.body;
       ctx.save();
@@ -316,7 +316,7 @@ export const FIGURES = {
     },
   },
 
-  vixinho: {
+  vee: {
     draw(ctx, s, c) {
       const k = c.body;
       const l = legsOf(s);
@@ -331,7 +331,7 @@ export const FIGURES = {
     },
   },
 
-  gota: {
+  drop: {
     draw(ctx, s, c) {
       const k = c.body;
       ctx.save();
@@ -348,7 +348,7 @@ export const FIGURES = {
     },
   },
 
-  caveira: {
+  skull: {
     draw(ctx, s, c) {
       const k = c.body;
       const l = legsOf(s);
@@ -371,13 +371,18 @@ export const FIGURES = {
   },
 
   // The one in the game: helmet with a tinted visor, backpack and boots. The pack fires a
-  // little jet on the way up. Asleep, it sits with its legs out, leans back on the pack
+  // little jet on every jump. Asleep, it sits with its legs out, leans back on the pack
   // and nods off.
-  astronauta: {
+  astronaut: {
     draw(ctx, s, c) {
       const k = c.body;
       if (s.sleep) return this.sleep(ctx, s, c);
-      if (s.pose === 'rise') fit(ctx, '♦', -4.4, -2.6, 1.8, 3 * (1 + 0.2 * Math.sin(s.t * 31)), c.hazard);
+      // The jet: full while it burns, shrinking into the pack as the burn runs out.
+      if (s.jet > 0) {
+        const burn = Math.min(1, s.jet / 0.08), h = 4 * burn * (1 + 0.2 * Math.sin(s.t * 31));
+        fit(ctx, '♦', -4.4, -4.4 + h / 2, 1.8 * (0.6 + 0.4 * burn), h, c.hazard);
+        if (burn > 0.5) fit(ctx, '♦', -4.4, -4.4 + h * 0.3, 0.8, h * 0.45, blend(c.hazard, c.light, 0.6));
+      }
       fit(ctx, '█', -4.3, -7, 2.2, 5, blend(k, c.bg, 0.35));
       const up = s.pose === 'rise' ? [-0.8, -0.8] : lift(s);
       fit(ctx, '█', -1.7, -1.7 + up[0], 2.4, 3.4, k);

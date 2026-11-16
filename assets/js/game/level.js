@@ -17,6 +17,10 @@ import { loc } from '../core/i18n.js';
 //           A field may cover a rect instead, { "pull": { at: [x, y, w, h], ... } }:
 //           its name then works as a zone too.
 //   events: see events.js
+//
+// A '$' with no open air around it (all eight neighbours are walls, fake walls or solid
+// tiles) is buried: it's drawn as part of the wall until someone walks into the fake wall
+// next to it. That's how a secret is hidden; a '$' in the open is only out of the way.
 
 const isGroup = (c) => c >= 'a' && c <= 'z';
 const isZone = (c) => c >= 'A' && c <= 'Z';
@@ -112,6 +116,9 @@ export class Level {
       });
     }
     for (const id of def.hidden || '') this.group(id).visible = false;
+    this.buried = new Set();          // secrets still inside their wall
+    this.dug = new Set();             // and the ones dug out of it
+    this.grid.forEach((ch, i) => { if (tileOf(ch)?.pickup && this.enclosed(i)) this.buried.add(i); });
     for (const [id, f] of this.fields) {
       if (!f.at) continue;
       const [x0, y0, w, h] = f.at, cells = new Set();
@@ -135,6 +142,34 @@ export class Level {
   set(i, ch) {
     this.grid[i] = ch;
     this.version++;
+  }
+
+  // Nothing around cell i that you could see into: walls, fake walls and solid tiles.
+  enclosed(i) {
+    const x0 = i % MAP_COLS, y0 = (i / MAP_COLS) | 0;
+    for (let y = y0 - 1; y <= y0 + 1; y++) {
+      for (let x = x0 - 1; x <= x0 + 1; x++) {
+        if (x === x0 && y === y0) continue;
+        const t = tileOf(this.at(x, y));
+        if (!t || t.oneway || t.hazard || t.exit || t.sign || t.pickup || t.hidden || !(t.solid || t.wall)) return false;
+      }
+    }
+    return true;
+  }
+
+  // The buried secrets the rect has dug into (it overlaps a cell next to one), now out in
+  // the open. Returns their indices.
+  dig(r) {
+    const found = [];
+    for (const i of this.buried) {
+      const x = i % MAP_COLS, y = (i / MAP_COLS) | 0;
+      if (!overlaps(r.x, r.y, r.w, r.h, (x - 1) * CW, (y - 1) * CH, CW * 3, CH * 3)) continue;
+      this.buried.delete(i);
+      this.dug.add(i);
+      this.version++;
+      found.push(i);
+    }
+    return found;
   }
 
   // Changes whenever the cached picture of the static map would be stale.

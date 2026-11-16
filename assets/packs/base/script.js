@@ -2,6 +2,7 @@
 // packs can register new trap actions, triggers and tiles from here.
 
 import { CW, CH, PHYS } from '../../js/config.js';
+import { loc } from '../../js/core/i18n.js';
 
 export function register({ registerAction, registerTrigger, registerTile }) {
   // Types a group onto the map one cell at a time, in reading order.
@@ -19,8 +20,10 @@ export function register({ registerAction, registerTrigger, registerTile }) {
     if (cell.ch !== '_') play.sfx('type');
   });
 
-  // Fires when a word is typed on a physical keyboard: { "typed": ["porta", "door"] }
-  registerTrigger('typed', (play, words) => words.some((w) => play.app.input.consume(w)));
+  // Fires when a word is typed on a physical keyboard, in the language being played:
+  // { "typed": { "pt-BR": ["saída"], "en": ["exit"] } } (a plain list counts in any language).
+  // P pauses the game, so a word with a "p" in it can never be typed in a level.
+  registerTrigger('typed', (play, words) => [].concat(loc(words)).some((w) => play.app.input.consume(w)));
 
   // Orbit: stars to look at, a meteor's tail (never solid) and the mouth of a wormhole.
   registerTile('·', { glyph: '·', color: 'dots' });

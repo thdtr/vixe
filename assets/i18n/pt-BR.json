@@ -59,6 +59,8 @@
   "hud.paused": "- pausa -",
   "hud.holdRestart": "segure a pausa para reiniciar",
 
+  "console.hello": "você está lendo o código. eu também estou lendo você.",
+  "touch.pause": "pausa",
   "touch.hint": "esquerda: arraste para andar   direita: toque para pular",
   "touch.hintSwap": "esquerda: toque para pular   direita: arraste para andar",
 
@@ -74,15 +76,22 @@
 
   "intro.world": "MUNDO {n}",
 
-  "secret.found": "$ {n}/{total}   você não deveria ter achado isso",
+  "secret.1": "$ {n}/{total}   você não deveria ter achado isso.",
+  "secret.2": "$ {n}/{total}   de novo? agora você está procurando.",
+  "secret.3": "$ {n}/{total}   pare de cutucar as paredes. elas sentem.",
+  "secret.4": "$ {n}/{total}   vou ter que esconder melhor.",
+  "secret.5": "$ {n}/{total}   tá bom. você sabe onde eu guardo as coisas.",
+  "secret.all": "$ {n}/{total}   não sobrou nada escondido. quase nada.",
   "flawless.done": "um mundo inteiro sem morrer. isso não estava nos planos.",
 
   "ending.main": "a última porta abriu.\ndo outro lado, outra porta.\nessa não fugiu, não caiu, não mentiu.\nvocê desconfiou dela mesmo assim.\n\nótimo. está aprendendo.",
   "ending.true": "então você achou os bastidores.\né aqui que eu guardo as armadilhas.\nnão conte para ninguém.\n\nna verdade, conte.\npreciso de mais gente para enganar.\n\nobrigado por jogar.   - o jogo",
   "ending.door": "em algum lugar, uma porta que não existia agora existe.",
-  "ending.missing": "ainda há {n} coisa(s) brilhando no escuro.",
+  "ending.missing": "ainda há {n} coisas brilhando no escuro.",
+  "ending.missing.one": "ainda há uma coisa brilhando no escuro.",
   "ending.challenge": "agora tente um mundo inteiro sem morrer.",
-  "ending.skipped": "{n} fase(s) pulada(s). a coroa espera por você lá.",
+  "ending.skipped": "{n} fases puladas. a coroa espera por você lá.",
+  "ending.skipped.one": "uma fase pulada. a coroa espera por você lá.",
   "ending.stats": "mortes {deaths}   tempo {time}",
 
   "credits.body": "# vixe\npor thiago dutra\n\n# feito com\nclaude code (opus 5.5)\n\n# inspirado em\nlevel devil",
