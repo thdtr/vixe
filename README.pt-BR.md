@@ -4,7 +4,7 @@
 
 Um jogo de plataforma de ~500 KB feito só de texto. Inspirado em *Level Devil*.
 
-**Jogue em <https://vixe.online>**
+**Jogue em <https://vixe-delta.vercel.app>**
 
 [![CI](https://github.com/thdtr/vixe/actions/workflows/ci.yml/badge.svg)](https://github.com/thdtr/vixe/actions/workflows/ci.yml)
 

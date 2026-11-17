@@ -4,7 +4,7 @@
 
 A ~500 KB platformer made entirely of text. Inspired by *Level Devil*.
 
-**Play it at <https://vixe.online>**
+**Play it at <https://vixe-delta.vercel.app>**
 
 [![CI](https://github.com/thdtr/vixe/actions/workflows/ci.yml/badge.svg)](https://github.com/thdtr/vixe/actions/workflows/ci.yml)
 
